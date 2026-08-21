@@ -11,6 +11,10 @@ import { OrganizationDetailPage } from '@/features/organizations/pages/Organizat
 import { OrgContentPage } from '@/features/content/pages/OrgContentPage'
 import { OrgExamsPage } from '@/features/exams/pages/OrgExamsPage'
 import { ExamTakePage } from '@/features/exams/pages/ExamTakePage'
+import { OrgAnalyticsPage } from '@/features/analytics/pages/OrgAnalyticsPage'
+import { OrgCertificatesPage } from '@/features/certificates/pages/OrgCertificatesPage'
+import { CertificateViewPage } from '@/features/certificates/pages/CertificateViewPage'
+import { VerifyCertificatePage } from '@/features/certificates/pages/VerifyCertificatePage'
 
 function App() {
   return (
@@ -21,6 +25,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/verify/:code" element={<VerifyCertificatePage />} />
           <Route
             path="/app"
             element={
@@ -66,6 +71,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <ExamTakePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/organizations/:orgId/analytics"
+            element={
+              <ProtectedRoute>
+                <OrgAnalyticsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/organizations/:orgId/certificates"
+            element={
+              <ProtectedRoute>
+                <OrgCertificatesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/organizations/:orgId/certificates/:certId"
+            element={
+              <ProtectedRoute>
+                <CertificateViewPage />
               </ProtectedRoute>
             }
           />
