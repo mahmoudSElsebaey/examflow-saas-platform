@@ -18,6 +18,7 @@ import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Container } from '@/components/ui/Container'
 import { Spinner } from '@/components/ui/Spinner'
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
+import { OrgSubNav } from '@/components/layout/OrgSubNav'
 import { appConfig } from '@/config/app'
 
 export function OrgAnalyticsPage() {
@@ -99,6 +100,8 @@ export function OrgAnalyticsPage() {
       </header>
 
       <Container className="py-10">
+        <OrgSubNav />
+
         <Link
           to={`/app/organizations/${orgId}`}
           className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground"

@@ -7,22 +7,29 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, Users } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as orgApi from '../api/orgApi'
-import type { Organization, OrgMember, OrgMemberRole } from '../types'
+import type { Organization, OrgMember } from '../types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Container } from '@/components/ui/Container'
 import { Spinner } from '@/components/ui/Spinner'
-import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
-import { appConfig } from '@/config/app'
+import { AppHeader } from '@/components/layout/AppHeader'
+import { OrgModuleGrid } from '@/components/layout/OrgModuleGrid'
+import { OrgSubNav } from '@/components/layout/OrgSubNav'
 
 export function OrganizationDetailPage() {
   const { orgId } = useParams<{ orgId: string }>()
   const { t } = useTranslation()
-  const { accessToken, logout, user } = useAuth()
+  const { accessToken } = useAuth()
   const [org, setOrg] = useState<Organization | null>(null)
   const [members, setMembers] = useState<OrgMember[]>([])
   const [loading, setLoading] = useState(true)
@@ -70,12 +77,8 @@ export function OrganizationDetailPage() {
 
   const onInvite = async (data: InviteForm) => {
     if (!accessToken || !orgId) return
-    setError(null)
     try {
-      await orgApi.inviteMemberApi(accessToken, orgId, {
-        email: data.email,
-        role: data.role as Exclude<OrgMemberRole, 'owner'>,
-      })
+      await orgApi.inviteMemberApi(accessToken, orgId, data)
       reset({ email: '', role: 'teacher' })
       await load()
     } catch (err) {
@@ -85,25 +88,7 @@ export function OrganizationDetailPage() {
 
   return (
     <div className="min-h-screen bg-mesh">
-      <header className="sticky top-0 z-40 border-b border-border/50 glass">
-        <Container>
-          <div className="flex h-14 items-center justify-between gap-3">
-            <Link to="/app" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-800 text-xs font-bold text-primary-foreground">
-                EF
-              </span>
-              <span className="font-bold text-foreground">{appConfig.APP_NAME}</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <LanguageSwitcher variant="compact" />
-              <span className="hidden text-sm text-muted sm:inline">{user?.firstName}</span>
-              <Button variant="outline" size="sm" onClick={() => logout()}>
-                {t('common.logOut')}
-              </Button>
-            </div>
-          </div>
-        </Container>
-      </header>
+      <AppHeader />
 
       <Container className="py-10">
         <Link
@@ -118,25 +103,26 @@ export function OrganizationDetailPage() {
           <div className="flex justify-center py-20">
             <Spinner />
           </div>
-        ) : !org ? (
+        ) : error && !org ? (
           <Alert variant="error">
-            <AlertDescription>{error || t('org.notFound')}</AlertDescription>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
-        ) : (
+        ) : org ? (
           <>
-            <div className="mb-8">
+            <div className="mb-6">
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   {org.name}
                 </h1>
-                <Badge variant="info">{org.plan}</Badge>
-                {org.myRole && <Badge variant="success">{org.myRole}</Badge>}
+                {org.myRole && <Badge variant="info">{org.myRole}</Badge>}
+                <Badge variant="success">{org.plan}</Badge>
               </div>
-              <p className="mt-1 text-muted">/{org.slug}</p>
               {org.description && (
-                <p className="mt-3 max-w-2xl text-sm text-muted">{org.description}</p>
+                <p className="mt-2 max-w-2xl text-sm text-muted">{org.description}</p>
               )}
             </div>
+
+            <OrgSubNav />
 
             {error && (
               <Alert variant="error" className="mb-6">
@@ -144,11 +130,18 @@ export function OrganizationDetailPage() {
               </Alert>
             )}
 
+            <section className="mb-10">
+              <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted">
+                {t('phase9.workspace')}
+              </h2>
+              <OrgModuleGrid orgId={org.id} />
+            </section>
+
             <div className="grid gap-6 lg:grid-cols-3">
-              <Card className="lg:col-span-2 border-border/60">
+              <Card className="border-border/60 lg:col-span-2">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-base">
-                    <Users className="h-4 w-4 text-primary" />
+                    <Users className="h-4 w-4" />
                     {t('org.members')}
                   </CardTitle>
                   <CardDescription>{t('org.membersHint')}</CardDescription>
@@ -158,7 +151,7 @@ export function OrganizationDetailPage() {
                     {members.map((m) => (
                       <li
                         key={m.id}
-                        className="flex flex-wrap items-center justify-between gap-2 py-3 first:pt-0 last:pb-0"
+                        className="flex flex-wrap items-center justify-between gap-2 py-3"
                       >
                         <div>
                           <p className="text-sm font-medium text-foreground">
@@ -179,16 +172,25 @@ export function OrganizationDetailPage() {
               </Card>
 
               {canManage && (
-                <Card className="border-border/60 h-fit">
+                <Card className="h-fit border-border/60">
                   <CardHeader>
                     <CardTitle className="text-base">{t('org.inviteTitle')}</CardTitle>
                     <CardDescription>{t('org.inviteHint')}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <form onSubmit={handleSubmit(onInvite)} className="space-y-4" noValidate>
+                    <form
+                      onSubmit={handleSubmit(onInvite)}
+                      className="space-y-4"
+                      noValidate
+                    >
                       <div className="space-y-2">
                         <Label htmlFor="email">{t('auth.email')}</Label>
-                        <Input id="email" type="email" error={!!errors.email} {...register('email')} />
+                        <Input
+                          id="email"
+                          type="email"
+                          error={!!errors.email}
+                          {...register('email')}
+                        />
                         {errors.email && (
                           <p className="text-xs text-error">{errors.email.message}</p>
                         )}
@@ -215,6 +217,10 @@ export function OrganizationDetailPage() {
               )}
             </div>
           </>
+        ) : (
+          <Alert variant="error">
+            <AlertDescription>{t('org.notFound')}</AlertDescription>
+          </Alert>
         )}
       </Container>
     </div>
