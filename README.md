@@ -4,7 +4,7 @@
 
 Production-ready educational SaaS built with the MERN stack (MongoDB, Express, React, Node.js) + TypeScript.
 
-> Status: **PHASE 0 — Discovery & Architecture** completed.
+> Status: **PHASE 1 — Project Initialization** completed.
 
 ---
 
@@ -59,172 +59,179 @@ The platform is **white-label ready** and domain-agnostic (Mathematics, Language
 - **i18n-ready** (Arabic + English from day one, RTL/LTR)
 - **Security-first**: Helmet, CORS, rate limiting, input validation (Zod), password hashing, RBAC + Permissions
 
-### Proposed Folder Structure
+### Current Folder Structure
 
 ```
 examflow-saas-platform/
 ├── client/                     # Frontend (Vite + React + TS)
 │   ├── public/
 │   ├── src/
-│   │   ├── app/                # App providers, store setup
-│   │   ├── components/         # Shared UI components (Design System)
-│   │   ├── features/           # Feature modules (auth, exams, questions...)
-│   │   ├── layouts/
-│   │   ├── pages/
+│   │   ├── app/
+│   │   ├── components/         # Shared UI (Design System)
+│   │   │   └── ui/             # Button, etc.
+│   │   ├── config/             # Centralized app config & branding
+│   │   ├── features/
 │   │   ├── hooks/
-│   │   ├── services/           # RTK Query APIs
-│   │   ├── store/
+│   │   ├── i18n/
+│   │   ├── layouts/
+│   │   ├── lib/                # utils (cn, etc.)
+│   │   ├── pages/
 │   │   ├── routes/
-│   │   ├── lib/
-│   │   ├── config/             # App configuration & branding
-│   │   ├── theme/              # Design tokens & theme
+│   │   ├── services/
+│   │   ├── store/
+│   │   ├── theme/
 │   │   ├── types/
-│   │   ├── assets/
-│   │   └── i18n/
+│   │   ├── App.tsx
+│   │   ├── main.tsx
+│   │   └── index.css           # Design Tokens (Tailwind v4 @theme)
 │   ├── index.html
 │   ├── package.json
-│   ├── tailwind.config.ts
-│   ├── tsconfig.json
-│   └── vite.config.ts
+│   ├── vite.config.ts
+│   └── tsconfig*.json
 │
 ├── server/                     # Backend (Express + TS)
 │   ├── src/
-│   │   ├── config/
+│   │   ├── config/             # Env validation (Zod)
 │   │   ├── controllers/
-│   │   ├── services/           # Business logic
+│   │   ├── services/
 │   │   ├── models/
-│   │   ├── routes/
-│   │   ├── middlewares/        # auth, tenant, rbac, validation, error
-│   │   ├── validators/         # Zod schemas
-│   │   ├── utils/
+│   │   ├── routes/             # health.routes
+│   │   ├── middlewares/        # errorHandler, etc.
+│   │   ├── validators/
+│   │   ├── utils/              # apiResponse
 │   │   ├── types/
-│   │   ├── jobs/               # Background jobs (later)
-│   │   └── integrations/       # Email, payments, storage
+│   │   ├── jobs/
+│   │   ├── integrations/
+│   │   ├── app.ts
+│   │   └── index.ts
 │   ├── package.json
 │   └── tsconfig.json
 │
-├── docs/                       # Architecture, ADRs, API docs
-├── .github/                    # CI/CD workflows (later)
 ├── .env.example
-├── README.md
-└── package.json                # Root workspace (optional)
+├── .gitignore
+├── .editorconfig
+├── .prettierrc
+└── README.md
 ```
 
 ---
 
-## 🗄️ Database Domain Model (High-Level)
+## 🛠️ Technology Stack
 
-Core entities (MongoDB + Mongoose):
+**Frontend**
+- React 19 + TypeScript
+- Vite 8
+- Tailwind CSS v4 + custom Design Tokens (`@theme`)
+- React Router
+- Redux Toolkit + RTK Query (ready)
+- React Hook Form + Zod
+- i18next (ready)
+- class-variance-authority + clsx + tailwind-merge
+- Lucide React
 
-| Entity              | Purpose                                      |
-|---------------------|----------------------------------------------|
-| User                | Global users                                 |
-| Organization        | Tenant                                       |
-| Membership          | User ↔ Organization + Role                   |
-| Role / Permission   | RBAC                                         |
-| Course / Subject / Topic | Educational structure                   |
-| StudentGroup        | Groups of students                           |
-| QuestionBank        | Collection of questions                      |
-| Question + QuestionVersion | Versioned questions (critical)         |
-| Exam + ExamSection + ExamQuestion | Exam definition                    |
-| ExamAttempt         | Student taking an exam                       |
-| StudentAnswer       | Answers + auto-save                          |
-| Result / ManualGrade / Rubric | Grading                           |
-| Certificate         | Issued certificates + verification           |
-| Notification        | In-app + email                               |
-| Invitation          | Org / course invites                         |
-| Plan / Subscription / Payment / Invoice | SaaS billing                  |
-| AuditLog            | Security & compliance                        |
-| SupportTicket       | Support                                      |
+**Backend**
+- Node.js + Express 5 + TypeScript
+- Zod (env + validation)
+- Helmet, CORS, Morgan, Cookie-Parser
+- JWT + bcryptjs (ready for Phase 3)
+- Mongoose (to be added in Phase 3/4)
 
-**Key design decisions:**
-- Question versioning: Old exams keep the exact version used at creation time.
-- Tenant isolation: Every tenant-scoped document carries `organizationId`. Middleware + service layer always enforce it.
-- Soft deletes + audit trails where needed.
+**Infra (planned)**
+- MongoDB Atlas
+- Cloudinary / S3-compatible
+- Redis (later)
+- Vercel (frontend)
+- Railway / Render / Fly.io (backend)
 
 ---
 
-## 🔐 Authentication & Authorization Strategy
+## 🎨 Design System Foundation
 
-- JWT Access Token (short-lived) + Refresh Token (httpOnly / secure strategy)
-- Register / Login / Logout / Refresh / Forgot & Reset Password / Email Verification
-- Role-Based Access Control (RBAC) + fine-grained Permissions
-- Roles: Super Admin, Organization Owner, Teacher, Examiner/Assistant, Student (Parent later)
-- Never trust frontend claims — always re-validate on backend
+- **Centralized tokens** in `client/src/index.css` via Tailwind v4 `@theme`
+- Colors: primary, secondary, accent, success, warning, error, info, neutrals
+- Typography, radius, shadows defined once
+- `Button` component with variants (primary, secondary, outline, ghost, danger, success) and sizes
+- Utility `cn()` for safe class merging
+- App branding centralized in `client/src/config/app.ts`
+
+Change the primary color in one place (`--color-primary`) and the whole UI updates.
 
 ---
 
-## 🎨 Design System & Branding Strategy
+## 🚀 Getting Started
 
-- Centralized `config/app.ts` for APP_NAME, logo, languages, contact, social links
-- Design tokens in CSS variables / Tailwind theme extension:
-  - Colors: primary, secondary, accent, neutral, success, warning, error, info
-  - Typography, spacing, radius, shadows
-- No hardcoded colors in components
-- Fully responsive (mobile-first where it matters: exam taking UI, dashboards)
-- Accessibility: semantic HTML, keyboard nav, focus states, ARIA, contrast
-- i18n: Arabic + English from day one with RTL/LTR support
+### Prerequisites
+- Node.js 20+
+- npm 10+
+
+### Installation
+
+```bash
+# Clone
+git clone https://github.com/mahmoudSElsebaey/examflow-saas-platform.git
+cd examflow-saas-platform
+
+# Client
+cd client
+npm install
+cp ../.env.example .env   # optional – set VITE_API_URL if needed
+
+# Server
+cd ../server
+npm install
+cp ../.env.example .env
+```
+
+### Development
+
+```bash
+# Terminal 1 – Backend
+cd server
+npm run dev
+# → http://localhost:5000/api/v1/health
+
+# Terminal 2 – Frontend
+cd client
+npm run dev
+# → http://localhost:5173
+```
+
+### Health Check
+```bash
+curl http://localhost:5000/api/v1/health
+```
 
 ---
 
 ## 🛣️ Development Roadmap
 
-| Phase | Name                              | Focus                                      | Status      |
-|-------|-----------------------------------|--------------------------------------------|-------------|
-| 0     | Discovery & Architecture          | This document                              | ✅ Done     |
-| 1     | Project Initialization            | Scaffold, TS, lint, theme, config          | Pending     |
-| 2     | Design System & Landing Page      | Full UI kit + professional landing         | Pending     |
-| 3     | Authentication                    | Full auth flows + RBAC                     | Pending     |
-| 4     | Multi-Tenant Organizations        | Orgs, memberships, isolation               | Pending     |
-| 5     | Courses                           | Subjects, topics, groups                   | Pending     |
-| 6     | Question Bank                     | CRUD, types, versioning, import            | Pending     |
-| 7     | Exam Builder                      | Sections, pools, settings, scheduling      | Pending     |
-| 8     | Exam Engine                       | Timer, auto-save, navigation, recovery     | Pending     |
-| 9     | Grading & Results                 | Auto + manual, rubrics, feedback           | Pending     |
-| 10    | Analytics                         | Student / Teacher / Org dashboards         | Pending     |
-| 11    | Certificates & Notifications      | Certificates + in-app/email                | Pending     |
-| 12    | SaaS Billing                      | Plans, subscriptions, limits, payments     | Pending     |
-| 13    | Advanced Features                 | Redis, jobs, AI, live monitoring...        | Later       |
-| 14    | Production Hardening              | Security, perf, a11y audit                 | Pending     |
-| 15    | Production Deployment             | Vercel + backend hosting + Atlas           | Pending     |
-
----
-
-## 🛠️ Technology Stack (Planned)
-
-**Frontend**
-- React 19 + TypeScript
-- Vite
-- Tailwind CSS + custom Design System
-- React Router
-- Redux Toolkit + RTK Query
-- React Hook Form + Zod
-- i18next (or equivalent)
-
-**Backend**
-- Node.js + Express + TypeScript
-- MongoDB + Mongoose
-- JWT + Refresh Tokens
-- Zod validation
-- Helmet, CORS, rate-limiting
-
-**Infra & Services**
-- MongoDB Atlas
-- Cloudinary (or S3-compatible) for media
-- Redis (later phases)
-- Email provider (Resend / SendGrid / etc.)
-- Payment provider (Stripe preferred, provider-agnostic interface)
-- Frontend: Vercel
-- Backend: Railway / Render / Fly.io / VPS (decision in Phase 15)
+| Phase | Name | Focus | Status |
+|-------|------|-------|--------|
+| 0 | Discovery & Architecture | Architecture, roadmap, domain model | ✅ Done |
+| 1 | Project Initialization | Scaffold, TS, Tailwind, Design Tokens, App Config | ✅ Done |
+| 2 | Design System & Landing Page | Full UI kit + professional landing | Pending |
+| 3 | Authentication | Full auth flows + RBAC | Pending |
+| 4 | Multi-Tenant Organizations | Orgs, memberships, isolation | Pending |
+| 5 | Courses | Subjects, topics, groups | Pending |
+| 6 | Question Bank | CRUD, types, versioning, import | Pending |
+| 7 | Exam Builder | Sections, pools, settings, scheduling | Pending |
+| 8 | Exam Engine | Timer, auto-save, navigation, recovery | Pending |
+| 9 | Grading & Results | Auto + manual, rubrics, feedback | Pending |
+| 10 | Analytics | Student / Teacher / Org dashboards | Pending |
+| 11 | Certificates & Notifications | Certificates + in-app/email | Pending |
+| 12 | SaaS Billing | Plans, subscriptions, limits, payments | Pending |
+| 13 | Advanced Features | Redis, jobs, AI, live monitoring... | Later |
+| 14 | Production Hardening | Security, perf, a11y audit | Pending |
+| 15 | Production Deployment | Vercel + backend hosting + Atlas | Pending |
 
 ---
 
 ## 🔒 Security Strategy
 
-- Password hashing (bcrypt / argon2)
+- Password hashing (bcrypt)
 - Short-lived access tokens + refresh token rotation
 - Strict CORS + Helmet
-- Rate limiting on auth and sensitive endpoints
+- Rate limiting on auth and sensitive endpoints (Phase 3+)
 - Input validation on every request (Zod)
 - Tenant isolation middleware
 - RBAC + Permission checks in services
@@ -235,38 +242,16 @@ Core entities (MongoDB + Mongoose):
 
 ---
 
-## 🚀 Deployment Strategy (High-Level)
-
-1. MongoDB Atlas (production cluster)
-2. Frontend → Vercel (preview + production)
-3. Backend → chosen PaaS or container host
-4. Environment variables managed securely
-5. CI via GitHub Actions (lint, typecheck, test, build)
-6. Full end-to-end production smoke tests before calling it Production Ready
-
----
-
-## 📁 Current Repository State
-
-- Repository created empty on 2026-08-21
-- Default branch: `main`
-- This README is the first commit (PHASE 0)
-
----
-
 ## 📌 Next Step
 
-**PHASE 1 — Project Initialization**
+**PHASE 2 — Design System & Landing Page**
 
 Will create:
-- `client/` and `server/` scaffolds
-- TypeScript configuration
-- ESLint + Prettier
-- Tailwind + Design tokens foundation
-- App configuration system
-- Base folder structure
-- `.env.example`
-- Root tooling
+- Complete set of UI primitives (Input, Card, Badge, Dialog, Alert, Table, Tabs, etc.)
+- Professional Landing Page (Navbar, Hero, Features, Pricing teaser, Footer)
+- Responsive navigation
+- Empty / Loading / Error states
+- Accessibility polish
 
 ---
 
