@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/Badge'
 import { appConfig } from '@/config/app'
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
 import { Link } from 'react-router-dom'
-import { BookOpen, ClipboardList, Users } from 'lucide-react'
+import { BookOpen, ClipboardList, Users, Building2, ArrowRight } from 'lucide-react'
 
 export function DashboardPage() {
   const { t } = useTranslation()
@@ -44,6 +44,26 @@ export function DashboardPage() {
           </h1>
           <p className="mt-1 text-muted">{t('dashboard.subtitle')}</p>
         </div>
+
+        <Card className="mb-8 border-primary/25 bg-surface">
+          <CardContent className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-muted text-primary">
+                <Building2 className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">{t('org.dashboardTitle')}</p>
+                <p className="mt-0.5 text-sm text-muted">{t('org.dashboardBody')}</p>
+              </div>
+            </div>
+            <Link to="/app/organizations">
+              <Button className="gap-2">
+                {t('org.manage')}
+                <ArrowRight className="h-4 w-4 rtl:rotate-180" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
 
         <div className="mb-8 grid gap-4 sm:grid-cols-3">
           {[
