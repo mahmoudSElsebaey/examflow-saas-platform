@@ -1,31 +1,34 @@
+import { useTranslation } from 'react-i18next'
 import { appConfig } from '@/config/app'
 import { Container } from '@/components/ui/Container'
-
-const footerLinks = {
-  Product: [
-    { label: 'Features', href: '#features' },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'Roadmap', href: '#' },
-  ],
-  Company: [
-    { label: 'About', href: '#' },
-    { label: 'Blog', href: '#' },
-    { label: 'Contact', href: '#' },
-  ],
-  Resources: [
-    { label: 'Documentation', href: '#' },
-    { label: 'Help Center', href: '#' },
-    { label: 'Status', href: '#' },
-  ],
-  Legal: [
-    { label: 'Privacy', href: '#' },
-    { label: 'Terms', href: '#' },
-    { label: 'Security', href: '#' },
-  ],
-}
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
 
 export function Footer() {
+  const { t } = useTranslation()
   const year = new Date().getFullYear()
+
+  const footerLinks = {
+    [t('footer.product')]: [
+      { label: t('footer.features'), href: '#features' },
+      { label: t('footer.pricing'), href: '#pricing' },
+      { label: t('footer.roadmap'), href: '#' },
+    ],
+    [t('footer.company')]: [
+      { label: t('footer.about'), href: '#' },
+      { label: t('footer.blog'), href: '#' },
+      { label: t('footer.contact'), href: '#' },
+    ],
+    [t('footer.resources')]: [
+      { label: t('footer.documentation'), href: '#' },
+      { label: t('footer.helpCenter'), href: '#' },
+      { label: t('footer.status'), href: '#' },
+    ],
+    [t('footer.legal')]: [
+      { label: t('footer.privacy'), href: '#' },
+      { label: t('footer.terms'), href: '#' },
+      { label: t('footer.security'), href: '#' },
+    ],
+  }
 
   return (
     <footer className="border-t border-border bg-surface">
@@ -40,12 +43,11 @@ export function Footer() {
                 {appConfig.APP_NAME}
               </span>
             </a>
-            <p className="mt-4 max-w-xs text-sm text-muted">
-              {appConfig.APP_TAGLINE}
-            </p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {appConfig.CONTACT_EMAIL}
-            </p>
+            <p className="mt-4 max-w-xs text-sm text-muted">{appConfig.APP_TAGLINE}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{appConfig.CONTACT_EMAIL}</p>
+            <div className="mt-4">
+              <LanguageSwitcher />
+            </div>
           </div>
 
           {Object.entries(footerLinks).map(([title, links]) => (
@@ -69,11 +71,9 @@ export function Footer() {
 
         <div className="flex flex-col items-center justify-between gap-4 border-t border-border py-6 sm:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {year} {appConfig.APP_NAME}. All rights reserved.
+            © {year} {appConfig.APP_NAME}. {t('footer.rights')}
           </p>
-          <p className="text-sm text-muted-foreground">
-            Built for education · Multi-tenant by design
-          </p>
+          <p className="text-sm text-muted-foreground">{t('footer.tagline')}</p>
         </div>
       </Container>
     </footer>
