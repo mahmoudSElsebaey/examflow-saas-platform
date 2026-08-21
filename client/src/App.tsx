@@ -6,6 +6,8 @@ import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
+import { OrganizationsPage } from '@/features/organizations/pages/OrganizationsPage'
+import { OrganizationDetailPage } from '@/features/organizations/pages/OrganizationDetailPage'
 
 function App() {
   return (
@@ -21,6 +23,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/organizations"
+            element={
+              <ProtectedRoute>
+                <OrganizationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/organizations/:orgId"
+            element={
+              <ProtectedRoute>
+                <OrganizationDetailPage />
               </ProtectedRoute>
             }
           />
