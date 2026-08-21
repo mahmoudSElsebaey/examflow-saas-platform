@@ -19,31 +19,31 @@ export function Navbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/60 bg-surface/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border/50 glass">
       <Container>
         <div className="flex h-16 items-center justify-between gap-4">
-          <Link to="/" className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-sm">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-800 text-sm font-bold text-primary-foreground shadow-md shadow-primary/25 transition-transform group-hover:scale-105">
               EF
             </span>
-            <span className="text-lg font-semibold tracking-tight text-foreground">
+            <span className="text-lg font-bold tracking-tight text-foreground">
               {appConfig.APP_NAME}
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-8 md:flex">
+          <nav className="hidden items-center gap-1 md:flex">
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-muted transition-colors hover:text-foreground"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-surface-subtle hover:text-foreground"
               >
                 {link.label}
               </a>
             ))}
           </nav>
 
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-2 md:flex">
             <LanguageSwitcher />
             <Link to="/login">
               <Button variant="ghost" size="sm">
@@ -61,7 +61,7 @@ export function Navbar() {
             <LanguageSwitcher variant="compact" />
             <button
               type="button"
-              className="inline-flex items-center justify-center rounded-lg p-2 text-muted"
+              className="inline-flex items-center justify-center rounded-lg p-2 text-muted hover:bg-surface-subtle"
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-label={t('nav.toggleMenu')}
@@ -73,7 +73,7 @@ export function Navbar() {
 
         <div
           className={cn(
-            'overflow-hidden transition-all md:hidden',
+            'overflow-hidden transition-all duration-300 md:hidden',
             open ? 'max-h-72 pb-4' : 'max-h-0'
           )}
         >
@@ -82,7 +82,7 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted hover:bg-background hover:text-foreground"
+                className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted hover:bg-surface-subtle hover:text-foreground"
                 onClick={() => setOpen(false)}
               >
                 {link.label}
