@@ -9,6 +9,9 @@ import authRoutes from './routes/auth.routes.js'
 import organizationRoutes from './routes/organization.routes.js'
 import contentRoutes from './routes/content.routes.js'
 import examRoutes from './routes/exam.routes.js'
+import analyticsRoutes from './routes/analytics.routes.js'
+import certificateRoutes from './routes/certificate.routes.js'
+import publicRoutes from './routes/public.routes.js'
 import { notFoundHandler, errorHandler } from './middlewares/errorHandler.js'
 
 const app = express()
@@ -36,6 +39,9 @@ app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/organizations', organizationRoutes)
 app.use('/api/v1/organizations/:orgId', contentRoutes)
 app.use('/api/v1/organizations/:orgId', examRoutes)
+app.use('/api/v1/organizations/:orgId', analyticsRoutes)
+app.use('/api/v1/organizations/:orgId', certificateRoutes)
+app.use('/api/v1/public', publicRoutes)
 
 app.use(notFoundHandler)
 app.use(errorHandler)
