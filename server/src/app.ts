@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser'
 import { config } from './config/index.js'
 import healthRoutes from './routes/health.routes.js'
 import authRoutes from './routes/auth.routes.js'
+import organizationRoutes from './routes/organization.routes.js'
 import { notFoundHandler, errorHandler } from './middlewares/errorHandler.js'
 
 const app = express()
@@ -30,6 +31,7 @@ if (config.isDev) {
 
 app.use('/api/v1/health', healthRoutes)
 app.use('/api/v1/auth', authRoutes)
+app.use('/api/v1/organizations', organizationRoutes)
 
 app.use(notFoundHandler)
 app.use(errorHandler)
