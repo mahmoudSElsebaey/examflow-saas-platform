@@ -4,7 +4,7 @@
 
 Production-ready educational SaaS built with the MERN stack (MongoDB, Express, React, Node.js) + TypeScript.
 
-> Status: **PHASE 1 — Project Initialization** completed.
+> Status: **PHASE 2 — Design System & Landing Page** completed.
 
 ---
 
@@ -21,7 +21,7 @@ ExamFlow is a true multi-tenant SaaS platform that allows educational institutio
 - Issue verifiable Certificates
 - Manage students, groups, and roles
 
-The platform is **white-label ready** and domain-agnostic (Mathematics, Languages, Programming, Science, Corporate Training, etc.).
+The platform is **white-label ready** and domain-agnostic.
 
 ---
 
@@ -36,83 +36,85 @@ The platform is **white-label ready** and domain-agnostic (Mathematics, Language
 │   + Tailwind    │     │  + JWT Auth     │     │                 │
 │   + RTK Query   │     │  + Multi-tenant │     │                 │
 └─────────────────┘     └─────────────────┘     └─────────────────┘
-         │                       │                       │
-         │                       ▼                       │
-         │              ┌─────────────────┐              │
-         └─────────────▶│  Redis (cache / │◀─────────────┘
-                        │  sessions / jobs)│
-                        └─────────────────┘
-                                 │
-                        ┌─────────────────┐
-                        │  Cloudinary /   │
-                        │  Object Storage │
-                        └─────────────────┘
 ```
 
 ### Core Principles
 
-- **Modular Monolith** (not microservices) — clean boundaries, easy to extract later
-- **Multi-tenant isolation** enforced at every protected resource (never trust frontend `organizationId`)
+- **Modular Monolith** — clean boundaries, easy to extract later
+- **Multi-tenant isolation** enforced at every protected resource
 - **Feature-based frontend organization**
 - **Service-layer business logic** on the backend
 - **Centralized Design System + Theme Tokens**
-- **i18n-ready** (Arabic + English from day one, RTL/LTR)
-- **Security-first**: Helmet, CORS, rate limiting, input validation (Zod), password hashing, RBAC + Permissions
+- **i18n-ready** (Arabic + English, RTL/LTR)
+- **Security-first**: Helmet, CORS, rate limiting, Zod, RBAC
 
 ### Current Folder Structure
 
 ```
 examflow-saas-platform/
-├── client/                     # Frontend (Vite + React + TS)
+├── client/
 │   ├── public/
 │   ├── src/
-│   │   ├── app/
-│   │   ├── components/         # Shared UI (Design System)
-│   │   │   └── ui/             # Button, etc.
-│   │   ├── config/             # Centralized app config & branding
-│   │   ├── features/
-│   │   ├── hooks/
-│   │   ├── i18n/
-│   │   ├── layouts/
-│   │   ├── lib/                # utils (cn, etc.)
-│   │   ├── pages/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── store/
-│   │   ├── theme/
-│   │   ├── types/
-│   │   ├── App.tsx
-│   │   ├── main.tsx
-│   │   └── index.css           # Design Tokens (Tailwind v4 @theme)
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── tsconfig*.json
-│
-├── server/                     # Backend (Express + TS)
-│   ├── src/
-│   │   ├── config/             # Env validation (Zod)
-│   │   ├── controllers/
-│   │   ├── services/
-│   │   ├── models/
-│   │   ├── routes/             # health.routes
-│   │   ├── middlewares/        # errorHandler, etc.
-│   │   ├── validators/
-│   │   ├── utils/              # apiResponse
-│   │   ├── types/
-│   │   ├── jobs/
-│   │   ├── integrations/
-│   │   ├── app.ts
-│   │   └── index.ts
-│   ├── package.json
-│   └── tsconfig.json
-│
+│   │   ├── components/
+│   │   │   ├── ui/              # Design System primitives
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Label.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Badge.tsx
+│   │   │   │   ├── Alert.tsx
+│   │   │   │   ├── Spinner.tsx
+│   │   │   │   ├── EmptyState.tsx
+│   │   │   │   ├── Container.tsx
+│   │   │   │   └── index.ts
+│   │   │   └── landing/         # Landing page sections
+│   │   │       ├── Navbar.tsx
+│   │   │       ├── Hero.tsx
+│   │   │       ├── Features.tsx
+│   │   │       ├── HowItWorks.tsx
+│   │   │       ├── Pricing.tsx
+│   │   │       ├── CTA.tsx
+│   │   │       └── Footer.tsx
+│   │   ├── config/app.ts        # Centralized branding & config
+│   │   ├── pages/LandingPage.tsx
+│   │   ├── lib/utils.ts
+│   │   ├── App.tsx              # React Router setup
+│   │   └── index.css            # Design Tokens (Tailwind v4 @theme)
+│   └── ...
+├── server/
+│   └── src/                     # Express + TS API (health endpoint ready)
 ├── .env.example
-├── .gitignore
-├── .editorconfig
-├── .prettierrc
 └── README.md
 ```
+
+---
+
+## 🎨 Design System (Phase 2)
+
+### Tokens
+All colors, radius, shadows, and typography live in `client/src/index.css` under `@theme`. Change `--color-primary` once and the entire UI updates.
+
+### UI Primitives
+| Component | Variants / Notes |
+|-----------|------------------|
+| Button | primary, secondary, outline, ghost, danger, success + sizes |
+| Input | error state, focus ring |
+| Label | accessible form labels |
+| Card | Header, Title, Description, Content, Footer |
+| Badge | default, secondary, outline, success, warning, error, info |
+| Alert | default, success, warning, error, info |
+| Spinner | sm / md / lg |
+| EmptyState | icon + title + description + action |
+| Container | sm / md / lg / xl / full |
+
+### Landing Page
+- Sticky responsive Navbar (desktop + mobile menu)
+- Hero with clear value proposition & dual CTAs
+- Features grid (8 core capabilities)
+- How it works (4-step flow)
+- Pricing (3 tiers: Starter / Professional / Enterprise)
+- Full-width CTA band
+- Multi-column Footer with brand + links
 
 ---
 
@@ -121,7 +123,7 @@ examflow-saas-platform/
 **Frontend**
 - React 19 + TypeScript
 - Vite 8
-- Tailwind CSS v4 + custom Design Tokens (`@theme`)
+- Tailwind CSS v4 + Design Tokens
 - React Router
 - Redux Toolkit + RTK Query (ready)
 - React Hook Form + Zod
@@ -131,74 +133,24 @@ examflow-saas-platform/
 
 **Backend**
 - Node.js + Express 5 + TypeScript
-- Zod (env + validation)
-- Helmet, CORS, Morgan, Cookie-Parser
+- Zod, Helmet, CORS, Morgan
 - JWT + bcryptjs (ready for Phase 3)
-- Mongoose (to be added in Phase 3/4)
-
-**Infra (planned)**
-- MongoDB Atlas
-- Cloudinary / S3-compatible
-- Redis (later)
-- Vercel (frontend)
-- Railway / Render / Fly.io (backend)
-
----
-
-## 🎨 Design System Foundation
-
-- **Centralized tokens** in `client/src/index.css` via Tailwind v4 `@theme`
-- Colors: primary, secondary, accent, success, warning, error, info, neutrals
-- Typography, radius, shadows defined once
-- `Button` component with variants (primary, secondary, outline, ghost, danger, success) and sizes
-- Utility `cn()` for safe class merging
-- App branding centralized in `client/src/config/app.ts`
-
-Change the primary color in one place (`--color-primary`) and the whole UI updates.
 
 ---
 
 ## 🚀 Getting Started
 
-### Prerequisites
-- Node.js 20+
-- npm 10+
-
-### Installation
-
 ```bash
-# Clone
 git clone https://github.com/mahmoudSElsebaey/examflow-saas-platform.git
 cd examflow-saas-platform
 
 # Client
-cd client
-npm install
-cp ../.env.example .env   # optional – set VITE_API_URL if needed
-
-# Server
-cd ../server
-npm install
-cp ../.env.example .env
-```
-
-### Development
-
-```bash
-# Terminal 1 – Backend
-cd server
-npm run dev
-# → http://localhost:5000/api/v1/health
-
-# Terminal 2 – Frontend
-cd client
-npm run dev
+cd client && npm install && npm run dev
 # → http://localhost:5173
-```
 
-### Health Check
-```bash
-curl http://localhost:5000/api/v1/health
+# Server (separate terminal)
+cd server && npm install && cp ../.env.example .env && npm run dev
+# → http://localhost:5000/api/v1/health
 ```
 
 ---
@@ -209,7 +161,7 @@ curl http://localhost:5000/api/v1/health
 |-------|------|-------|--------|
 | 0 | Discovery & Architecture | Architecture, roadmap, domain model | ✅ Done |
 | 1 | Project Initialization | Scaffold, TS, Tailwind, Design Tokens, App Config | ✅ Done |
-| 2 | Design System & Landing Page | Full UI kit + professional landing | Pending |
+| 2 | Design System & Landing Page | Full UI kit + professional landing | ✅ Done |
 | 3 | Authentication | Full auth flows + RBAC | Pending |
 | 4 | Multi-Tenant Organizations | Orgs, memberships, isolation | Pending |
 | 5 | Courses | Subjects, topics, groups | Pending |
@@ -220,44 +172,29 @@ curl http://localhost:5000/api/v1/health
 | 10 | Analytics | Student / Teacher / Org dashboards | Pending |
 | 11 | Certificates & Notifications | Certificates + in-app/email | Pending |
 | 12 | SaaS Billing | Plans, subscriptions, limits, payments | Pending |
-| 13 | Advanced Features | Redis, jobs, AI, live monitoring... | Later |
+| 13 | Advanced Features | Redis, jobs, AI, live monitoring | Later |
 | 14 | Production Hardening | Security, perf, a11y audit | Pending |
-| 15 | Production Deployment | Vercel + backend hosting + Atlas | Pending |
-
----
-
-## 🔒 Security Strategy
-
-- Password hashing (bcrypt)
-- Short-lived access tokens + refresh token rotation
-- Strict CORS + Helmet
-- Rate limiting on auth and sensitive endpoints (Phase 3+)
-- Input validation on every request (Zod)
-- Tenant isolation middleware
-- RBAC + Permission checks in services
-- File upload validation & size limits
-- Audit logs for critical actions
-- No secrets in code; `.env.example` documented
-- Production: no stack traces, centralized error handler
+| 15 | Production Deployment | Vercel + backend + Atlas | Pending |
 
 ---
 
 ## 📌 Next Step
 
-**PHASE 2 — Design System & Landing Page**
+**PHASE 3 — Authentication**
 
-Will create:
-- Complete set of UI primitives (Input, Card, Badge, Dialog, Alert, Table, Tabs, etc.)
-- Professional Landing Page (Navbar, Hero, Features, Pricing teaser, Footer)
-- Responsive navigation
-- Empty / Loading / Error states
-- Accessibility polish
+Will implement:
+- Register / Login / Logout / Refresh token
+- Forgot & Reset Password
+- Email verification (structure)
+- JWT access + refresh strategy
+- Protected routes (frontend + backend)
+- Basic RBAC foundation
 
 ---
 
 ## License
 
-Private / All rights reserved (to be decided by owner).
+Private / All rights reserved.
 
 ---
 
