@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,30 +12,32 @@ import { Label } from '@/components/ui/Label'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Container } from '@/components/ui/Container'
-
-const schema = z
-  .object({
-    firstName: z.string().min(1, 'First name is required').max(100),
-    lastName: z.string().min(1, 'Last name is required').max(100),
-    email: z.string().email('Invalid email'),
-    password: z
-      .string()
-      .min(8, 'At least 8 characters')
-      .regex(/[A-Za-z]/, 'Must contain a letter')
-      .regex(/[0-9]/, 'Must contain a number'),
-    confirmPassword: z.string(),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  })
-
-type FormData = z.infer<typeof schema>
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
 
 export function RegisterPage() {
+  const { t } = useTranslation()
   const { register: registerUser } = useAuth()
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
+
+  const schema = z
+    .object({
+      firstName: z.string().min(1, t('validation.firstNameRequired')).max(100),
+      lastName: z.string().min(1, t('validation.lastNameRequired')).max(100),
+      email: z.string().email(t('validation.invalidEmail')),
+      password: z
+        .string()
+        .min(8, t('validation.passwordMin'))
+        .regex(/[A-Za-z]/, t('validation.passwordLetter'))
+        .regex(/[0-9]/, t('validation.passwordNumber')),
+      confirmPassword: z.string(),
+    })
+    .refine((d) => d.password === d.confirmPassword, {
+      message: t('validation.passwordsMatch'),
+      path: ['confirmPassword'],
+    })
+
+  type FormData = z.infer<typeof schema>
 
   const {
     register,
@@ -55,7 +58,7 @@ export function RegisterPage() {
       })
       navigate('/app', { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed')
+      setError(err instanceof Error ? err.message : t('auth.registerFailed'))
     }
   }
 
@@ -63,13 +66,14 @@ export function RegisterPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border bg-surface">
         <Container>
-          <div className="flex h-14 items-center">
+          <div className="flex h-14 items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
                 EF
               </span>
               <span className="font-semibold text-foreground">{appConfig.APP_NAME}</span>
             </Link>
+            <LanguageSwitcher variant="compact" />
           </div>
         </Container>
       </header>
@@ -77,8 +81,8 @@ export function RegisterPage() {
       <main className="flex flex-1 items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Create your account</CardTitle>
-            <CardDescription>Start using ExamFlow for free</CardDescription>
+            <CardTitle className="text-2xl">{t('auth.createAccount')}</CardTitle>
+            <CardDescription>{t('auth.registerSubtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
@@ -90,14 +94,14 @@ export function RegisterPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First name</Label>
+                  <Label htmlFor="firstName">{t('auth.firstName')}</Label>
                   <Input id="firstName" error={!!errors.firstName} {...register('firstName')} />
                   {errors.firstName && (
                     <p className="text-xs text-error">{errors.firstName.message}</p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last name</Label>
+                  <Label htmlFor="lastName">{t('auth.lastName')}</Label>
                   <Input id="lastName" error={!!errors.lastName} {...register('lastName')} />
                   {errors.lastName && (
                     <p className="text-xs text-error">{errors.lastName.message}</p>
@@ -106,7 +110,7 @@ export function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -120,7 +124,7 @@ export function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('auth.password')}</Label>
                 <Input
                   id="password"
                   type="password"
@@ -134,7 +138,7 @@ export function RegisterPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm password</Label>
+                <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -148,14 +152,14 @@ export function RegisterPage() {
               </div>
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? 'Creating account…' : 'Create account'}
+                {isSubmitting ? t('auth.creatingAccount') : t('auth.createAccountBtn')}
               </Button>
             </form>
 
             <p className="mt-6 text-center text-sm text-muted">
-              Already have an account?{' '}
+              {t('auth.hasAccount')}{' '}
               <Link to="/login" className="font-medium text-primary hover:underline">
-                Sign in
+                {t('auth.signInLink')}
               </Link>
             </p>
           </CardContent>

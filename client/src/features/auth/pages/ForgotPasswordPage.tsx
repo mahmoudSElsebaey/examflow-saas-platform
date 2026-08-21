@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -11,16 +12,18 @@ import { Label } from '@/components/ui/Label'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Container } from '@/components/ui/Container'
-
-const schema = z.object({
-  email: z.string().email('Invalid email'),
-})
-
-type FormData = z.infer<typeof schema>
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
 
 export function ForgotPasswordPage() {
+  const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  const schema = z.object({
+    email: z.string().email(t('validation.invalidEmail')),
+  })
+
+  type FormData = z.infer<typeof schema>
 
   const {
     register,
@@ -36,7 +39,7 @@ export function ForgotPasswordPage() {
       await forgotPasswordApi(data.email)
       setSuccess(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Request failed')
+      setError(err instanceof Error ? err.message : t('auth.requestFailed'))
     }
   }
 
@@ -44,13 +47,14 @@ export function ForgotPasswordPage() {
     <div className="flex min-h-screen flex-col bg-background">
       <header className="border-b border-border bg-surface">
         <Container>
-          <div className="flex h-14 items-center">
+          <div className="flex h-14 items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-xs font-bold text-primary-foreground">
                 EF
               </span>
               <span className="font-semibold text-foreground">{appConfig.APP_NAME}</span>
             </Link>
+            <LanguageSwitcher variant="compact" />
           </div>
         </Container>
       </header>
@@ -58,22 +62,18 @@ export function ForgotPasswordPage() {
       <main className="flex flex-1 items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Reset password</CardTitle>
-            <CardDescription>
-              Enter your email and we&apos;ll send you a reset link
-            </CardDescription>
+            <CardTitle className="text-2xl">{t('auth.resetPassword')}</CardTitle>
+            <CardDescription>{t('auth.resetSubtitle')}</CardDescription>
           </CardHeader>
           <CardContent>
             {success ? (
               <div className="space-y-4">
                 <Alert variant="success">
-                  <AlertDescription>
-                    If an account exists with that email, a reset link has been sent.
-                  </AlertDescription>
+                  <AlertDescription>{t('auth.resetSent')}</AlertDescription>
                 </Alert>
                 <Link to="/login">
                   <Button variant="outline" className="w-full">
-                    Back to sign in
+                    {t('auth.backToSignIn')}
                   </Button>
                 </Link>
               </div>
@@ -85,7 +85,7 @@ export function ForgotPasswordPage() {
                   </Alert>
                 )}
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t('auth.email')}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -97,11 +97,11 @@ export function ForgotPasswordPage() {
                   )}
                 </div>
                 <Button type="submit" className="w-full" disabled={isSubmitting}>
-                  {isSubmitting ? 'Sending…' : 'Send reset link'}
+                  {isSubmitting ? t('auth.sending') : t('auth.sendReset')}
                 </Button>
                 <p className="text-center text-sm text-muted">
                   <Link to="/login" className="font-medium text-primary hover:underline">
-                    Back to sign in
+                    {t('auth.backToSignIn')}
                   </Link>
                 </p>
               </form>
