@@ -23,7 +23,31 @@ if (!parsed.success) {
   process.exit(1)
 }
 
-export const env = parsed.data
+const env = parsed.data
+
+if (env.NODE_ENV === 'production') {
+  const weak = [
+    'dev-access-secret-change-me-32chars',
+    'dev-refresh-secret-change-me-32chars',
+    'change-me-generate-with-openssl-rand-hex-32',
+    'change-me-access-secret-min-32-chars',
+    'change-me-refresh-secret-min-32-chars',
+  ]
+  if (
+    !env.DATABASE_URL ||
+    weak.includes(env.JWT_ACCESS_SECRET) ||
+    weak.includes(env.JWT_REFRESH_SECRET) ||
+    env.JWT_ACCESS_SECRET.length < 32 ||
+    env.JWT_REFRESH_SECRET.length < 32
+  ) {
+    console.error(
+      '❌ Production requires DATABASE_URL and strong JWT secrets (min 32 chars, not defaults).'
+    )
+    process.exit(1)
+  }
+}
+
+export { env }
 
 export const config = {
   env: env.NODE_ENV,
