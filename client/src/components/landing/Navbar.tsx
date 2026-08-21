@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { appConfig } from '@/config/app'
 import { Button } from '@/components/ui/Button'
@@ -18,14 +19,14 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border/60 bg-surface/80 backdrop-blur-md">
       <Container>
         <div className="flex h-16 items-center justify-between">
-          <a href="/" className="flex items-center gap-2.5">
+          <Link to="/" className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-sm">
               EF
             </span>
             <span className="text-lg font-semibold tracking-tight text-foreground">
               {appConfig.APP_NAME}
             </span>
-          </a>
+          </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
             {navLinks.map((link) => (
@@ -40,12 +41,16 @@ export function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
-            <Button variant="ghost" size="sm">
-              Log in
-            </Button>
-            <Button variant="primary" size="sm">
-              Get started
-            </Button>
+            <Link to="/login">
+              <Button variant="ghost" size="sm">
+                Log in
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button variant="primary" size="sm">
+                Get started
+              </Button>
+            </Link>
           </div>
 
           <button
@@ -77,12 +82,16 @@ export function Navbar() {
               </a>
             ))}
             <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
-              <Button variant="outline" size="sm" className="w-full">
-                Log in
-              </Button>
-              <Button variant="primary" size="sm" className="w-full">
-                Get started
-              </Button>
+              <Link to="/login" onClick={() => setOpen(false)}>
+                <Button variant="outline" size="sm" className="w-full">
+                  Log in
+                </Button>
+              </Link>
+              <Link to="/register" onClick={() => setOpen(false)}>
+                <Button variant="primary" size="sm" className="w-full">
+                  Get started
+                </Button>
+              </Link>
             </div>
           </nav>
         </div>
