@@ -1,42 +1,36 @@
 # ExamFlow
 
-**Multi-Tenant SaaS Platform for Online Examinations, Assessments, Question Banks & Student Performance Analytics**
+**Multi-Tenant SaaS Platform for Online Examinations & Assessments**
 
-> Status: **PHASE 3.5 — Internationalization & RTL/LTR** completed.
+> Status: **PHASE 4 — Premium UI/UX & Visual Identity** completed.
 
----
+## Visual Identity — "Scholar Glow"
 
-## i18n (Phase 3.5)
+- **Primary:** Deep Teal (`#0f766e`) — focus, growth, learning
+- **Accent:** Warm Amber (`#d97706`) — progress, achievement
+- **Surfaces:** Warm stone backgrounds (not pure white)
+- **Typography:** Plus Jakarta Sans + Noto Sans Arabic
+- **Motion:** Purposeful micro-animations via `motion` (respects `prefers-reduced-motion`)
 
-- **Languages:** English (`en`, LTR) · Arabic (`ar`, RTL)
-- **Stack:** `i18next` + `react-i18next` + `i18next-browser-languagedetector`
-- **Files:** `client/src/i18n/locales/{en,ar}/translation.json`
-- **Direction:** `document.documentElement.dir` / `lang` updated on language change
-- **Persistence:** `localStorage` key `examflow_lang`
-- **Fallback:** browser language → Arabic if `ar*`, else English
-- **Switcher:** Navbar, Footer, Auth headers, Dashboard
+## Stack
 
-### Run
+React 19 · Vite · Tailwind v4 · TypeScript · i18n (EN/AR + RTL) · Express · MongoDB
+
+## Run
 
 ```bash
 cd client && npm install && npm run dev
+cd server && npm install && npm run dev
 ```
-
-Toggle language with the switcher. No full page reload required.
-
----
 
 ## Roadmap
 
-| Phase | Name | Status |
-|-------|------|--------|
-| 0 | Discovery & Architecture | ✅ Done |
-| 1 | Project Initialization | ✅ Done |
-| 2 | Design System & Landing Page | ✅ Done |
-| 3 | Authentication | ✅ Done |
-| 3.5 | Internationalization & RTL/LTR | ✅ Done |
-| 4 | Multi-Tenant Organizations | Pending |
+| Phase | Status |
+|-------|--------|
+| 0–3.5 Architecture → Auth → i18n | ✅ |
+| 4 Premium UI/UX | ✅ |
+| 5+ Organizations → Exams | Pending |
 
 ---
 
-**ExamFlow** — Production SaaS, not a tutorial.
+**ExamFlow** — Smart Assessments. Real Insights.
