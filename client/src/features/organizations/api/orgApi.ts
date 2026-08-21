@@ -50,7 +50,12 @@ export async function getOrganizationApi(accessToken: string, orgId: string) {
 export async function updateOrganizationApi(
   accessToken: string,
   orgId: string,
-  body: { name?: string; description?: string | null; primaryColor?: string | null }
+  body: {
+    name?: string
+    description?: string | null
+    primaryColor?: string | null
+    logoUrl?: string | null
+  }
 ) {
   return request<{ organization: Organization }>(`/${orgId}`, accessToken, {
     method: 'PATCH',

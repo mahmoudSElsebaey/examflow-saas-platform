@@ -1,17 +1,16 @@
 import { Organization } from '../models/Organization.js'
 import { Membership } from '../models/Membership.js'
 import { User } from '../models/User.js'
-import type { OrgMemberRole, OrganizationDTO, MemberDTO } from '../types/organization.js'
 import { AppError } from '../middlewares/errorHandler.js'
+import type { OrganizationDTO, MemberDTO, OrgMemberRole } from '../types/organization.js'
 
-function slugify(input: string): string {
-  return input
+function slugify(name: string): string {
+  return name
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_]+/g, '-')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
     .slice(0, 60)
 }
 
@@ -41,11 +40,11 @@ export async function createOrganization(
   userId: string,
   data: { name: string; slug?: string; description?: string }
 ): Promise<OrganizationDTO> {
-  let slug = data.slug ? slugify(data.slug) : slugify(data.name)
-  if (!slug) throw new AppError('Invalid organization slug', 400, 'INVALID_SLUG')
+  let slug = (data.slug || slugify(data.name)).toLowerCase()
+  if (!slug) slug = `org-${Date.now().toString(36)}`
 
-  const existing = await Organization.findOne({ slug })
-  if (existing) {
+  const exists = await Organization.findOne({ slug })
+  if (exists) {
     slug = `${slug}-${Date.now().toString(36).slice(-4)}`
   }
 
@@ -55,42 +54,39 @@ export async function createOrganization(
     description: data.description?.trim() || null,
     ownerId: userId,
     plan: 'free',
+    branding: { logoUrl: null, primaryColor: null },
   })
 
   await Membership.create({
-    organizationId: org._id,
+    organizationId: org.id,
     userId,
     role: 'owner',
     status: 'active',
+    joinedAt: new Date(),
   })
-
-  await User.updateOne(
-    { _id: userId, role: 'student' },
-    { $set: { role: 'org_owner' } }
-  )
 
   return toOrgDTO(org, 'owner')
 }
 
-export async function listMyOrganizations(userId: string): Promise<OrganizationDTO[]> {
+export async function listOrganizations(userId: string): Promise<OrganizationDTO[]> {
   const memberships = await Membership.find({
     userId,
     status: { $in: ['active', 'invited'] },
-  }).lean()
-
-  if (memberships.length === 0) return []
-
+  })
   const orgIds = memberships.map((m) => m.organizationId)
-  const orgs = await Organization.find({ _id: { $in: orgIds }, isActive: true })
+  const orgs = await Organization.find({
+    _id: { $in: orgIds },
+    isActive: true,
+  }).sort({ name: 1 })
 
-  const roleByOrg = new Map(
+  const roleMap = new Map(
     memberships.map((m) => [m.organizationId.toString(), m.role as OrgMemberRole])
   )
 
-  return orgs.map((org) => toOrgDTO(org, roleByOrg.get(org.id)))
+  return orgs.map((org) => toOrgDTO(org, roleMap.get(org.id)))
 }
 
-export async function getOrganizationForMember(
+export async function getOrganization(
   orgId: string,
   userId: string
 ): Promise<OrganizationDTO> {
@@ -110,7 +106,12 @@ export async function getOrganizationForMember(
 export async function updateOrganization(
   orgId: string,
   userId: string,
-  data: { name?: string; description?: string | null; primaryColor?: string | null }
+  data: {
+    name?: string
+    description?: string | null
+    primaryColor?: string | null
+    logoUrl?: string | null
+  }
 ): Promise<OrganizationDTO> {
   const membership = await Membership.findOne({
     organizationId: orgId,
@@ -125,11 +126,18 @@ export async function updateOrganization(
 
   if (data.name !== undefined) org.name = data.name.trim()
   if (data.description !== undefined) org.description = data.description
-  if (data.primaryColor !== undefined) {
-    org.branding = { ...org.branding, primaryColor: data.primaryColor }
-  }
-  await org.save()
 
+  const branding = {
+    logoUrl: org.branding?.logoUrl ?? null,
+    primaryColor: org.branding?.primaryColor ?? null,
+  }
+  if (data.primaryColor !== undefined) branding.primaryColor = data.primaryColor
+  if (data.logoUrl !== undefined) branding.logoUrl = data.logoUrl
+  if (data.primaryColor !== undefined || data.logoUrl !== undefined) {
+    org.branding = branding
+  }
+
+  await org.save()
   return toOrgDTO(org, membership.role)
 }
 
@@ -158,7 +166,7 @@ export async function listMembers(orgId: string, userId: string): Promise<Member
       lastName: u?.lastName ?? '',
       role: m.role,
       status: m.status,
-      joinedAt: m.createdAt.toISOString(),
+      joinedAt: (m.joinedAt || m.createdAt).toISOString(),
     }
   })
 }
@@ -166,12 +174,8 @@ export async function listMembers(orgId: string, userId: string): Promise<Member
 export async function inviteMember(
   orgId: string,
   actorId: string,
-  data: { email: string; role: OrgMemberRole }
+  data: { email: string; role: Exclude<OrgMemberRole, 'owner'> }
 ): Promise<MemberDTO> {
-  if (data.role === 'owner') {
-    throw new AppError('Cannot invite as owner', 400, 'INVALID_ROLE')
-  }
-
   const actor = await Membership.findOne({
     organizationId: orgId,
     userId: actorId,
@@ -181,17 +185,11 @@ export async function inviteMember(
   if (!actor) throw new AppError('Insufficient permissions', 403, 'FORBIDDEN')
 
   const user = await User.findOne({ email: data.email.toLowerCase().trim() })
-  if (!user) {
-    throw new AppError(
-      'User not found. They must register first.',
-      404,
-      'USER_NOT_FOUND'
-    )
-  }
+  if (!user) throw new AppError('User not found. They must register first.', 404, 'USER_NOT_FOUND')
 
   const existing = await Membership.findOne({
     organizationId: orgId,
-    userId: user._id,
+    userId: user.id,
   })
   if (existing) {
     throw new AppError('User is already a member', 409, 'ALREADY_MEMBER')
@@ -199,10 +197,11 @@ export async function inviteMember(
 
   const membership = await Membership.create({
     organizationId: orgId,
-    userId: user._id,
+    userId: user.id,
     role: data.role,
     status: 'active',
     invitedBy: actorId,
+    joinedAt: new Date(),
   })
 
   return {
@@ -213,14 +212,6 @@ export async function inviteMember(
     lastName: user.lastName,
     role: membership.role,
     status: membership.status,
-    joinedAt: membership.createdAt.toISOString(),
+    joinedAt: membership.joinedAt!.toISOString(),
   }
-}
-
-export async function getMembership(orgId: string, userId: string) {
-  return Membership.findOne({
-    organizationId: orgId,
-    userId,
-    status: 'active',
-  })
 }
