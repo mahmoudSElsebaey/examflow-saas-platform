@@ -2,23 +2,28 @@
 
 **Multi-Tenant SaaS Platform for Online Examinations & Assessments**
 
-> Status: **PHASE 6 — Courses & Question Banks** completed.
+> Status: **PHASE 7 — Exam Builder & Exam Engine** completed.
 
-## Features by phase
+## Roadmap
 
 | Phase | Status |
 |-------|--------|
 | 0–3.5 Architecture → Auth → i18n | ✅ |
-| 4 Premium UI/UX (Scholar Glow) | ✅ |
-| 5 Multi-Tenant Organizations | ✅ |
+| 4 Premium UI/UX | ✅ |
+| 5 Organizations | ✅ |
 | 6 Courses & Question Banks | ✅ |
-| 7+ Exam engine | Pending |
+| 7 Exam Builder & Engine | ✅ |
+| 8+ Analytics / Certificates | Pending |
 
-## Content APIs (tenant-scoped)
+## Exam APIs
 
-`/api/v1/organizations/:orgId/courses`
-`/api/v1/organizations/:orgId/banks`
-`/api/v1/organizations/:orgId/banks/:bankId/questions`
+`/api/v1/organizations/:orgId/exams`
+`/api/v1/organizations/:orgId/exams/:examId/publish`
+`/api/v1/organizations/:orgId/exams/:examId/attempts`
+`/api/v1/organizations/:orgId/attempts/:attemptId`
+`/api/v1/organizations/:orgId/attempts/:attemptId/submit`
+
+Features: draft/publish, question snapshot, shuffle, timer, auto-grade objective items, max attempts.
 
 ## Run
 

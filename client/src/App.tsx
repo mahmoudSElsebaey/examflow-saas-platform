@@ -9,6 +9,8 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { OrganizationsPage } from '@/features/organizations/pages/OrganizationsPage'
 import { OrganizationDetailPage } from '@/features/organizations/pages/OrganizationDetailPage'
 import { OrgContentPage } from '@/features/content/pages/OrgContentPage'
+import { OrgExamsPage } from '@/features/exams/pages/OrgExamsPage'
+import { ExamTakePage } from '@/features/exams/pages/ExamTakePage'
 
 function App() {
   return (
@@ -48,6 +50,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <OrgContentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/organizations/:orgId/exams"
+            element={
+              <ProtectedRoute>
+                <OrgExamsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/organizations/:orgId/attempts/:attemptId"
+            element={
+              <ProtectedRoute>
+                <ExamTakePage />
               </ProtectedRoute>
             }
           />
