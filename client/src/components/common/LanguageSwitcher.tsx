@@ -28,12 +28,12 @@ export function LanguageSwitcher({ className, variant = 'buttons' }: LanguageSwi
         type="button"
         onClick={() => change(next)}
         className={cn(
-          'inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-background',
+          'inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface px-2.5 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-surface-subtle',
           className
         )}
         aria-label={t('common.language')}
       >
-        <Languages className="h-3.5 w-3.5" />
+        <Languages className="h-3.5 w-3.5 text-primary" />
         {current === 'en' ? t('common.arabic') : t('common.english')}
       </button>
     )
@@ -42,7 +42,7 @@ export function LanguageSwitcher({ className, variant = 'buttons' }: LanguageSwi
   return (
     <div
       className={cn(
-        'inline-flex items-center rounded-lg border border-border bg-surface p-0.5',
+        'inline-flex items-center rounded-lg border border-border bg-surface p-0.5 shadow-sm',
         className
       )}
       role="group"
@@ -54,7 +54,7 @@ export function LanguageSwitcher({ className, variant = 'buttons' }: LanguageSwi
           type="button"
           onClick={() => change(opt.code)}
           className={cn(
-            'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
+            'rounded-md px-2.5 py-1 text-xs font-semibold transition-colors',
             current === opt.code
               ? 'bg-primary text-primary-foreground shadow-sm'
               : 'text-muted hover:text-foreground'

@@ -8,10 +8,11 @@ export function HowItWorks() {
   const { t } = useTranslation()
 
   return (
-    <section id="how-it-works" className="border-b border-border bg-surface py-20 sm:py-24">
-      <Container>
+    <section id="how-it-works" className="relative border-b border-border bg-surface py-20 sm:py-24">
+      <div className="pointer-events-none absolute inset-0 bg-hero-glow opacity-50" />
+      <Container className="relative">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl text-balance">
             {t('howItWorks.title')}
           </h2>
           <p className="mt-4 text-lg text-muted">{t('howItWorks.subtitle')}</p>
@@ -19,8 +20,13 @@ export function HowItWorks() {
 
         <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((key, i) => (
-            <div key={key} className="relative">
-              <span className="text-4xl font-bold text-primary/20">{stepNumbers[i]}</span>
+            <div
+              key={key}
+              className="relative rounded-xl border border-border/50 bg-surface-elevated/80 p-5 shadow-sm"
+            >
+              <span className="text-3xl font-extrabold tracking-tight text-primary/25">
+                {stepNumbers[i]}
+              </span>
               <h3 className="mt-2 text-lg font-semibold text-foreground">
                 {t(`howItWorks.${key}.title`)}
               </h3>
