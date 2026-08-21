@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Container } from '@/components/ui/Container'
 import { cn } from '@/lib/utils'
+import { Link } from 'react-router-dom'
 
 const plans = [
   { key: 'starter' as const, highlighted: false },
@@ -19,7 +20,7 @@ export function Pricing() {
     <section id="pricing" className="border-b border-border bg-background py-20 sm:py-24">
       <Container>
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl text-balance">
             {t('pricing.title')}
           </h2>
           <p className="mt-4 text-lg text-muted">{t('pricing.subtitle')}</p>
@@ -36,12 +37,14 @@ export function Pricing() {
                 key={plan.key}
                 className={cn(
                   'relative flex flex-col',
-                  plan.highlighted && 'border-primary shadow-lg ring-1 ring-primary/20'
+                  plan.highlighted
+                    ? 'border-primary/40 shadow-lg shadow-primary/10 ring-1 ring-primary/20'
+                    : 'border-border/70'
                 )}
               >
                 {plan.highlighted && (
                   <Badge
-                    className="absolute -top-3 start-1/2 -translate-x-1/2 rtl:translate-x-1/2"
+                    className="absolute -top-3 start-1/2 -translate-x-1/2 rtl:translate-x-1/2 bg-accent text-accent-foreground border-0"
                     variant="default"
                   >
                     {t('pricing.mostPopular')}
@@ -50,7 +53,7 @@ export function Pricing() {
                 <CardHeader>
                   <CardTitle className="text-xl">{t(`pricing.${plan.key}.name`)}</CardTitle>
                   <div className="mt-3 flex items-baseline gap-1">
-                    <span className="text-4xl font-bold tracking-tight text-foreground">
+                    <span className="text-4xl font-extrabold tracking-tight text-foreground">
                       {t(`pricing.${plan.key}.price`)}
                     </span>
                     {plan.key === 'professional' && (
@@ -68,19 +71,21 @@ export function Pricing() {
                         key={feature}
                         className="flex items-start gap-2.5 text-sm text-foreground"
                       >
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                         {feature}
                       </li>
                     ))}
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button
-                    variant={plan.highlighted ? 'primary' : 'outline'}
-                    className="w-full"
-                  >
-                    {t(`pricing.${plan.key}.cta`)}
-                  </Button>
+                  <Link to="/register" className="w-full">
+                    <Button
+                      variant={plan.highlighted ? 'primary' : 'outline'}
+                      className="w-full"
+                    >
+                      {t(`pricing.${plan.key}.cta`)}
+                    </Button>
+                  </Link>
                 </CardFooter>
               </Card>
             )

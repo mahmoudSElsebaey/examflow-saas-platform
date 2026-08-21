@@ -36,10 +36,10 @@ export function Footer() {
         <div className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-6">
           <div className="lg:col-span-2">
             <a href="/" className="flex items-center gap-2.5">
-              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-800 text-sm font-bold text-primary-foreground shadow-md shadow-primary/20">
                 EF
               </span>
-              <span className="text-lg font-semibold text-foreground">
+              <span className="text-lg font-bold text-foreground">
                 {appConfig.APP_NAME}
               </span>
             </a>
