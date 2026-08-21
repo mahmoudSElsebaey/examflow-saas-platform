@@ -1,24 +1,27 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Menu, X } from 'lucide-react'
 import { appConfig } from '@/config/app'
 import { Button } from '@/components/ui/Button'
 import { Container } from '@/components/ui/Container'
+import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
 import { cn } from '@/lib/utils'
 
-const navLinks = [
-  { label: 'Features', href: '#features' },
-  { label: 'How it works', href: '#how-it-works' },
-  { label: 'Pricing', href: '#pricing' },
-]
-
 export function Navbar() {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+
+  const navLinks = [
+    { label: t('nav.features'), href: '#features' },
+    { label: t('nav.howItWorks'), href: '#how-it-works' },
+    { label: t('nav.pricing'), href: '#pricing' },
+  ]
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/60 bg-surface/80 backdrop-blur-md">
       <Container>
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-16 items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5">
             <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground shadow-sm">
               EF
@@ -41,33 +44,37 @@ export function Navbar() {
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
+            <LanguageSwitcher />
             <Link to="/login">
               <Button variant="ghost" size="sm">
-                Log in
+                {t('common.logIn')}
               </Button>
             </Link>
             <Link to="/register">
               <Button variant="primary" size="sm">
-                Get started
+                {t('common.getStarted')}
               </Button>
             </Link>
           </div>
 
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-lg p-2 text-muted md:hidden"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-            aria-label="Toggle menu"
-          >
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
+          <div className="flex items-center gap-2 md:hidden">
+            <LanguageSwitcher variant="compact" />
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-lg p-2 text-muted"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-label={t('nav.toggleMenu')}
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
         <div
           className={cn(
             'overflow-hidden transition-all md:hidden',
-            open ? 'max-h-64 pb-4' : 'max-h-0'
+            open ? 'max-h-72 pb-4' : 'max-h-0'
           )}
         >
           <nav className="flex flex-col gap-1 pt-2">
@@ -84,12 +91,12 @@ export function Navbar() {
             <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
               <Link to="/login" onClick={() => setOpen(false)}>
                 <Button variant="outline" size="sm" className="w-full">
-                  Log in
+                  {t('common.logIn')}
                 </Button>
               </Link>
               <Link to="/register" onClick={() => setOpen(false)}>
                 <Button variant="primary" size="sm" className="w-full">
-                  Get started
+                  {t('common.getStarted')}
                 </Button>
               </Link>
             </div>
