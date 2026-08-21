@@ -1,0 +1,248 @@
+const en = {
+  common: {
+    appName: 'ExamFlow',
+    save: 'Save',
+    cancel: 'Cancel',
+    delete: 'Delete',
+    edit: 'Edit',
+    search: 'Search',
+    loading: 'Loading…',
+    back: 'Back',
+    next: 'Next',
+    submit: 'Submit',
+    close: 'Close',
+    confirm: 'Confirm',
+    yes: 'Yes',
+    no: 'No',
+    or: 'or',
+    and: 'and',
+    viewAll: 'View all',
+    learnMore: 'Learn more',
+    getStarted: 'Get started',
+    logIn: 'Log in',
+    logOut: 'Log out',
+    signUp: 'Sign up',
+    continue: 'Continue',
+    language: 'Language',
+    english: 'English',
+    arabic: 'Arabic',
+  },
+  nav: {
+    features: 'Features',
+    howItWorks: 'How it works',
+    pricing: 'Pricing',
+    toggleMenu: 'Toggle menu',
+  },
+  hero: {
+    badge: 'Multi-tenant SaaS for modern education',
+    titleBefore: 'Build, deliver & analyze',
+    titleHighlight: 'exams',
+    titleAfter: 'that scale',
+    description:
+      'Multi-tenant SaaS platform for online examinations, assessments, question banks, and student performance analytics. Create question banks, design sophisticated exams, grade automatically, and issue certificates — all from one secure platform.',
+    startTrial: 'Start free trial',
+    watchDemo: 'Watch demo',
+    noCard: 'No credit card required · Free for small teams',
+  },
+  features: {
+    title: 'Everything you need to run assessments at scale',
+    subtitle: 'From question banks to certificates — one platform for the entire exam lifecycle.',
+    questionBanks: {
+      title: 'Question Banks',
+      description:
+        'Organize questions by subject, topic, and difficulty. Support for multiple question types with full versioning.',
+    },
+    examBuilder: {
+      title: 'Exam Builder',
+      description:
+        'Create exams with sections, randomized pools, time limits, and advanced delivery settings in minutes.',
+    },
+    randomization: {
+      title: 'Smart Randomization',
+      description:
+        'Pool-based question selection and answer shuffling so every student gets a unique yet fair exam.',
+    },
+    examEngine: {
+      title: 'Secure Exam Engine',
+      description:
+        'Server-side timing, auto-save, recovery from disconnects, and controlled navigation during attempts.',
+    },
+    analytics: {
+      title: 'Deep Analytics',
+      description:
+        'Student, class, and organization-level insights. Identify weak topics and measure learning outcomes.',
+    },
+    certificates: {
+      title: 'Certificates',
+      description:
+        'Automatically issue verifiable certificates after successful completion. White-label ready.',
+    },
+    teams: {
+      title: 'Teams & Roles',
+      description:
+        'Invite teachers, examiners, and students. Fine-grained RBAC keeps every organization secure.',
+    },
+    security: {
+      title: 'Enterprise Security',
+      description:
+        'Multi-tenant isolation, audit logs, JWT authentication, and industry-standard security practices.',
+    },
+  },
+  howItWorks: {
+    title: 'How ExamFlow works',
+    subtitle: 'A clear path from setup to certificates — designed for real educational workflows.',
+    step1: {
+      title: 'Create your organization',
+      description:
+        'Sign up, set up your brand, invite teachers and staff, and configure roles in under five minutes.',
+    },
+    step2: {
+      title: 'Build question banks & exams',
+      description:
+        'Import or author questions, organize them into banks, then assemble exams with sections and rules.',
+    },
+    step3: {
+      title: 'Deliver & monitor',
+      description:
+        'Schedule exams, share secure links, and watch attempts in real time with auto-save and recovery.',
+    },
+    step4: {
+      title: 'Grade, analyze & certify',
+      description:
+        'Automatic grading for objective questions, rich analytics, and one-click certificate issuance.',
+    },
+  },
+  pricing: {
+    title: 'Simple, transparent pricing',
+    subtitle: 'Start free. Upgrade when your institution grows. No hidden fees.',
+    mostPopular: 'Most popular',
+    perMonth: '/month',
+    starter: {
+      name: 'Starter',
+      price: 'Free',
+      description: 'For individual teachers and small groups getting started.',
+      cta: 'Start free',
+      features: [
+        '1 organization',
+        'Up to 50 students',
+        '200 questions',
+        'Basic analytics',
+        'Email support',
+      ],
+    },
+    professional: {
+      name: 'Professional',
+      price: '$49',
+      description: 'For academies and training centers that need more power.',
+      cta: 'Start trial',
+      features: [
+        'Unlimited students',
+        'Unlimited questions',
+        'Advanced analytics',
+        'Certificates',
+        'Question import',
+        'Priority support',
+      ],
+    },
+    enterprise: {
+      name: 'Enterprise',
+      price: 'Custom',
+      description: 'For institutions that need white-label, SSO, and SLAs.',
+      cta: 'Contact sales',
+      features: [
+        'Everything in Professional',
+        'White-label branding',
+        'SSO / SAML',
+        'Dedicated support',
+        'Custom integrations',
+        'SLA & audit logs',
+      ],
+    },
+  },
+  cta: {
+    title: 'Ready to modernize your assessments?',
+    subtitle:
+      'Join institutions that use ExamFlow to deliver secure, scalable exams and meaningful learning insights.',
+    startTrial: 'Start free trial',
+    talkSales: 'Talk to sales',
+  },
+  footer: {
+    product: 'Product',
+    company: 'Company',
+    resources: 'Resources',
+    legal: 'Legal',
+    features: 'Features',
+    pricing: 'Pricing',
+    roadmap: 'Roadmap',
+    about: 'About',
+    blog: 'Blog',
+    contact: 'Contact',
+    documentation: 'Documentation',
+    helpCenter: 'Help Center',
+    status: 'Status',
+    privacy: 'Privacy',
+    terms: 'Terms',
+    security: 'Security',
+    rights: 'All rights reserved.',
+    tagline: 'Built for education · Multi-tenant by design',
+  },
+  auth: {
+    welcomeBack: 'Welcome back',
+    signInSubtitle: 'Sign in to your ExamFlow account',
+    email: 'Email',
+    password: 'Password',
+    forgotPassword: 'Forgot password?',
+    signingIn: 'Signing in…',
+    signIn: 'Sign in',
+    noAccount: "Don't have an account?",
+    createOne: 'Create one',
+    createAccount: 'Create your account',
+    registerSubtitle: 'Start using ExamFlow for free',
+    firstName: 'First name',
+    lastName: 'Last name',
+    confirmPassword: 'Confirm password',
+    creatingAccount: 'Creating account…',
+    createAccountBtn: 'Create account',
+    hasAccount: 'Already have an account?',
+    signInLink: 'Sign in',
+    resetPassword: 'Reset password',
+    resetSubtitle: "Enter your email and we'll send you a reset link",
+    sendReset: 'Send reset link',
+    sending: 'Sending…',
+    backToSignIn: 'Back to sign in',
+    resetSent: 'If an account exists with that email, a reset link has been sent.',
+    loginFailed: 'Login failed',
+    registerFailed: 'Registration failed',
+    requestFailed: 'Request failed',
+  },
+  validation: {
+    invalidEmail: 'Invalid email',
+    passwordRequired: 'Password is required',
+    firstNameRequired: 'First name is required',
+    lastNameRequired: 'Last name is required',
+    passwordMin: 'At least 8 characters',
+    passwordLetter: 'Must contain a letter',
+    passwordNumber: 'Must contain a number',
+    passwordsMatch: 'Passwords do not match',
+  },
+  dashboard: {
+    welcome: 'Welcome, {{name}}!',
+    subtitle: 'This is your dashboard. Full exam features arrive in later phases.',
+    account: 'Account',
+    email: 'Email',
+    role: 'Role',
+    emailVerified: 'Email verified',
+    yes: 'Yes',
+    pending: 'Pending',
+    comingNext: 'Coming next',
+    comingNextBody:
+      'Organizations, courses, question banks, and the exam engine will be built in Phases 4–8.',
+  },
+  errors: {
+    generic: 'Something went wrong',
+    unauthorized: 'Please sign in to continue',
+    notFound: 'Page not found',
+  },
+} as const
+
+export default en
