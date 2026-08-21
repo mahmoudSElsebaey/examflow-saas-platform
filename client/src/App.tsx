@@ -8,6 +8,7 @@ import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { OrganizationsPage } from '@/features/organizations/pages/OrganizationsPage'
 import { OrganizationDetailPage } from '@/features/organizations/pages/OrganizationDetailPage'
+import { OrgContentPage } from '@/features/content/pages/OrgContentPage'
 
 function App() {
   return (
@@ -39,6 +40,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <OrganizationDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/app/organizations/:orgId/content"
+            element={
+              <ProtectedRoute>
+                <OrgContentPage />
               </ProtectedRoute>
             }
           />

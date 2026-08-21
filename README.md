@@ -2,43 +2,30 @@
 
 **Multi-Tenant SaaS Platform for Online Examinations & Assessments**
 
-> Status: **PHASE 5 — Multi-Tenant Organizations** completed.
+> Status: **PHASE 6 — Courses & Question Banks** completed.
 
-## Visual Identity — "Scholar Glow"
+## Features by phase
 
-- Primary: Deep Teal · Accent: Warm Amber · Surfaces: Warm stone
-- Typography: Plus Jakarta Sans + Noto Sans Arabic
-- i18n: English (LTR) / Arabic (RTL)
+| Phase | Status |
+|-------|--------|
+| 0–3.5 Architecture → Auth → i18n | ✅ |
+| 4 Premium UI/UX (Scholar Glow) | ✅ |
+| 5 Multi-Tenant Organizations | ✅ |
+| 6 Courses & Question Banks | ✅ |
+| 7+ Exam engine | Pending |
 
-## Organizations (Phase 5)
+## Content APIs (tenant-scoped)
 
-- Create / list organizations (tenant workspaces)
-- Membership with roles: owner, admin, teacher, examiner, student
-- Invite existing users by email
-- Tenant isolation via membership checks
-- APIs under `/api/v1/organizations`
-
-## Stack
-
-React 19 · Vite · Tailwind v4 · TypeScript · i18n · Express · MongoDB · JWT
+`/api/v1/organizations/:orgId/courses`
+`/api/v1/organizations/:orgId/banks`
+`/api/v1/organizations/:orgId/banks/:bankId/questions`
 
 ## Run
 
 ```bash
 cd client && npm install && npm run dev
 cd server && npm install && npm run dev
-# Set DATABASE_URL in server/.env
+# DATABASE_URL in server/.env
 ```
-
-## Roadmap
-
-| Phase | Status |
-|-------|--------|
-| 0–3.5 Architecture → Auth → i18n | ✅ |
-| 4 Premium UI/UX | ✅ |
-| 5 Multi-Tenant Organizations | ✅ |
-| 6+ Courses / Question banks / Exams | Pending |
-
----
 
 **ExamFlow** — Smart Assessments. Real Insights.
