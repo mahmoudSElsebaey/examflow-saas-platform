@@ -2,7 +2,7 @@
 
 **Multi-Tenant SaaS Platform for Online Examinations & Assessments**
 
-> Status: **PHASE 8 — Analytics & Certificates** completed.
+> Status: **PHASE 9 — Polish & UX** completed.
 
 ## Roadmap
 
@@ -14,13 +14,15 @@
 | 6 Courses & Question Banks | ✅ |
 | 7 Exam Builder & Engine | ✅ |
 | 8 Analytics & Certificates | ✅ |
+| 9 Polish & UX | ✅ |
 
-## New APIs
+## Phase 9 highlights
 
-- `GET /api/v1/organizations/:orgId/analytics`
-- `GET /api/v1/organizations/:orgId/exams/:examId/analytics`
-- `GET/POST certificates` under org; `POST .../attempts/:id/certificate`
-- `GET /api/v1/public/certificates/verify/:code`
+- Shared `AppHeader`
+- Org workspace hub with module cards
+- `OrgSubNav` across content / exams / analytics / certificates
+- Dashboard lists organizations with quick open
+- Full EN/AR strings for exam, analytics, certificates
 
 ## Run
 
