@@ -119,7 +119,12 @@ const en = {
     confirmSubmit: 'Submit this exam?', answered: 'answered', attemptNotFound: 'Attempt not found',
     resultTitle: 'Exam result', submitted: 'Submitted.', timedOut: 'Time ran out.',
     passed: 'Passed', failed: 'Not passed', pts: 'pts',
-    shortAnswerHint: 'Short answers are graded manually later.',
+    saving: 'Saving…', saved: 'Saved', saveFailed: 'Save failed',
+    yourAnswer: 'Your answer',
+    shortAnswerPlaceholder: 'Type your answer here…',
+    shortAnswerBadge: 'Short answer',
+    shortAnswerPendingHint: 'Short-answer items may be reviewed manually; objective score is shown above.',
+    shortAnswerHint: 'Short answers are not auto-graded; they are stored for manual review.',
   },
   analytics: {
     title: 'Analytics', subtitle: 'Organization performance.',
