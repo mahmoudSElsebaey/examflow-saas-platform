@@ -11,6 +11,11 @@ import {
 import { AppError } from '../middlewares/errorHandler.js'
 import type { RegisterInput, LoginInput } from '../validators/auth.validators.js'
 import type { AuthUser } from '../types/auth.js'
+import {
+  sendEmail,
+  verificationEmail,
+  passwordResetEmail,
+} from './email.service.js'
 
 const SALT_ROUNDS = 12
 
@@ -49,7 +54,7 @@ export async function registerUser(input: RegisterInput): Promise<{
   user.refreshTokenHash = hashToken(refreshToken)
   await user.save()
 
-  // TODO: send verification email with emailVerificationToken (Phase 11)
+  await sendEmail(verificationEmail(user.email, emailVerificationToken))
 
   return {
     user: toAuthUser(user),
@@ -108,7 +113,7 @@ export async function refreshTokens(refreshToken: string): Promise<{
 
   const user = await User.findById(payload.userId).select('+refreshTokenHash')
   if (!user || !user.isActive) {
-    throw new AppError('User not found or inactive', 401, 'INVALID_REFRESH_TOKEN')
+    throw new AppError('User not found', 401, 'INVALID_REFRESH_TOKEN')
   }
 
   if (!user.refreshTokenHash || user.refreshTokenHash !== hashToken(refreshToken)) {
@@ -121,16 +126,12 @@ export async function refreshTokens(refreshToken: string): Promise<{
     role: user.role,
   }
 
-  const newAccessToken = signAccessToken(newPayload)
-  const newRefreshToken = signRefreshToken(newPayload)
-
-  user.refreshTokenHash = hashToken(newRefreshToken)
+  const accessToken = signAccessToken(newPayload)
+  const newRefresh = signRefreshToken(newPayload)
+  user.refreshTokenHash = hashToken(newRefresh)
   await user.save()
 
-  return {
-    accessToken: newAccessToken,
-    refreshToken: newRefreshToken,
-  }
+  return { accessToken, refreshToken: newRefresh }
 }
 
 export async function logoutUser(userId: string): Promise<void> {
@@ -145,6 +146,8 @@ export async function getCurrentUser(userId: string): Promise<AuthUser> {
   return toAuthUser(user)
 }
 
+export const getMe = getCurrentUser
+
 export async function forgotPassword(email: string): Promise<void> {
   const user = await User.findOne({ email })
   if (!user) return
@@ -154,10 +157,7 @@ export async function forgotPassword(email: string): Promise<void> {
   user.passwordResetExpires = new Date(Date.now() + 60 * 60 * 1000)
   await user.save()
 
-  // TODO: send password reset email with token (Phase 11)
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[DEV] Password reset token for ${email}: ${token}`)
-  }
+  await sendEmail(passwordResetEmail(user.email, token))
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
@@ -165,7 +165,7 @@ export async function resetPassword(token: string, newPassword: string): Promise
   const user = await User.findOne({
     passwordResetToken: hashed,
     passwordResetExpires: { $gt: new Date() },
-  }).select('+passwordResetToken +passwordResetExpires')
+  }).select('+passwordResetToken +passwordResetExpires +password')
 
   if (!user) {
     throw new AppError('Invalid or expired reset token', 400, 'INVALID_RESET_TOKEN')
@@ -176,4 +176,42 @@ export async function resetPassword(token: string, newPassword: string): Promise
   user.passwordResetExpires = null
   user.refreshTokenHash = null
   await user.save()
+}
+
+export async function verifyEmail(token: string): Promise<AuthUser> {
+  const hashed = hashToken(token)
+  const user = await User.findOne({
+    emailVerificationToken: hashed,
+    emailVerificationExpires: { $gt: new Date() },
+  }).select('+emailVerificationToken +emailVerificationExpires')
+
+  if (!user) {
+    throw new AppError('Invalid or expired verification token', 400, 'INVALID_VERIFY_TOKEN')
+  }
+
+  user.isEmailVerified = true
+  user.emailVerificationToken = null
+  user.emailVerificationExpires = null
+  await user.save()
+
+  return toAuthUser(user)
+}
+
+export async function resendVerification(userId: string): Promise<void> {
+  const user = await User.findById(userId).select(
+    '+emailVerificationToken +emailVerificationExpires'
+  )
+  if (!user || !user.isActive) {
+    throw new AppError('User not found', 404, 'USER_NOT_FOUND')
+  }
+  if (user.isEmailVerified) {
+    throw new AppError('Email already verified', 400, 'ALREADY_VERIFIED')
+  }
+
+  const token = generateRandomToken()
+  user.emailVerificationToken = hashToken(token)
+  user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  await user.save()
+
+  await sendEmail(verificationEmail(user.email, token))
 }
