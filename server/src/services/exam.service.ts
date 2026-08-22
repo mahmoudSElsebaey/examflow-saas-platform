@@ -2,7 +2,14 @@ import { Exam } from '../models/Exam.js'
 import { ExamAttempt } from '../models/ExamAttempt.js'
 import { Question } from '../models/Question.js'
 import { AppError } from '../middlewares/errorHandler.js'
-import type { ExamDTO, ExamAttemptDTO, AttemptQuestionView } from '../types/exam.js'
+import type {
+  ExamDTO,
+  ExamAttemptDTO,
+  AttemptQuestionView,
+  AttemptReviewSummary,
+} from '../types/exam.js'
+import * as certService from './certificate.service.js'
+import { Certificate } from '../models/Certificate.js'
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
@@ -34,20 +41,91 @@ function toExamDTO(e: InstanceType<typeof Exam>): ExamDTO {
   }
 }
 
+function arraysEqualAsSet(a: string[], b: string[]): boolean {
+  if (a.length !== b.length) return false
+  const sa = new Set(a)
+  return b.every((x) => sa.has(x))
+}
+
 function toAttemptDTO(
   a: InstanceType<typeof ExamAttempt>,
-  opts?: { includeQuestions?: boolean; examTitle?: string }
+  opts?: {
+    includeQuestions?: boolean
+    examTitle?: string
+    certificateId?: string | null
+    certificateCode?: string | null
+  }
 ): ExamAttemptDTO {
-  const questions: AttemptQuestionView[] | undefined = opts?.includeQuestions
-    ? (a.questionSnapshot || []).map((q) => ({
+  const closed = a.status === 'submitted' || a.status === 'timed_out'
+  let review: AttemptReviewSummary | undefined
+  let questions: AttemptQuestionView[] | undefined
+
+  if (opts?.includeQuestions) {
+    let correctCount = 0
+    let wrongCount = 0
+    let skippedCount = 0
+    let pendingManualCount = 0
+
+    questions = (a.questionSnapshot || []).map((q) => {
+      const selected =
+        a.answers?.find((x) => x.questionId === q.id)?.selected ?? []
+      const base: AttemptQuestionView = {
         id: q.id,
         type: q.type,
         stem: q.stem,
         options: q.options?.map((o) => ({ id: o.id, text: o.text })) ?? [],
         points: q.points,
         difficulty: q.difficulty,
-      }))
-    : undefined
+      }
+
+      if (!closed) return base
+
+      const correct = q.correctAnswers || []
+      let outcome: AttemptQuestionView['outcome']
+      let pointsEarned = 0
+
+      if (q.type === 'short_answer') {
+        outcome = selected.some((s) => s.trim().length > 0)
+          ? 'pending_manual'
+          : 'skipped'
+        if (outcome === 'pending_manual') pendingManualCount++
+        else skippedCount++
+      } else if (selected.length === 0) {
+        outcome = 'skipped'
+        skippedCount++
+      } else if (arraysEqualAsSet(selected, correct)) {
+        outcome = 'correct'
+        pointsEarned = q.points || 0
+        correctCount++
+      } else {
+        outcome = 'wrong'
+        wrongCount++
+      }
+
+      return {
+        ...base,
+        correctAnswers: correct,
+        userSelected: selected,
+        outcome,
+        pointsEarned,
+      }
+    })
+
+    const started = a.startedAt ? new Date(a.startedAt).getTime() : null
+    const ended = a.submittedAt ? new Date(a.submittedAt).getTime() : null
+    const timeTakenSeconds =
+      started != null && ended != null
+        ? Math.max(0, Math.round((ended - started) / 1000))
+        : null
+
+    review = {
+      correctCount,
+      wrongCount,
+      skippedCount,
+      pendingManualCount,
+      timeTakenSeconds,
+    }
+  }
 
   return {
     id: a.id,
@@ -69,6 +147,9 @@ function toAttemptDTO(
     passed: a.passed ?? null,
     questions,
     examTitle: opts?.examTitle,
+    review,
+    certificateId: opts?.certificateId ?? null,
+    certificateCode: opts?.certificateCode ?? null,
   }
 }
 
@@ -211,12 +292,6 @@ export async function archiveExam(orgId: string, examId: string): Promise<void> 
   await exam.save()
 }
 
-function arraysEqualAsSet(a: string[], b: string[]): boolean {
-  if (a.length !== b.length) return false
-  const sa = new Set(a)
-  return b.every((x) => sa.has(x))
-}
-
 async function gradeAttempt(
   attempt: InstanceType<typeof ExamAttempt>,
   passingScorePercent: number
@@ -350,9 +425,21 @@ export async function getAttempt(
     await attempt.save()
   }
 
+  let certificateId: string | null = null
+  let certificateCode: string | null = null
+  if (attempt.status === 'submitted' || attempt.status === 'timed_out') {
+    const existing = await Certificate.findOne({ attemptId: attempt.id })
+    if (existing) {
+      certificateId = existing.id
+      certificateCode = existing.code
+    }
+  }
+
   return toAttemptDTO(attempt, {
     includeQuestions: true,
     examTitle: exam?.title,
+    certificateId,
+    certificateCode,
   })
 }
 
@@ -420,7 +507,39 @@ export async function submitAttempt(
   await gradeAttempt(attempt, exam?.passingScorePercent ?? 50)
   await attempt.save()
 
-  return toAttemptDTO(attempt, { includeQuestions: true, examTitle: exam?.title })
+  let certificateId: string | null = null
+  let certificateCode: string | null = null
+  if (attempt.passed) {
+    try {
+      const cert = await certService.issueCertificateForAttempt(
+        orgId,
+        attempt.id,
+        userId,
+        false
+      )
+      certificateId = cert.id
+      certificateCode = cert.code
+    } catch {
+      const existing = await Certificate.findOne({ attemptId: attempt.id })
+      if (existing) {
+        certificateId = existing.id
+        certificateCode = existing.code
+      }
+    }
+  } else {
+    const existing = await Certificate.findOne({ attemptId: attempt.id })
+    if (existing) {
+      certificateId = existing.id
+      certificateCode = existing.code
+    }
+  }
+
+  return toAttemptDTO(attempt, {
+    includeQuestions: true,
+    examTitle: exam?.title,
+    certificateId,
+    certificateCode,
+  })
 }
 
 export async function listMyAttempts(
