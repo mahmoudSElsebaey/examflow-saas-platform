@@ -4,6 +4,7 @@ import { User } from '../models/User.js'
 import { AppError } from '../middlewares/errorHandler.js'
 import type { OrganizationDTO, MemberDTO, OrgMemberRole } from '../types/organization.js'
 import { sendEmail, orgInviteEmail } from './email.service.js'
+import * as notifService from './notification.service.js'
 
 function slugify(name: string): string {
   return name
@@ -219,6 +220,18 @@ export async function inviteMember(
   await sendEmail(
     orgInviteEmail(user.email, org?.name || 'Organization', membership.role)
   )
+  try {
+    await notifService.createNotification({
+      userId: user.id,
+      organizationId: orgId,
+      type: 'org_invite',
+      title: 'Organization invite',
+      body: `You were added to "${org?.name || 'Organization'}" as ${membership.role}.`,
+      link: `/app/organizations/${orgId}`,
+    })
+  } catch {
+    // non-blocking
+  }
 
   return {
     id: membership.id,
