@@ -7,33 +7,28 @@ export function Footer() {
   const { t } = useTranslation()
   const year = new Date().getFullYear()
 
+  /** Only links that resolve on the current landing page (or real routes). */
   const footerLinks = {
     [t('footer.product')]: [
       { label: t('footer.features'), href: '#features' },
       { label: t('footer.pricing'), href: '#pricing' },
-      { label: t('footer.roadmap'), href: '#' },
     ],
     [t('footer.company')]: [
-      { label: t('footer.about'), href: '#' },
-      { label: t('footer.blog'), href: '#' },
-      { label: t('footer.contact'), href: '#' },
-    ],
-    [t('footer.resources')]: [
-      { label: t('footer.documentation'), href: '#' },
-      { label: t('footer.helpCenter'), href: '#' },
-      { label: t('footer.status'), href: '#' },
+      {
+        label: t('footer.contact'),
+        href: `mailto:${appConfig.CONTACT_EMAIL}`,
+      },
     ],
     [t('footer.legal')]: [
-      { label: t('footer.privacy'), href: '#' },
-      { label: t('footer.terms'), href: '#' },
-      { label: t('footer.security'), href: '#' },
+      { label: t('footer.privacy'), href: '/#privacy' },
+      { label: t('footer.terms'), href: '/#terms' },
     ],
   }
 
   return (
     <footer className="border-t border-border bg-surface">
       <Container>
-        <div className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-6">
+        <div className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <a href="/" className="flex items-center gap-2.5">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-800 text-sm font-bold text-primary-foreground shadow-md shadow-primary/20">
