@@ -323,6 +323,7 @@ export {
   updateTopic,
   deleteTopic,
   listLessons,
+  getLesson,
   createLesson,
   updateLesson,
   deleteLesson,
