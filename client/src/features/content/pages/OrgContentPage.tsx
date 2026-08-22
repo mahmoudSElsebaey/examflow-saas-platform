@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, BookOpen, Library, Plus, HelpCircle, Trash2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, Library, Plus, HelpCircle, Trash2, Layers } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as contentApi from '../api/contentApi'
 import type { Course, Question, QuestionBank, QuestionType } from '../types'
@@ -19,8 +19,9 @@ import { Spinner } from '@/components/ui/Spinner'
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
 import { appConfig } from '@/config/app'
 import { cn } from '@/lib/utils'
+import { HierarchyPanel } from '../components/HierarchyPanel'
 
-type Tab = 'courses' | 'banks' | 'questions'
+type Tab = 'courses' | 'hierarchy' | 'banks' | 'questions'
 
 export function OrgContentPage() {
   const { orgId } = useParams<{ orgId: string }>()
@@ -195,6 +196,7 @@ export function OrgContentPage() {
 
   const tabs: { id: Tab; label: string; icon: typeof BookOpen }[] = [
     { id: 'courses', label: t('content.courses'), icon: BookOpen },
+    { id: 'hierarchy', label: t('content.hierarchy'), icon: Layers },
     { id: 'banks', label: t('content.banks'), icon: Library },
     { id: 'questions', label: t('content.questions'), icon: HelpCircle },
   ]
@@ -328,6 +330,10 @@ export function OrgContentPage() {
                   )}
                 </div>
               </div>
+            )}
+
+            {tab === 'hierarchy' && orgId && accessToken && (
+              <HierarchyPanel orgId={orgId} accessToken={accessToken} courses={courses} />
             )}
 
             {tab === 'banks' && (
