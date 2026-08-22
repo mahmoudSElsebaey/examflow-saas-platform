@@ -1,37 +1,40 @@
 import { z } from 'zod'
 
 export const registerSchema = z.object({
-  email: z.string().email('Invalid email address').toLowerCase().trim(),
+  email: z.string().email(),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128)
-    .regex(/[A-Za-z]/, 'Password must contain at least one letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
-  firstName: z.string().min(1, 'First name is required').max(100).trim(),
-  lastName: z.string().min(1, 'Last name is required').max(100).trim(),
+    .min(8)
+    .regex(/[A-Za-z]/, 'Must contain a letter')
+    .regex(/[0-9]/, 'Must contain a number'),
+  firstName: z.string().min(1).max(100),
+  lastName: z.string().min(1).max(100),
 })
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email address').toLowerCase().trim(),
-  password: z.string().min(1, 'Password is required'),
+  email: z.string().email(),
+  password: z.string().min(1),
 })
 
 export const forgotPasswordSchema = z.object({
-  email: z.string().email('Invalid email address').toLowerCase().trim(),
+  email: z.string().email(),
 })
 
 export const resetPasswordSchema = z.object({
-  token: z.string().min(1, 'Token is required'),
+  token: z.string().min(10),
   password: z
     .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128)
-    .regex(/[A-Za-z]/, 'Password must contain at least one letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+    .min(8)
+    .regex(/[A-Za-z]/, 'Must contain a letter')
+    .regex(/[0-9]/, 'Must contain a number'),
+})
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(10),
 })
 
 export type RegisterInput = z.infer<typeof registerSchema>
 export type LoginInput = z.infer<typeof loginSchema>
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>

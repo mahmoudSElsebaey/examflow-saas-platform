@@ -8,6 +8,7 @@ import {
   loginSchema,
   forgotPasswordSchema,
   resetPasswordSchema,
+  verifyEmailSchema,
 } from '../validators/auth.validators.js'
 
 const router = Router()
@@ -41,5 +42,12 @@ router.post(
   validateBody(resetPasswordSchema),
   authController.resetPassword
 )
+router.post(
+  '/verify-email',
+  authLimiter,
+  validateBody(verifyEmailSchema),
+  authController.verifyEmail
+)
+router.post('/resend-verification', authenticate, authController.resendVerification)
 
 export default router

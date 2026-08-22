@@ -1,16 +1,5 @@
 import type { OrgMemberRole } from '../types'
 
-export type WorkspaceNavId =
-  | 'overview'
-  | 'courses'
-  | 'banks'
-  | 'exams'
-  | 'students'
-  | 'analytics'
-  | 'certificates'
-  | 'members'
-  | 'settings'
-
 const STAFF: OrgMemberRole[] = ['owner', 'admin', 'teacher', 'examiner']
 
 export function isStaffRole(role?: OrgMemberRole | null): boolean {
@@ -18,12 +7,27 @@ export function isStaffRole(role?: OrgMemberRole | null): boolean {
 }
 
 export function canManageContent(role?: OrgMemberRole | null): boolean {
-  return !!role && ['owner', 'admin', 'teacher', 'examiner'].includes(role)
+  return !!role && STAFF.includes(role)
 }
 
 export function canManageMembers(role?: OrgMemberRole | null): boolean {
   return !!role && ['owner', 'admin'].includes(role)
 }
+
+export function canViewAnalytics(role?: OrgMemberRole | null): boolean {
+  return isStaffRole(role)
+}
+
+export type WorkspaceNavId =
+  | 'overview'
+  | 'courses'
+  | 'banks'
+  | 'exams'
+  | 'students'
+  | 'certificates'
+  | 'analytics'
+  | 'members'
+  | 'settings'
 
 export function visibleNavIds(role?: OrgMemberRole | null): WorkspaceNavId[] {
   if (!role) return ['overview']
