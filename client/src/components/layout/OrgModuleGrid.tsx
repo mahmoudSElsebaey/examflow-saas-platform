@@ -9,6 +9,8 @@ import {
   Users,
   UserCog,
   Settings,
+  PenLine,
+  CreditCard,
   type LucideIcon,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -58,6 +60,13 @@ export function OrgModuleGrid({ orgId, role, className }: Props) {
       icon: ClipboardList,
     },
     {
+      id: 'grading',
+      to: `${base}/grading`,
+      labelKey: 'workspace.nav.grading',
+      descKey: 'workspace.mod.grading',
+      icon: PenLine,
+    },
+    {
       id: 'students',
       to: `${base}/students`,
       labelKey: 'workspace.nav.students',
@@ -91,6 +100,13 @@ export function OrgModuleGrid({ orgId, role, className }: Props) {
       labelKey: 'workspace.nav.settings',
       descKey: 'workspace.mod.settings',
       icon: Settings,
+    },
+    {
+      id: 'billing',
+      to: `${base}/billing`,
+      labelKey: 'workspace.nav.billing',
+      descKey: 'workspace.mod.billing',
+      icon: CreditCard,
     },
   ]
 
