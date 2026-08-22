@@ -175,6 +175,12 @@ export async function listLessons(
   return rows.map(toLessonDTO)
 }
 
+export async function getLesson(orgId: string, lessonId: string): Promise<LessonDTO> {
+  const lesson = await Lesson.findOne({ _id: lessonId, organizationId: orgId, isActive: true })
+  if (!lesson) throw new AppError('Lesson not found', 404, 'LESSON_NOT_FOUND')
+  return toLessonDTO(lesson)
+}
+
 export async function createLesson(
   orgId: string,
   userId: string,
