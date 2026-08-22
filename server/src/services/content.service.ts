@@ -311,3 +311,19 @@ export async function deleteQuestion(
     { $inc: { questionCount: -1 } }
   )
 }
+
+// Re-export hierarchy APIs
+export {
+  listSubjects,
+  createSubject,
+  updateSubject,
+  deleteSubject,
+  listTopics,
+  createTopic,
+  updateTopic,
+  deleteTopic,
+  listLessons,
+  createLesson,
+  updateLesson,
+  deleteLesson,
+} from './content.hierarchy.js'
