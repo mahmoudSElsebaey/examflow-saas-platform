@@ -13,6 +13,8 @@ export interface IExam extends Document {
   shuffleOptions: boolean
   maxAttempts: number
   totalPoints: number
+  availableFrom?: Date | null
+  availableTo?: Date | null
   createdBy: Types.ObjectId
   createdAt: Date
   updatedAt: Date
@@ -41,6 +43,8 @@ const examSchema = new Schema<IExam>(
     shuffleOptions: { type: Boolean, default: true },
     maxAttempts: { type: Number, default: 1, min: 1, max: 20 },
     totalPoints: { type: Number, default: 0, min: 0 },
+    availableFrom: { type: Date, default: null },
+    availableTo: { type: Date, default: null },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }

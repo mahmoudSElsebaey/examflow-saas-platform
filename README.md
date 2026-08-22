@@ -2,24 +2,17 @@
 
 **Multi-Tenant SaaS Platform for Online Examinations & Assessments**
 
-> Status: **Phase 2 — Manual Grading** complete
+> Status: **Phases 3–6** (Delivery polish, Questions, Analytics v2, Notifications)
 
-## Phases
+## Completed roadmap phases
 
 | Phase | Status |
 |-------|--------|
-| CORE PRODUCT COMPLETION | ✅ |
-| P0 Stabilization | ✅ |
-| P1 Auth lifecycle | ✅ |
-| **P2 Manual grading** | ✅ |
-
-### Phase 2
-- Short-answer answers store `manualScore`, `feedback`, `gradedBy`
-- `needsManualGrading` on attempts after submit
-- Staff queue: `GET .../grading/queue`
-- Grade: `PATCH .../grading/attempts/:id`
-- UI: Organization → Grading
-- Re-score + optional certificate issue when fully graded & passed
+| CORE + P0–P2 | ✅ |
+| **P3 Exam delivery polish** | ✅ availability window + student available list |
+| **P4 Question hardening** | ✅ filters, bulk import, delete protection |
+| **P5 Analytics v2** | ✅ question stats + student history API |
+| **P6 Notifications** | ✅ in-app model + events + header bell |
 
 ```bash
 cd server && npm install && npm run typecheck && npm run build
