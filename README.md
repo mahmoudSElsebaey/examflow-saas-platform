@@ -1,6 +1,6 @@
 # ExamFlow
 
-> Status: **Phase 05 complete** — Stripe Billing (Checkout + Webhook + Portal)
+> Status: **Phase 06 complete** — Student Progress + Analytics history
 
 Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exams, grading, certificates, analytics, billing, platform admin.
 
@@ -26,37 +26,33 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 | Student Learn (curriculum viewer) | Done (Phase 03) |
 | Email provider (Resend) + event notifications | Done (Phase 04) |
 | Stripe billing (Checkout / Portal / Webhook) | Done (Phase 05) |
+| Student progress + history analytics | Done (Phase 06) |
 
-## Phase 05 highlights
+## Phase 06 highlights
 
-- **Billing modes**: `auto` (Stripe if key present, else mock), `mock`, `stripe`.
-- **Stripe Checkout** for professional / enterprise; plan applied via webhook.
-- **Customer Portal** for subscription management.
-- Org fields: `stripeCustomerId`, `stripeSubscriptionId`.
-- Health: `billingMode`, `stripeConfigured`.
+- Fixed `GET /analytics/me` (`getStudentHistory`) — was broken.
+- **LessonProgress** model: viewed / completed per user per lesson.
+- Auto-mark **viewed** when opening a lesson; **Mark complete** in Learn UI.
+- Student **My progress** page: exam history + lesson progress.
+- Nav: `progress` for students and staff.
 
 ## Setup
 
 ```bash
 cp .env.example .env
-# DATABASE_URL, JWT secrets
-# optional: EMAIL_*, STRIPE_*
-
 cd server && npm install && npm run dev
 cd client && npm install && npm run dev
 ```
 
-Docker: see `DEPLOY.md`.
+## Testing Phase 06
 
-## Testing Phase 05
-
-1. Without Stripe keys → mock plan switch still works.
-2. Set `STRIPE_SECRET_KEY` + price IDs → Upgrade opens Checkout.
-3. Configure webhook `POST /api/v1/billing/webhook` → plan updates after payment.
-4. Portal button appears when org has a Stripe customer.
+1. Open a lesson in Learn → progress viewed is recorded.
+2. Click Mark complete → status completed.
+3. Open **My progress** → see attempts + lessons.
+4. `GET /api/v1/organizations/:orgId/analytics/me` returns history.
 
 ## Next phase
 
-**Phase 06** — when ordered (see product backlog).
+**Phase 07** — when ordered (see product backlog).
 
 **ExamFlow** — Smart Assessments. Real Insights.

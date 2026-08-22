@@ -16,6 +16,7 @@ import { OrgExamsPage } from '@/features/exams/pages/OrgExamsPage'
 import { OrgGradingPage } from '@/features/exams/pages/OrgGradingPage'
 import { ExamTakePage } from '@/features/exams/pages/ExamTakePage'
 import { OrgAnalyticsPage } from '@/features/analytics/pages/OrgAnalyticsPage'
+import { StudentProgressPage } from '@/features/analytics/pages/StudentProgressPage'
 import { OrgCertificatesPage } from '@/features/certificates/pages/OrgCertificatesPage'
 import { CertificateViewPage } from '@/features/certificates/pages/CertificateViewPage'
 import { VerifyCertificatePage } from '@/features/certificates/pages/VerifyCertificatePage'
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="/app/organizations/:orgId/grading/:attemptId" element={<ProtectedRoute><OrgGradingPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/attempts/:attemptId" element={<ProtectedRoute><ExamTakePage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/analytics" element={<ProtectedRoute><OrgAnalyticsPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/progress" element={<ProtectedRoute><StudentProgressPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/certificates" element={<ProtectedRoute><OrgCertificatesPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/certificates/:certId" element={<ProtectedRoute><CertificateViewPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/students" element={<ProtectedRoute><OrgStudentsPage /></ProtectedRoute>} />

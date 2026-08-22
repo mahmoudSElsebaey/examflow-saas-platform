@@ -46,3 +46,33 @@ async function request<T>(
 export async function getOrgAnalyticsApi(token: string, orgId: string) {
   return request<{ analytics: OrgAnalytics }>(`${base(orgId)}/analytics`, token)
 }
+
+export interface StudentHistory {
+  attemptsCount: number
+  completedCount: number
+  averagePercent: number | null
+  passRate: number | null
+  lessonsViewed: number
+  lessonsCompleted: number
+  attempts: {
+    id: string
+    examId: string
+    examTitle: string
+    status: string
+    percent: number | null
+    passed: boolean | null
+    startedAt: string
+    submittedAt: string | null
+  }[]
+  recentLessons: {
+    lessonId: string
+    lessonTitle: string
+    status: string
+    viewedAt: string
+    completedAt: string | null
+  }[]
+}
+
+export async function getStudentHistoryApi(token: string, orgId: string) {
+  return request<{ analytics: StudentHistory }>(`${base(orgId)}/analytics/me`, token)
+}
