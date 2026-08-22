@@ -39,3 +39,29 @@ export interface ExamAnalyticsDTO {
     submittedAt: string | null
   }[]
 }
+
+export interface StudentHistoryDTO {
+  attemptsCount: number
+  completedCount: number
+  averagePercent: number | null
+  passRate: number | null
+  lessonsViewed: number
+  lessonsCompleted: number
+  attempts: {
+    id: string
+    examId: string
+    examTitle: string
+    status: string
+    percent: number | null
+    passed: boolean | null
+    startedAt: string
+    submittedAt: string | null
+  }[]
+  recentLessons: {
+    lessonId: string
+    lessonTitle: string
+    status: string
+    viewedAt: string
+    completedAt: string | null
+  }[]
+}
