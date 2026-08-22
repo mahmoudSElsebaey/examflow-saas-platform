@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as examApi from '../api/examApi'
@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Container } from '@/components/ui/Container'
 import { Spinner } from '@/components/ui/Spinner'
 import { cn } from '@/lib/utils'
+import { ExamResultView } from './ExamResultView'
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -109,12 +110,10 @@ export function ExamTakePage() {
       return
     }
     if (!attempt || attempt.status !== 'in_progress') return
-
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     saveTimerRef.current = setTimeout(() => {
       void persistAnswers()
     }, 700)
-
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
     }
@@ -234,34 +233,16 @@ export function ExamTakePage() {
 
   if (isDone) {
     return (
-      <div className="min-h-screen bg-background">
-        <Container className="py-16">
-          <Card className="mx-auto max-w-lg border-border/60">
-            <CardContent className="space-y-4 pt-8 text-center">
-              <h1 className="text-2xl font-bold text-foreground">
-                {attempt.examTitle || t('exam.resultTitle')}
-              </h1>
-              <p className="text-muted">
-                {attempt.status === 'timed_out' ? t('exam.timedOut') : t('exam.submitted')}
-              </p>
-              <div className="flex flex-wrap justify-center gap-3">
-                <Badge variant={attempt.passed ? 'success' : 'error'}>
-                  {attempt.passed ? t('exam.passed') : t('exam.failed')}
-                </Badge>
-                <Badge variant="info">
-                  {attempt.score}/{attempt.maxScore} ({attempt.percent}%)
-                </Badge>
-              </div>
-              <p className="text-xs text-muted">{t('exam.shortAnswerPendingHint')}</p>
-              <Link to={`/app/organizations/${orgId}/exams`}>
-                <Button variant="outline" className="mt-4">
-                  {t('exam.backToExams')}
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        </Container>
-      </div>
+      <ExamResultView
+        attempt={attempt}
+        orgId={orgId!}
+        accessToken={accessToken}
+        onIssued={(id, code) =>
+          setAttempt((prev) =>
+            prev ? { ...prev, certificateId: id, certificateCode: code } : prev
+          )
+        }
+      />
     )
   }
 
