@@ -234,6 +234,15 @@ export async function deleteTopic(req: TenantRequest, res: Response, next: NextF
   }
 }
 
+export async function getLesson(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const lesson = await content.getLesson(orgId(req), param(req, 'lessonId'))
+    return sendSuccess(res, { lesson })
+  } catch (e) {
+    next(e)
+  }
+}
+
 export async function listLessons(req: TenantRequest, res: Response, next: NextFunction) {
   try {
     const topicId = typeof req.query.topicId === 'string' ? req.query.topicId : undefined
