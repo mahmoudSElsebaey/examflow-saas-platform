@@ -32,6 +32,11 @@ export async function listExamsApi(token: string, orgId: string) {
   return request<{ exams: Exam[] }>(`${base(orgId)}/exams`, token)
 }
 
+/** Student-facing list of published exams currently available to the user. */
+export async function listAvailableExamsApi(token: string, orgId: string) {
+  return request<{ exams: Exam[] }>(`${base(orgId)}/exams/available`, token)
+}
+
 export async function getExamApi(token: string, orgId: string, examId: string) {
   return request<{ exam: Exam }>(`${base(orgId)}/exams/${examId}`, token)
 }
