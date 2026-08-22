@@ -5,6 +5,8 @@ import { Certificate } from '../models/Certificate.js'
 import { AppError } from '../middlewares/errorHandler.js'
 import type { ExamAttemptDTO, GradingQueueItem } from '../types/exam.js'
 import * as certService from './certificate.service.js'
+import * as notifService from './notification.service.js'
+import { sendEmail, resultReadyEmail } from './email.service.js'
 import { gradeAttempt, toAttemptDTO } from './exam.service.js'
 
 export async function listPendingGrading(orgId: string): Promise<GradingQueueItem[]> {
@@ -62,8 +64,8 @@ export async function applyManualGrades(
     organizationId: orgId,
   })
   if (!attempt) throw new AppError('Attempt not found', 404, 'ATTEMPT_NOT_FOUND')
-  if (attempt.status !== 'submitted' && attempt.status !== 'timed_out') {
-    throw new AppError('Attempt is not completed', 400, 'ATTEMPT_NOT_COMPLETED')
+  if (attempt.status === 'in_progress') {
+    throw new AppError('Attempt still in progress', 400, 'ATTEMPT_IN_PROGRESS')
   }
 
   const exam = await Exam.findById(attempt.examId)
@@ -126,6 +128,24 @@ export async function applyManualGrades(
   }
 
   const student = await User.findById(attempt.userId)
+  try {
+    const link = `/app/organizations/${orgId}/attempts/${attempt.id}`
+    await notifService.createNotification({
+      userId: attempt.userId.toString(),
+      organizationId: orgId,
+      type: 'result_ready',
+      title: 'Results ready',
+      body: `Your results for "${exam?.title || 'Exam'}" have been updated.`,
+      link,
+    })
+    if (student?.email) {
+      void sendEmail(
+        resultReadyEmail(student.email, exam?.title || 'Exam', orgId, attempt.id)
+      )
+    }
+  } catch {
+    // non-blocking
+  }
   const dto = toAttemptDTO(attempt, {
     includeQuestions: true,
     examTitle: exam?.title,
