@@ -13,6 +13,9 @@ import { OrgExamsPage } from '@/features/exams/pages/OrgExamsPage'
 import { ExamTakePage } from '@/features/exams/pages/ExamTakePage'
 import { OrgAnalyticsPage } from '@/features/analytics/pages/OrgAnalyticsPage'
 import { OrgCertificatesPage } from '@/features/certificates/pages/OrgCertificatesPage'
+import { OrgStudentsPage } from '@/features/organizations/pages/OrgStudentsPage'
+import { OrgMembersPage } from '@/features/organizations/pages/OrgMembersPage'
+import { OrgSettingsPage } from '@/features/organizations/pages/OrgSettingsPage'
 import { CertificateViewPage } from '@/features/certificates/pages/CertificateViewPage'
 import { VerifyCertificatePage } from '@/features/certificates/pages/VerifyCertificatePage'
 
@@ -26,78 +29,18 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/verify/:code" element={<VerifyCertificatePage />} />
-          <Route
-            path="/app"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app/organizations"
-            element={
-              <ProtectedRoute>
-                <OrganizationsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app/organizations/:orgId"
-            element={
-              <ProtectedRoute>
-                <OrganizationDetailPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app/organizations/:orgId/content"
-            element={
-              <ProtectedRoute>
-                <OrgContentPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app/organizations/:orgId/exams"
-            element={
-              <ProtectedRoute>
-                <OrgExamsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app/organizations/:orgId/attempts/:attemptId"
-            element={
-              <ProtectedRoute>
-                <ExamTakePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app/organizations/:orgId/analytics"
-            element={
-              <ProtectedRoute>
-                <OrgAnalyticsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app/organizations/:orgId/certificates"
-            element={
-              <ProtectedRoute>
-                <OrgCertificatesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/app/organizations/:orgId/certificates/:certId"
-            element={
-              <ProtectedRoute>
-                <CertificateViewPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/app" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/app/organizations" element={<ProtectedRoute><OrganizationsPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId" element={<ProtectedRoute><OrganizationDetailPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/content" element={<ProtectedRoute><OrgContentPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/exams" element={<ProtectedRoute><OrgExamsPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/attempts/:attemptId" element={<ProtectedRoute><ExamTakePage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/analytics" element={<ProtectedRoute><OrgAnalyticsPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/certificates" element={<ProtectedRoute><OrgCertificatesPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/certificates/:certId" element={<ProtectedRoute><CertificateViewPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/students" element={<ProtectedRoute><OrgStudentsPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/members" element={<ProtectedRoute><OrgMembersPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/settings" element={<ProtectedRoute><OrgSettingsPage /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
