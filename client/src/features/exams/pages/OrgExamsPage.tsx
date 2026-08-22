@@ -1,39 +1,46 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, ClipboardList, Plus, Play, Send } from 'lucide-react'
+import { ClipboardList, Plus, Play, Send } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as examApi from '../api/examApi'
 import * as contentApi from '@/features/content/api/contentApi'
+import * as orgApi from '@/features/organizations/api/orgApi'
 import type { Exam } from '../types'
 import type { Question } from '@/features/content/types'
+import type { OrgMemberRole, Organization } from '@/features/organizations/types'
+import { isStaffRole } from '@/features/organizations/lib/roles'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
-import { Container } from '@/components/ui/Container'
 import { Spinner } from '@/components/ui/Spinner'
-import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
-import { appConfig } from '@/config/app'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { OrgWorkspaceLayout } from '@/components/layout/OrgWorkspaceLayout'
 
 export function OrgExamsPage() {
   const { orgId } = useParams<{ orgId: string }>()
   const { t } = useTranslation()
-  const { accessToken, logout, user } = useAuth()
+  const { accessToken } = useAuth()
   const navigate = useNavigate()
 
+  const [org, setOrg] = useState<Organization | null>(null)
+  const [role, setRole] = useState<OrgMemberRole | null>(null)
   const [exams, setExams] = useState<Exam[]>([])
+  const [available, setAvailable] = useState<Exam[]>([])
   const [allQuestions, setAllQuestions] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [selectedQ, setSelectedQ] = useState<string[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
+
+  const isStaff = isStaffRole(role)
 
   const form = useForm({
     resolver: zodResolver(
@@ -59,14 +66,25 @@ export function OrgExamsPage() {
     setLoading(true)
     setError(null)
     try {
-      const examsRes = await examApi.listExamsApi(accessToken, orgId)
-      setExams(examsRes.data?.exams ?? [])
-      const banksRes = await contentApi.listBanksApi(accessToken, orgId)
-      const banks = banksRes.data?.banks ?? []
-      const qLists = await Promise.all(
-        banks.map((b) => contentApi.listQuestionsApi(accessToken, orgId, b.id))
-      )
-      setAllQuestions(qLists.flatMap((r) => r.data?.questions ?? []))
+      const orgRes = await orgApi.getOrganizationApi(accessToken, orgId)
+      const organization = orgRes.data?.organization ?? null
+      setOrg(organization)
+      const myRole = organization?.myRole ?? null
+      setRole(myRole)
+
+      if (isStaffRole(myRole)) {
+        const examsRes = await examApi.listExamsApi(accessToken, orgId)
+        setExams(examsRes.data?.exams ?? [])
+        const banksRes = await contentApi.listBanksApi(accessToken, orgId)
+        const banks = banksRes.data?.banks ?? []
+        const qLists = await Promise.all(
+          banks.map((b) => contentApi.listQuestionsApi(accessToken, orgId, b.id))
+        )
+        setAllQuestions(qLists.flatMap((r) => r.data?.questions ?? []))
+      } else {
+        const availRes = await examApi.listAvailableExamsApi(accessToken, orgId)
+        setAvailable(availRes.data?.exams ?? [])
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
     } finally {
@@ -78,14 +96,8 @@ export function OrgExamsPage() {
     void load()
   }, [accessToken, orgId])
 
-  const onCreate = async (data: {
-    title: string
-    description?: string
-    timeLimitMinutes?: number | null
-    passingScorePercent?: number
-    maxAttempts?: number
-  }) => {
-    if (!accessToken || !orgId) return
+  const onSubmit = form.handleSubmit(async (data) => {
+    if (!accessToken || !orgId || !isStaff) return
     try {
       if (editingId) {
         await examApi.updateExamApi(accessToken, orgId, editingId, {
@@ -106,10 +118,10 @@ export function OrgExamsPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
     }
-  }
+  })
 
   const onPublish = async (examId: string) => {
-    if (!accessToken || !orgId) return
+    if (!accessToken || !orgId || !isStaff) return
     try {
       await examApi.publishExamApi(accessToken, orgId, examId)
       await load()
@@ -136,43 +148,22 @@ export function OrgExamsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-mesh">
-      <header className="sticky top-0 z-40 border-b border-border/50 glass">
-        <Container>
-          <div className="flex h-14 items-center justify-between gap-3">
-            <Link to="/app" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-800 text-xs font-bold text-primary-foreground">
-                EF
-              </span>
-              <span className="font-bold text-foreground">{appConfig.APP_NAME}</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <LanguageSwitcher variant="compact" />
-              <span className="hidden text-sm text-muted sm:inline">{user?.firstName}</span>
-              <Button variant="outline" size="sm" onClick={() => logout()}>
-                {t('common.logOut')}
-              </Button>
-            </div>
-          </div>
-        </Container>
-      </header>
-
-      <Container className="py-10">
-        <Link
-          to={`/app/organizations/${orgId}`}
-          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-          {t('exam.backToOrg')}
-        </Link>
-
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              {t('exam.title')}
-            </h1>
-            <p className="mt-1 text-muted">{t('exam.subtitle')}</p>
-          </div>
+    <OrgWorkspaceLayout
+      orgId={orgId!}
+      orgName={org?.name}
+      role={role}
+      branding={org?.branding}
+    >
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+            {isStaff ? t('exam.title') : t('exam.availableTitle')}
+          </h1>
+          <p className="mt-1 text-muted">
+            {isStaff ? t('exam.subtitle') : t('exam.availableSubtitle')}
+          </p>
+        </div>
+        {isStaff && (
           <Button
             className="gap-2 self-start"
             onClick={() => {
@@ -185,111 +176,119 @@ export function OrgExamsPage() {
             <Plus className="h-4 w-4" />
             {t('exam.create')}
           </Button>
-        </div>
-
-        {error && (
-          <Alert variant="error" className="mb-6">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
         )}
+      </div>
 
-        {showForm && (
-          <Card className="mb-8 border-primary/20">
-            <CardHeader>
-              <CardTitle>{editingId ? t('exam.edit') : t('exam.create')}</CardTitle>
-              <CardDescription>{t('exam.createHint')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={form.handleSubmit(onCreate)} className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label>{t('exam.examTitle')}</Label>
-                    <Input {...form.register('title')} />
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label>{t('exam.description')}</Label>
-                    <Input {...form.register('description')} />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('exam.timeLimit')}</Label>
-                    <Input
-                      type="number"
-                      {...form.register('timeLimitMinutes', { valueAsNumber: true })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('exam.passingScore')}</Label>
-                    <Input
-                      type="number"
-                      {...form.register('passingScorePercent', { valueAsNumber: true })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>{t('exam.maxAttempts')}</Label>
-                    <Input
-                      type="number"
-                      {...form.register('maxAttempts', { valueAsNumber: true })}
-                    />
-                  </div>
-                </div>
+      {error && (
+        <Alert variant="error" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
-                <div>
-                  <Label className="mb-2 block">{t('exam.selectQuestions')}</Label>
-                  <div className="max-h-56 space-y-2 overflow-y-auto rounded-lg border border-border p-3">
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Spinner />
+        </div>
+      ) : isStaff ? (
+        <>
+          {showForm && (
+            <Card className="mb-8 border-primary/20">
+              <CardHeader>
+                <CardTitle>{editingId ? t('exam.edit') : t('exam.create')}</CardTitle>
+                <CardDescription>{t('exam.createHint')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={onSubmit} className="space-y-4">
+                  <div>
+                    <Label htmlFor="title">{t('exam.examTitle')}</Label>
+                    <Input id="title" {...form.register('title')} />
+                  </div>
+                  <div>
+                    <Label htmlFor="description">{t('exam.description')}</Label>
+                    <Input id="description" {...form.register('description')} />
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <Label htmlFor="timeLimitMinutes">{t('exam.timeLimit')}</Label>
+                      <Input
+                        id="timeLimitMinutes"
+                        type="number"
+                        {...form.register('timeLimitMinutes', { valueAsNumber: true })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="passingScorePercent">{t('exam.passingScore')}</Label>
+                      <Input
+                        id="passingScorePercent"
+                        type="number"
+                        {...form.register('passingScorePercent', { valueAsNumber: true })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="maxAttempts">{t('exam.maxAttempts')}</Label>
+                      <Input
+                        id="maxAttempts"
+                        type="number"
+                        {...form.register('maxAttempts', { valueAsNumber: true })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label>{t('exam.selectQuestions')}</Label>
+                    <p className="mb-2 text-xs text-muted">
+                      {t('exam.selectedCount', { count: selectedQ.length })}
+                    </p>
                     {allQuestions.length === 0 ? (
                       <p className="text-sm text-muted">{t('exam.noQuestions')}</p>
                     ) : (
-                      allQuestions.map((q) => (
-                        <label
-                          key={q.id}
-                          className="flex cursor-pointer items-start gap-2 rounded-md p-2 hover:bg-surface-subtle"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedQ.includes(q.id)}
-                            onChange={() => toggleQ(q.id)}
-                            className="mt-1"
-                          />
-                          <span className="text-sm text-foreground">
-                            <Badge variant="info" className="me-2">
-                              {q.type}
-                            </Badge>
-                            {q.stem.slice(0, 120)}
-                            {q.stem.length > 120 ? '…' : ''}
-                          </span>
-                        </label>
-                      ))
+                      <ul className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
+                        {allQuestions.map((q) => (
+                          <li key={q.id}>
+                            <label className="flex cursor-pointer items-start gap-2 rounded px-2 py-1.5 text-sm hover:bg-surface-subtle">
+                              <input
+                                type="checkbox"
+                                checked={selectedQ.includes(q.id)}
+                                onChange={() => toggleQ(q.id)}
+                                className="mt-0.5"
+                              />
+                              <span className="min-w-0 flex-1">
+                                <span className="line-clamp-2">{q.stem}</span>
+                                <span className="ms-1 text-xs text-muted">
+                                  ({q.points} {t('exam.pts')})
+                                </span>
+                              </span>
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
                     )}
                   </div>
-                  <p className="mt-1 text-xs text-muted">
-                    {t('exam.selectedCount', { count: selectedQ.length })}
-                  </p>
-                </div>
 
-                <div className="flex gap-2">
-                  <Button type="submit">{t('common.save')}</Button>
-                  <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>
-                    {t('common.cancel')}
-                  </Button>
-                </div>
-              </form>
-            </CardContent>
-          </Card>
-        )}
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="submit">{editingId ? t('common.save') : t('exam.create')}</Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        setShowForm(false)
+                        setEditingId(null)
+                      }}
+                    >
+                      {t('common.cancel')}
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+          )}
 
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Spinner />
-          </div>
-        ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {exams.map((exam) => (
               <Card key={exam.id} className="border-border/60">
-                <CardContent className="pt-6">
-                  <div className="mb-3 flex items-start justify-between gap-2">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-muted text-primary">
-                      <ClipboardList className="h-5 w-5" />
-                    </div>
+                <CardContent className="pt-5">
+                  <div className="mb-2 flex items-start justify-between gap-2">
+                    <h3 className="font-semibold text-foreground">{exam.title}</h3>
                     <Badge
                       variant={
                         exam.status === 'published'
@@ -302,13 +301,12 @@ export function OrgExamsPage() {
                       {exam.status}
                     </Badge>
                   </div>
-                  <h3 className="font-semibold text-foreground">{exam.title}</h3>
                   {exam.description && (
-                    <p className="mt-1 line-clamp-2 text-sm text-muted">{exam.description}</p>
+                    <p className="mb-2 line-clamp-2 text-sm text-muted">{exam.description}</p>
                   )}
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted">
+                  <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted">
                     <span>
-                      {exam.questionCount} {t('exam.questions')}
+                      {exam.questionCount ?? exam.questionIds?.length ?? 0} {t('exam.questions')}
                     </span>
                     <span>·</span>
                     <span>
@@ -330,7 +328,7 @@ export function OrgExamsPage() {
                         variant="outline"
                         className="gap-1"
                         onClick={() => onPublish(exam.id)}
-                        disabled={exam.questionCount === 0}
+                        disabled={(exam.questionCount ?? exam.questionIds?.length ?? 0) === 0}
                       >
                         <Send className="h-3.5 w-3.5" />
                         {t('exam.publish')}
@@ -347,7 +345,7 @@ export function OrgExamsPage() {
                       variant="ghost"
                       onClick={() => {
                         setEditingId(exam.id)
-                        setSelectedQ(exam.questionIds)
+                        setSelectedQ(exam.questionIds ?? [])
                         form.reset({
                           title: exam.title,
                           description: exam.description ?? '',
@@ -365,11 +363,65 @@ export function OrgExamsPage() {
               </Card>
             ))}
             {exams.length === 0 && (
-              <p className="text-sm text-muted sm:col-span-3">{t('exam.empty')}</p>
+              <div className="sm:col-span-2 lg:col-span-3">
+                <EmptyState
+                  icon={<ClipboardList className="h-6 w-6" />}
+                  title={t('exam.empty')}
+                  description={t('exam.emptyHint')}
+                />
+              </div>
             )}
           </div>
-        )}
-      </Container>
-    </div>
+        </>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {available.map((exam) => (
+            <Card key={exam.id} className="border-border/60">
+              <CardContent className="pt-5">
+                <div className="mb-2 flex items-start justify-between gap-2">
+                  <h3 className="font-semibold text-foreground">{exam.title}</h3>
+                  <Badge variant="success">{t('exam.statusAvailable')}</Badge>
+                </div>
+                {exam.description && (
+                  <p className="mb-2 line-clamp-2 text-sm text-muted">{exam.description}</p>
+                )}
+                <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted">
+                  <span>
+                    {exam.questionCount ?? exam.questionIds?.length ?? 0} {t('exam.questions')}
+                  </span>
+                  {exam.timeLimitMinutes != null && (
+                    <>
+                      <span>·</span>
+                      <span>
+                        {exam.timeLimitMinutes} {t('exam.min')}
+                      </span>
+                    </>
+                  )}
+                  <span>·</span>
+                  <span>
+                    {t('exam.passingScore')}: {exam.passingScorePercent}%
+                  </span>
+                </div>
+                <div className="mt-4">
+                  <Button size="sm" className="gap-1" onClick={() => onStart(exam.id)}>
+                    <Play className="h-3.5 w-3.5" />
+                    {t('exam.start')}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          {available.length === 0 && (
+            <div className="sm:col-span-2 lg:col-span-3">
+              <EmptyState
+                icon={<ClipboardList className="h-6 w-6" />}
+                title={t('exam.noAvailable')}
+                description={t('exam.noAvailableHint')}
+              />
+            </div>
+          )}
+        </div>
+      )}
+    </OrgWorkspaceLayout>
   )
 }
