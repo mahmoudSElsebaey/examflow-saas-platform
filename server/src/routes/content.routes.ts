@@ -57,6 +57,7 @@ router.patch(
 router.delete('/topics/:topicId', canManage, ctrl.deleteTopic)
 
 router.get('/lessons', ctrl.listLessons)
+router.get('/lessons/:lessonId', ctrl.getLesson)
 router.post('/lessons', canManage, validateBody(createLessonSchema), ctrl.createLesson)
 router.patch(
   '/lessons/:lessonId',

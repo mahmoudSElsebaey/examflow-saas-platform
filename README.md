@@ -1,6 +1,6 @@
 # ExamFlow
 
-> Status: **Phase 02 complete** — Content Hierarchy (Subjects / Topics / Lessons)
+> Status: **Phase 03 complete** — Student Learning Experience
 
 Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exams, grading, certificates, analytics, mock billing, platform admin.
 
@@ -23,22 +23,16 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 | Mock billing + plan limits | Done |
 | Platform admin | Done |
 | Subjects / Topics / Lessons | Done (Phase 02) |
+| Student Learn (curriculum viewer) | Done (Phase 03) |
 | Stripe / real email | Not started |
 
-## Phase 01 highlights
+## Phase 03 highlights
 
-- Role-aware **OrgExamsPage**: students see available exams only; staff see builder/publish.
-- Shared **OrgWorkspaceLayout** (header + branded nav).
-- Nav includes **grading** + **billing** for appropriate roles.
-- Footer cleaned (no dead product links).
-- App home + Platform Admin links in header for `super_admin`.
-
-## Phase 02 highlights
-
-- **Subject → Topic → Lesson** hierarchy under each Course.
-- Soft-delete (archive) cascades topics/lessons when subject/topic archived.
-- Staff CRUD via Content page **Curriculum** tab (tree UI + create forms).
-- APIs: `GET/POST /subjects`, `/topics`, `/lessons` under org tenant.
+- Student **Learn** portal: Course → Subject → Topic → Lesson tree.
+- Lesson reader with content + duration.
+- `GET /lessons/:lessonId` for members.
+- Staff can attach lesson content/duration when creating lessons.
+- Nav: `learn` visible to students and staff.
 
 ## Available roles (membership)
 
@@ -46,7 +40,7 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 |------|------|
 | owner / admin | Full workspace + members + settings + billing |
 | teacher / examiner | Content, exams, grading, students, analytics, certificates |
-| student | Overview, available exams, certificates |
+| student | Overview, **Learn**, available exams, certificates |
 
 Platform `super_admin` → `/app/admin`.
 
@@ -58,6 +52,7 @@ Platform `super_admin` → `/app/admin`.
 | `/app` | Authenticated dashboard |
 | `/app/organizations/:orgId` | Org overview |
 | `/app/organizations/:orgId/content` | Courses, curriculum, banks, questions |
+| `/app/organizations/:orgId/learn` | Student/staff curriculum viewer |
 | `/app/organizations/:orgId/exams` | Staff manage / Student take |
 | `/app/organizations/:orgId/grading` | Staff |
 | `/app/admin` | super_admin |
@@ -74,15 +69,14 @@ cd client && npm install && npm run dev
 
 Docker: see `DEPLOY.md`.
 
-## Testing Phase 02
+## Testing Phase 03
 
-1. Login as staff → org → Content → **Curriculum** tab.
-2. Select a course → create Subject → create Topic under it → create Lesson.
-3. Expand tree nodes; archive subject and confirm topics/lessons hidden.
-4. Switch AR/EN and check RTL labels.
+1. As staff: Content → Curriculum → create subject/topic/lesson with content.
+2. As student: open org → **Learn** → expand tree → open a lesson.
+3. Verify AR/EN labels on Learn page.
 
 ## Next phase
 
-**Phase 03** — when ordered (see product backlog).
+**Phase 04** — when ordered (see product backlog).
 
 **ExamFlow** — Smart Assessments. Real Insights.
