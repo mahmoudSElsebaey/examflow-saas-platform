@@ -7,6 +7,7 @@ import type {
   LoginInput,
   ForgotPasswordInput,
   ResetPasswordInput,
+  VerifyEmailInput,
 } from '../validators/auth.validators.js'
 import { config } from '../config/index.js'
 
@@ -38,10 +39,11 @@ export async function login(req: AuthenticatedRequest, res: Response, next: Next
   try {
     const result = await authService.loginUser(req.body as LoginInput)
     res.cookie(REFRESH_COOKIE, result.refreshToken, cookieOptions)
-    return sendSuccess(res, {
-      user: result.user,
-      accessToken: result.accessToken,
-    }, 'Login successful')
+    return sendSuccess(
+      res,
+      { user: result.user, accessToken: result.accessToken },
+      'Login successful'
+    )
   } catch (err) {
     next(err)
   }
@@ -80,10 +82,10 @@ export async function logout(req: AuthenticatedRequest, res: Response, next: Nex
 export async function me(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   try {
     if (!req.user?.id) {
-      return sendError(res, 'Not authenticated', 401, 'UNAUTHORIZED')
+      return sendError(res, 'Unauthorized', 401, 'UNAUTHORIZED')
     }
-    const user = await authService.getCurrentUser(req.user.id)
-    return sendSuccess(res, { user }, 'Current user')
+    const user = await authService.getMe(req.user.id)
+    return sendSuccess(res, { user })
   } catch (err) {
     next(err)
   }
@@ -100,7 +102,7 @@ export async function forgotPassword(
     return sendSuccess(
       res,
       null,
-      'If an account exists with that email, a reset link has been sent'
+      'If an account exists, a reset link was sent'
     )
   } catch (err) {
     next(err)
@@ -115,7 +117,37 @@ export async function resetPassword(
   try {
     const { token, password } = req.body as ResetPasswordInput
     await authService.resetPassword(token, password)
-    return sendSuccess(res, null, 'Password reset successful')
+    return sendSuccess(res, null, 'Password updated successfully')
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function verifyEmail(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { token } = req.body as VerifyEmailInput
+    const user = await authService.verifyEmail(token)
+    return sendSuccess(res, { user }, 'Email verified')
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function resendVerification(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.user?.id) {
+      return sendError(res, 'Unauthorized', 401, 'UNAUTHORIZED')
+    }
+    await authService.resendVerification(req.user.id)
+    return sendSuccess(res, null, 'Verification email sent')
   } catch (err) {
     next(err)
   }
