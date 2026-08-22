@@ -13,6 +13,9 @@ const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(16).default('dev-refresh-secret-change-me-32chars'),
   JWT_ACCESS_EXPIRES_IN: z.string().default('15m'),
   JWT_REFRESH_EXPIRES_IN: z.string().default('7d'),
+  EMAIL_PROVIDER: z.enum(['log', 'resend']).default('log'),
+  RESEND_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().default('ExamFlow <onboarding@resend.dev>'),
 })
 
 const parsed = envSchema.safeParse(process.env)
@@ -63,4 +66,9 @@ export const config = {
   },
   isDev: env.NODE_ENV === 'development',
   isProd: env.NODE_ENV === 'production',
+  email: {
+    provider: env.EMAIL_PROVIDER,
+    resendApiKey: env.RESEND_API_KEY,
+    from: env.EMAIL_FROM,
+  },
 } as const

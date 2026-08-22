@@ -1,6 +1,6 @@
 # ExamFlow
 
-> Status: **Phase 03 complete** — Student Learning Experience
+> Status: **Phase 04 complete** — Email Provider + Event Notifications
 
 Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exams, grading, certificates, analytics, mock billing, platform admin.
 
@@ -8,7 +8,7 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 
 | Area | Status |
 |------|--------|
-| Auth + JWT + verify/reset | Done (email adapter logs only) |
+| Auth + JWT + verify/reset | Done |
 | Multi-tenant orgs + roles | Done |
 | Design System (Scholar Glow) | Done |
 | i18n EN/AR + RTL | Done |
@@ -24,15 +24,15 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 | Platform admin | Done |
 | Subjects / Topics / Lessons | Done (Phase 02) |
 | Student Learn (curriculum viewer) | Done (Phase 03) |
-| Stripe / real email | Not started |
+| Email provider (Resend) + event notifications | Done (Phase 04) |
+| Stripe | Not started |
 
-## Phase 03 highlights
+## Phase 04 highlights
 
-- Student **Learn** portal: Course → Subject → Topic → Lesson tree.
-- Lesson reader with content + duration.
-- `GET /lessons/:lessonId` for members.
-- Staff can attach lesson content/duration when creating lessons.
-- Nav: `learn` visible to students and staff.
+- **Resend** email provider when `EMAIL_PROVIDER=resend` + `RESEND_API_KEY` (fallback: log).
+- Templates: verify, reset, invite, exam published, results ready, certificate issued.
+- In-app notifications on: exam publish, result ready, certificate issued, grading needed, org invite.
+- Health endpoint reports `emailProvider` / `emailConfigured`.
 
 ## Available roles (membership)
 
@@ -44,24 +44,12 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 
 Platform `super_admin` → `/app/admin`.
 
-## Important routes
-
-| Path | Who |
-|------|-----|
-| `/` | Public landing |
-| `/app` | Authenticated dashboard |
-| `/app/organizations/:orgId` | Org overview |
-| `/app/organizations/:orgId/content` | Courses, curriculum, banks, questions |
-| `/app/organizations/:orgId/learn` | Student/staff curriculum viewer |
-| `/app/organizations/:orgId/exams` | Staff manage / Student take |
-| `/app/organizations/:orgId/grading` | Staff |
-| `/app/admin` | super_admin |
-
 ## Setup
 
 ```bash
 cp .env.example .env
 # set DATABASE_URL, JWT secrets
+# optional: EMAIL_PROVIDER=resend and RESEND_API_KEY
 
 cd server && npm install && npm run dev
 cd client && npm install && npm run dev
@@ -69,14 +57,16 @@ cd client && npm install && npm run dev
 
 Docker: see `DEPLOY.md`.
 
-## Testing Phase 03
+## Testing Phase 04
 
-1. As staff: Content → Curriculum → create subject/topic/lesson with content.
-2. As student: open org → **Learn** → expand tree → open a lesson.
-3. Verify AR/EN labels on Learn page.
+1. Publish an exam → students get in-app notification (and email if Resend configured).
+2. Submit auto-graded exam → student `result_ready` notification.
+3. Short-answer submit → staff `grading_needed`; after grade → student `result_ready`.
+4. Pass + certificate → `certificate_issued` notification + email.
+5. `GET /api/v1/health` → check `emailProvider`.
 
 ## Next phase
 
-**Phase 04** — when ordered (see product backlog).
+**Phase 05** — when ordered (see product backlog).
 
 **ExamFlow** — Smart Assessments. Real Insights.
