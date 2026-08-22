@@ -47,7 +47,7 @@ function arraysEqualAsSet(a: string[], b: string[]): boolean {
   return b.every((x) => sa.has(x))
 }
 
-function toAttemptDTO(
+export function toAttemptDTO(
   a: InstanceType<typeof ExamAttempt>,
   opts?: {
     includeQuestions?: boolean
@@ -67,8 +67,8 @@ function toAttemptDTO(
     let pendingManualCount = 0
 
     questions = (a.questionSnapshot || []).map((q) => {
-      const selected =
-        a.answers?.find((x) => x.questionId === q.id)?.selected ?? []
+      const ansRow = a.answers?.find((x) => x.questionId === q.id)
+      const selected = ansRow?.selected ?? []
       const base: AttemptQuestionView = {
         id: q.id,
         type: q.type,
@@ -85,11 +85,19 @@ function toAttemptDTO(
       let pointsEarned = 0
 
       if (q.type === 'short_answer') {
-        outcome = selected.some((s) => s.trim().length > 0)
-          ? 'pending_manual'
-          : 'skipped'
-        if (outcome === 'pending_manual') pendingManualCount++
-        else skippedCount++
+        const hasText = selected.some((s) => s.trim().length > 0)
+        if (!hasText) {
+          outcome = 'skipped'
+          skippedCount++
+        } else if (ansRow?.manualScore != null) {
+          pointsEarned = Math.min(q.points || 0, Math.max(0, ansRow.manualScore))
+          outcome = pointsEarned > 0 ? 'correct' : 'wrong'
+          if (outcome === 'correct') correctCount++
+          else wrongCount++
+        } else {
+          outcome = 'pending_manual'
+          pendingManualCount++
+        }
       } else if (selected.length === 0) {
         outcome = 'skipped'
         skippedCount++
@@ -108,6 +116,7 @@ function toAttemptDTO(
         userSelected: selected,
         outcome,
         pointsEarned,
+        feedback: ansRow?.feedback ?? null,
       }
     })
 
@@ -140,11 +149,15 @@ function toAttemptDTO(
       a.answers?.map((x) => ({
         questionId: x.questionId,
         selected: x.selected ?? [],
+        manualScore: x.manualScore ?? null,
+        feedback: x.feedback ?? null,
+        gradedAt: x.gradedAt ? new Date(x.gradedAt).toISOString() : null,
       })) ?? [],
     score: a.score ?? null,
     maxScore: a.maxScore ?? null,
     percent: a.percent ?? null,
     passed: a.passed ?? null,
+    needsManualGrading: !!a.needsManualGrading,
     questions,
     examTitle: opts?.examTitle,
     review,
@@ -292,11 +305,12 @@ export async function archiveExam(orgId: string, examId: string): Promise<void> 
   await exam.save()
 }
 
-async function gradeAttempt(
+export async function gradeAttempt(
   attempt: InstanceType<typeof ExamAttempt>,
   passingScorePercent: number
 ) {
   let score = 0
+  let pendingManual = 0
   const maxScore = (attempt.questionSnapshot || []).reduce(
     (s, q) => s + (q.points || 0),
     0
@@ -304,7 +318,15 @@ async function gradeAttempt(
   for (const q of attempt.questionSnapshot || []) {
     const ans = attempt.answers?.find((a) => a.questionId === q.id)
     const selected = ans?.selected ?? []
-    if (q.type === 'short_answer') continue
+    if (q.type === 'short_answer') {
+      const hasText = selected.some((s) => (s || '').trim().length > 0)
+      if (hasText && ans?.manualScore == null) {
+        pendingManual++
+      } else if (ans?.manualScore != null) {
+        score += Math.min(q.points || 0, Math.max(0, ans.manualScore))
+      }
+      continue
+    }
     if (arraysEqualAsSet(selected, q.correctAnswers || [])) {
       score += q.points || 0
     }
@@ -314,6 +336,7 @@ async function gradeAttempt(
   attempt.maxScore = maxScore
   attempt.percent = percent
   attempt.passed = percent >= passingScorePercent
+  attempt.needsManualGrading = pendingManual > 0
 }
 
 export async function startAttempt(
@@ -509,7 +532,7 @@ export async function submitAttempt(
 
   let certificateId: string | null = null
   let certificateCode: string | null = null
-  if (attempt.passed) {
+  if (attempt.passed && !attempt.needsManualGrading) {
     try {
       const cert = await certService.issueCertificateForAttempt(
         orgId,
