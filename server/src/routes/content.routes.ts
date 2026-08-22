@@ -17,6 +17,7 @@ import {
   updateLessonSchema,
 } from '../validators/content.validators.js'
 import * as ctrl from '../controllers/content.controller.js'
+import * as progressCtrl from '../controllers/progress.controller.js'
 
 const router = Router({ mergeParams: true })
 
@@ -58,6 +59,9 @@ router.delete('/topics/:topicId', canManage, ctrl.deleteTopic)
 
 router.get('/lessons', ctrl.listLessons)
 router.get('/lessons/:lessonId', ctrl.getLesson)
+router.post('/lessons/:lessonId/progress/view', progressCtrl.markViewed)
+router.post('/lessons/:lessonId/progress/complete', progressCtrl.markCompleted)
+router.get('/progress/me', progressCtrl.myProgress)
 router.post('/lessons', canManage, validateBody(createLessonSchema), ctrl.createLesson)
 router.patch(
   '/lessons/:lessonId',
