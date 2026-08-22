@@ -3,6 +3,7 @@ import { Membership } from '../models/Membership.js'
 import { User } from '../models/User.js'
 import { AppError } from '../middlewares/errorHandler.js'
 import type { OrganizationDTO, MemberDTO, OrgMemberRole } from '../types/organization.js'
+import { sendEmail, orgInviteEmail } from './email.service.js'
 
 function slugify(name: string): string {
   return name
@@ -213,6 +214,11 @@ export async function inviteMember(
     status: 'active',
     invitedBy: actorId,
   })
+
+  const org = await Organization.findById(orgId)
+  await sendEmail(
+    orgInviteEmail(user.email, org?.name || 'Organization', membership.role)
+  )
 
   return {
     id: membership.id,
