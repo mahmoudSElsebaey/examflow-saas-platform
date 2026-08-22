@@ -2,7 +2,9 @@ import { Exam } from '../models/Exam.js'
 import { ExamAttempt } from '../models/ExamAttempt.js'
 import { Question } from '../models/Question.js'
 import { AppError } from '../middlewares/errorHandler.js'
-import type { OrgAnalyticsDTO, ExamAnalyticsDTO } from '../types/analytics.js'
+import type { OrgAnalyticsDTO, ExamAnalyticsDTO, StudentHistoryDTO } from '../types/analytics.js'
+import { LessonProgress } from '../models/LessonProgress.js'
+import { Lesson } from '../models/Lesson.js'
 
 function avg(nums: number[]): number | null {
   if (nums.length === 0) return null
@@ -87,7 +89,7 @@ export async function getExamAnalytics(
         : null,
     minPercent: percents.length ? Math.min(...percents) : null,
     maxPercent: percents.length ? Math.max(...percents) : null,
-    attempts: attempts.slice(0, 50).map((a) => ({
+    attempts: attempts.map((a) => ({
       id: a.id,
       userId: a.userId.toString(),
       status: a.status,
@@ -97,6 +99,64 @@ export async function getExamAnalytics(
       passed: a.passed ?? null,
       startedAt: a.startedAt.toISOString(),
       submittedAt: a.submittedAt?.toISOString() ?? null,
+    })),
+  }
+}
+
+export async function getStudentHistory(
+  userId: string,
+  orgId: string
+): Promise<StudentHistoryDTO> {
+  const [attempts, progress] = await Promise.all([
+    ExamAttempt.find({ organizationId: orgId, userId }).sort({ createdAt: -1 }).limit(50),
+    LessonProgress.find({ organizationId: orgId, userId }).sort({ updatedAt: -1 }).limit(50),
+  ])
+
+  const examIds = [...new Set(attempts.map((a) => a.examId.toString()))]
+  const exams = await Exam.find({ _id: { $in: examIds } })
+  const examTitleMap = new Map(exams.map((e) => [e.id, e.title]))
+
+  const completed = attempts.filter(
+    (a) => a.status === 'submitted' || a.status === 'timed_out'
+  )
+  const percents = completed
+    .map((a) => a.percent)
+    .filter((p): p is number => p != null)
+  const passed = completed.filter((a) => a.passed === true).length
+
+  const lessonIds = progress.map((p) => p.lessonId)
+  const lessons = await Lesson.find({ _id: { $in: lessonIds } })
+  const lessonTitleMap = new Map(lessons.map((l) => [l.id, l.title]))
+
+  return {
+    attemptsCount: attempts.length,
+    completedCount: completed.length,
+    averagePercent:
+      percents.length > 0
+        ? Math.round((percents.reduce((a, b) => a + b, 0) / percents.length) * 10) / 10
+        : null,
+    passRate:
+      completed.length > 0
+        ? Math.round((passed / completed.length) * 1000) / 10
+        : null,
+    lessonsViewed: progress.length,
+    lessonsCompleted: progress.filter((p) => p.status === 'completed').length,
+    attempts: attempts.map((a) => ({
+      id: a.id,
+      examId: a.examId.toString(),
+      examTitle: examTitleMap.get(a.examId.toString()) || 'Exam',
+      status: a.status,
+      percent: a.percent ?? null,
+      passed: a.passed ?? null,
+      startedAt: a.startedAt.toISOString(),
+      submittedAt: a.submittedAt?.toISOString() ?? null,
+    })),
+    recentLessons: progress.map((p) => ({
+      lessonId: p.lessonId.toString(),
+      lessonTitle: lessonTitleMap.get(p.lessonId.toString()) || 'Lesson',
+      status: p.status,
+      viewedAt: p.viewedAt.toISOString(),
+      completedAt: p.completedAt?.toISOString() ?? null,
     })),
   }
 }
