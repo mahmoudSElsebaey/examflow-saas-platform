@@ -21,6 +21,8 @@ import { OrgMembersPage } from '@/features/organizations/pages/OrgMembersPage'
 import { OrgSettingsPage } from '@/features/organizations/pages/OrgSettingsPage'
 import { CertificateViewPage } from '@/features/certificates/pages/CertificateViewPage'
 import { VerifyCertificatePage } from '@/features/certificates/pages/VerifyCertificatePage'
+import { AdminPage } from '@/features/admin/pages/AdminPage'
+import { OrgBillingPage } from '@/features/billing/pages/OrgBillingPage'
 
 function App() {
   return (
@@ -35,6 +37,7 @@ function App() {
           <Route path="/verify-email" element={<VerifyEmailPage />} />
           <Route path="/verify/:code" element={<VerifyCertificatePage />} />
           <Route path="/app" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/app/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
           <Route path="/app/organizations" element={<ProtectedRoute><OrganizationsPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId" element={<ProtectedRoute><OrganizationDetailPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/content" element={<ProtectedRoute><OrgContentPage /></ProtectedRoute>} />
@@ -48,6 +51,7 @@ function App() {
           <Route path="/app/organizations/:orgId/students" element={<ProtectedRoute><OrgStudentsPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/members" element={<ProtectedRoute><OrgMembersPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/settings" element={<ProtectedRoute><OrgSettingsPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/billing" element={<ProtectedRoute><OrgBillingPage /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
