@@ -15,6 +15,9 @@ export interface ExamDTO {
   maxAttempts: number
   totalPoints: number
   questionCount: number
+  availableFrom?: string | null
+  availableTo?: string | null
+  isAvailableNow?: boolean
   createdBy: string
   createdAt: string
   updatedAt: string
