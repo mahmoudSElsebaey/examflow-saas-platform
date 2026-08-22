@@ -2,7 +2,7 @@ import { Notification } from '../models/Notification.js'
 import type { NotificationType } from '../models/Notification.js'
 import { AppError } from '../middlewares/errorHandler.js'
 
-export interface NotificationDTO {
+export type NotificationDTO = {
   id: string
   type: NotificationType
   title: string
@@ -70,4 +70,74 @@ export async function markAllRead(userId: string): Promise<void> {
     { userId, readAt: null },
     { $set: { readAt: new Date() } }
   )
+}
+
+/** Notify all active student members of an organization (best-effort). */
+export async function notifyOrgStudents(
+  organizationId: string,
+  input: {
+    type: NotificationType
+    title: string
+    body: string
+    link?: string | null
+  }
+): Promise<number> {
+  const { Membership } = await import('../models/Membership.js')
+  const members = await Membership.find({
+    organizationId,
+    role: 'student',
+    status: 'active',
+  }).select('userId')
+  let count = 0
+  for (const m of members) {
+    try {
+      await createNotification({
+        userId: m.userId.toString(),
+        organizationId,
+        type: input.type,
+        title: input.title,
+        body: input.body,
+        link: input.link,
+      })
+      count += 1
+    } catch {
+      // best-effort
+    }
+  }
+  return count
+}
+
+/** Notify staff (owner/admin/teacher/examiner) in an org. */
+export async function notifyOrgStaff(
+  organizationId: string,
+  input: {
+    type: NotificationType
+    title: string
+    body: string
+    link?: string | null
+  }
+): Promise<number> {
+  const { Membership } = await import('../models/Membership.js')
+  const members = await Membership.find({
+    organizationId,
+    role: { $in: ['owner', 'admin', 'teacher', 'examiner'] },
+    status: 'active',
+  }).select('userId')
+  let count = 0
+  for (const m of members) {
+    try {
+      await createNotification({
+        userId: m.userId.toString(),
+        organizationId,
+        type: input.type,
+        title: input.title,
+        body: input.body,
+        link: input.link,
+      })
+      count += 1
+    } catch {
+      // best-effort
+    }
+  }
+  return count
 }
