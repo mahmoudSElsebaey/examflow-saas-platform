@@ -157,3 +157,116 @@ export async function deleteQuestion(req: TenantRequest, res: Response, next: Ne
     next(e)
   }
 }
+
+// ─── Subjects / Topics / Lessons ────────────────────────────────────
+
+export async function listSubjects(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const courseId = typeof req.query.courseId === 'string' ? req.query.courseId : undefined
+    const subjects = await content.listSubjects(orgId(req), courseId)
+    return sendSuccess(res, { subjects })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function createSubject(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const subject = await content.createSubject(orgId(req), req.user!.id, req.body)
+    return sendSuccess(res, { subject }, 'Subject created', 201)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function updateSubject(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const subject = await content.updateSubject(orgId(req), param(req, 'subjectId'), req.body)
+    return sendSuccess(res, { subject }, 'Subject updated')
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function deleteSubject(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    await content.deleteSubject(orgId(req), param(req, 'subjectId'))
+    return sendSuccess(res, null, 'Subject archived')
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function listTopics(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const subjectId = typeof req.query.subjectId === 'string' ? req.query.subjectId : undefined
+    const topics = await content.listTopics(orgId(req), subjectId)
+    return sendSuccess(res, { topics })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function createTopic(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const topic = await content.createTopic(orgId(req), req.user!.id, req.body)
+    return sendSuccess(res, { topic }, 'Topic created', 201)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function updateTopic(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const topic = await content.updateTopic(orgId(req), param(req, 'topicId'), req.body)
+    return sendSuccess(res, { topic }, 'Topic updated')
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function deleteTopic(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    await content.deleteTopic(orgId(req), param(req, 'topicId'))
+    return sendSuccess(res, null, 'Topic archived')
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function listLessons(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const topicId = typeof req.query.topicId === 'string' ? req.query.topicId : undefined
+    const lessons = await content.listLessons(orgId(req), topicId)
+    return sendSuccess(res, { lessons })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function createLesson(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const lesson = await content.createLesson(orgId(req), req.user!.id, req.body)
+    return sendSuccess(res, { lesson }, 'Lesson created', 201)
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function updateLesson(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const lesson = await content.updateLesson(orgId(req), param(req, 'lessonId'), req.body)
+    return sendSuccess(res, { lesson }, 'Lesson updated')
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function deleteLesson(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    await content.deleteLesson(orgId(req), param(req, 'lessonId'))
+    return sendSuccess(res, null, 'Lesson archived')
+  } catch (e) {
+    next(e)
+  }
+}
