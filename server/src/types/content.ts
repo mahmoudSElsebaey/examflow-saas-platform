@@ -52,3 +52,44 @@ export interface QuestionDTO {
   createdAt: string
   updatedAt: string
 }
+
+export interface SubjectDTO {
+  id: string
+  organizationId: string
+  courseId: string
+  title: string
+  code?: string | null
+  description?: string | null
+  order: number
+  isActive: boolean
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface TopicDTO {
+  id: string
+  organizationId: string
+  subjectId: string
+  title: string
+  description?: string | null
+  order: number
+  isActive: boolean
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface LessonDTO {
+  id: string
+  organizationId: string
+  topicId: string
+  title: string
+  content?: string | null
+  durationMinutes?: number | null
+  order: number
+  isActive: boolean
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+}

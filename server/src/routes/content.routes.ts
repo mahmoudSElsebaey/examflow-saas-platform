@@ -9,6 +9,12 @@ import {
   updateBankSchema,
   createQuestionSchema,
   updateQuestionSchema,
+  createSubjectSchema,
+  updateSubjectSchema,
+  createTopicSchema,
+  updateTopicSchema,
+  createLessonSchema,
+  updateLessonSchema,
 } from '../validators/content.validators.js'
 import * as ctrl from '../controllers/content.controller.js'
 
@@ -28,6 +34,37 @@ router.patch(
   ctrl.updateCourse
 )
 router.delete('/courses/:courseId', canManage, ctrl.deleteCourse)
+
+// Hierarchy
+router.get('/subjects', ctrl.listSubjects)
+router.post('/subjects', canManage, validateBody(createSubjectSchema), ctrl.createSubject)
+router.patch(
+  '/subjects/:subjectId',
+  canManage,
+  validateBody(updateSubjectSchema),
+  ctrl.updateSubject
+)
+router.delete('/subjects/:subjectId', canManage, ctrl.deleteSubject)
+
+router.get('/topics', ctrl.listTopics)
+router.post('/topics', canManage, validateBody(createTopicSchema), ctrl.createTopic)
+router.patch(
+  '/topics/:topicId',
+  canManage,
+  validateBody(updateTopicSchema),
+  ctrl.updateTopic
+)
+router.delete('/topics/:topicId', canManage, ctrl.deleteTopic)
+
+router.get('/lessons', ctrl.listLessons)
+router.post('/lessons', canManage, validateBody(createLessonSchema), ctrl.createLesson)
+router.patch(
+  '/lessons/:lessonId',
+  canManage,
+  validateBody(updateLessonSchema),
+  ctrl.updateLesson
+)
+router.delete('/lessons/:lessonId', canManage, ctrl.deleteLesson)
 
 router.get('/banks', ctrl.listBanks)
 router.post('/banks', canManage, validateBody(createBankSchema), ctrl.createBank)
