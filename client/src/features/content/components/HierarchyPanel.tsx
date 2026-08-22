@@ -31,6 +31,8 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
   const [topicTitle, setTopicTitle] = useState('')
   const [topicSubjectId, setTopicSubjectId] = useState('')
   const [lessonTitle, setLessonTitle] = useState('')
+  const [lessonContent, setLessonContent] = useState('')
+  const [lessonDuration, setLessonDuration] = useState('')
   const [lessonTopicId, setLessonTopicId] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -130,8 +132,12 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
       await contentApi.createLessonApi(accessToken, orgId, {
         topicId: lessonTopicId,
         title: lessonTitle.trim(),
+        content: lessonContent.trim() || undefined,
+        durationMinutes: lessonDuration ? Number(lessonDuration) : undefined,
       })
       setLessonTitle('')
+      setLessonContent('')
+      setLessonDuration('')
       const res = await contentApi.listLessonsApi(accessToken, orgId, lessonTopicId)
       setLessonsByTopic((m) => ({ ...m, [lessonTopicId]: res.data?.lessons ?? [] }))
       setExpandedTopics((s) => ({ ...s, [lessonTopicId]: true }))
@@ -276,14 +282,27 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
               onChange={(e) => setLessonTitle(e.target.value)}
               placeholder={t('content.lessonTitle')}
             />
-            <Button
-              disabled={busy || !lessonTitle.trim() || !lessonTopicId}
-              onClick={() => void onCreateLesson()}
-            >
-              <Plus className="me-1 h-4 w-4" />
-              {t('content.createLesson')}
-            </Button>
+            <Input
+              type="number"
+              min={0}
+              value={lessonDuration}
+              onChange={(e) => setLessonDuration(e.target.value)}
+              placeholder={t('content.durationMinutes')}
+            />
           </div>
+          <textarea
+            className="min-h-[88px] w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm"
+            value={lessonContent}
+            onChange={(e) => setLessonContent(e.target.value)}
+            placeholder={t('content.lessonContent')}
+          />
+          <Button
+            disabled={busy || !lessonTitle.trim() || !lessonTopicId}
+            onClick={() => void onCreateLesson()}
+          >
+            <Plus className="me-1 h-4 w-4" />
+            {t('content.createLesson')}
+          </Button>
           <p className="text-xs text-muted">{t('content.expandToPickTopic')}</p>
         </CardContent>
       </Card>
