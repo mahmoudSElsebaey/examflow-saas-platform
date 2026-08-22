@@ -11,6 +11,7 @@ import {
   Award,
   UserCog,
   Settings,
+  PenLine,
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
@@ -32,6 +33,7 @@ const NAV: {
   { id: 'courses', path: '/content?tab=courses', labelKey: 'workspace.nav.courses', icon: BookOpen },
   { id: 'banks', path: '/content?tab=banks', labelKey: 'workspace.nav.banks', icon: Library },
   { id: 'exams', path: '/exams', labelKey: 'workspace.nav.exams', icon: ClipboardList },
+  { id: 'grading', path: '/grading', labelKey: 'workspace.nav.grading', icon: PenLine },
   { id: 'students', path: '/students', labelKey: 'workspace.nav.students', icon: Users },
   { id: 'analytics', path: '/analytics', labelKey: 'workspace.nav.analytics', icon: BarChart3 },
   { id: 'certificates', path: '/certificates', labelKey: 'workspace.nav.certificates', icon: Award },
@@ -100,11 +102,11 @@ export function OrgWorkspaceNav({ role: roleProp, className }: Props) {
             className={cn(
               'inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors',
               active
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-primary-muted text-primary'
                 : 'text-muted hover:bg-surface-subtle hover:text-foreground'
             )}
           >
-            <Icon className="h-3.5 w-3.5" />
+            <Icon className="h-4 w-4" />
             {t(labelKey)}
           </Link>
         )
