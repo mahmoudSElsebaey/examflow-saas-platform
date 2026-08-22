@@ -76,3 +76,17 @@ export async function resetPasswordApi(token: string, password: string) {
     body: JSON.stringify({ token, password }),
   })
 }
+
+export async function verifyEmailApi(token: string) {
+  return request<{ user: AuthUser }>('/verify-email', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  })
+}
+
+export async function resendVerificationApi(accessToken: string) {
+  return request<null>('/resend-verification', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+}
