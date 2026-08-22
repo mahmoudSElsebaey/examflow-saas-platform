@@ -140,6 +140,8 @@ const en = {
     confirmDeleteTopic: 'Archive this topic and its lessons?',
     confirmDeleteLesson: 'Archive this lesson?',
     min: 'min',
+    durationMinutes: 'Duration (minutes)',
+    lessonContent: 'Lesson content (optional)',
   },
   exam: {
     title: 'Exams', subtitle: 'Build and deliver.',
@@ -182,11 +184,12 @@ const en = {
   workspace: {
     navLabel: 'Organization menu',
     nav: {
-      overview: 'Overview', courses: 'Courses', banks: 'Question banks', exams: 'Exams',
+      overview: 'Overview', learn: 'Learn', courses: 'Courses', banks: 'Question banks', exams: 'Exams',
       grading: 'Grading', students: 'Students', analytics: 'Analytics', certificates: 'Certificates',
       members: 'Members', settings: 'Settings', billing: 'Billing',
     },
     mod: {
+      learn: 'Browse subjects, topics, and lessons.',
       courses: 'Create and manage courses.',
       banks: 'Organize questions.',
       exams: 'Build and publish exams.',
@@ -215,6 +218,15 @@ const en = {
     dashboardSubtitle: 'Enter the organization workspace.',
     modContentDesc: 'Courses and banks.', modExamsDesc: 'Exams.',
     modAnalyticsDesc: 'Analytics.', modCertDesc: 'Certificates.', modMembersDesc: 'Members.',
+  },
+  learn: {
+    title: 'Learn',
+    subtitle: 'Browse the curriculum and open lessons.',
+    noCourses: 'No courses available yet.',
+    noSubjects: 'No subjects published for this course yet.',
+    backToCurriculum: 'Back to curriculum',
+    lessonNotFound: 'Lesson not found.',
+    noContent: 'This lesson has no content yet.',
   },
   errors: {
     generic: 'Something went wrong',
