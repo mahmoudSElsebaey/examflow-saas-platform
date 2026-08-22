@@ -19,6 +19,7 @@ router.use(requireOrgMember)
 const canManage = requireOrgRoles('owner', 'admin', 'teacher', 'examiner')
 
 router.get('/exams', ctrl.listExams)
+router.get('/exams/available', ctrl.listAvailableExams)
 router.post('/exams', canManage, validateBody(createExamSchema), ctrl.createExam)
 router.get('/exams/:examId', ctrl.getExam)
 router.patch(

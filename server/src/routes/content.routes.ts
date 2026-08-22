@@ -41,6 +41,7 @@ router.patch(
 router.delete('/banks/:bankId', canManage, ctrl.deleteBank)
 
 router.get('/banks/:bankId/questions', ctrl.listQuestions)
+router.post('/banks/:bankId/questions/import', canManage, ctrl.importQuestions)
 router.post(
   '/banks/:bankId/questions',
   canManage,

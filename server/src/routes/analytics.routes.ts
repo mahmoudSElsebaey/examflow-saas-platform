@@ -12,5 +12,6 @@ const staff = requireOrgRoles('owner', 'admin', 'teacher', 'examiner')
 
 router.get('/analytics', staff, ctrl.orgAnalytics)
 router.get('/exams/:examId/analytics', staff, ctrl.examAnalytics)
+router.get('/analytics/me', ctrl.studentHistory)
 
 export default router

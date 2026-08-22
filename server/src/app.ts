@@ -12,6 +12,7 @@ import examRoutes from './routes/exam.routes.js'
 import analyticsRoutes from './routes/analytics.routes.js'
 import certificateRoutes from './routes/certificate.routes.js'
 import publicRoutes from './routes/public.routes.js'
+import notificationRoutes from './routes/notification.routes.js'
 import { notFoundHandler, errorHandler } from './middlewares/errorHandler.js'
 
 const app = express()
@@ -42,6 +43,7 @@ app.use('/api/v1/organizations/:orgId', examRoutes)
 app.use('/api/v1/organizations/:orgId', analyticsRoutes)
 app.use('/api/v1/organizations/:orgId', certificateRoutes)
 app.use('/api/v1/public', publicRoutes)
+app.use('/api/v1/notifications', notificationRoutes)
 
 app.use(notFoundHandler)
 app.use(errorHandler)
