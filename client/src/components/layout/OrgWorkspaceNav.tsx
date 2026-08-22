@@ -13,6 +13,7 @@ import {
   Settings,
   PenLine,
   CreditCard,
+  GraduationCap,
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
@@ -31,6 +32,7 @@ const NAV: {
   icon: LucideIcon
 }[] = [
   { id: 'overview', path: '', labelKey: 'workspace.nav.overview', icon: LayoutDashboard },
+  { id: 'learn', path: '/learn', labelKey: 'workspace.nav.learn', icon: GraduationCap },
   { id: 'courses', path: '/content?tab=courses', labelKey: 'workspace.nav.courses', icon: BookOpen },
   { id: 'banks', path: '/content?tab=banks', labelKey: 'workspace.nav.banks', icon: Library },
   { id: 'exams', path: '/exams', labelKey: 'workspace.nav.exams', icon: ClipboardList },
