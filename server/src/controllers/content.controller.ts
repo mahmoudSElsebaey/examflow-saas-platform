@@ -2,6 +2,7 @@ import type { Response, NextFunction } from 'express'
 import { sendSuccess } from '../utils/apiResponse.js'
 import type { TenantRequest } from '../middlewares/tenant.js'
 import * as content from '../services/content.service.js'
+import * as contentImport from '../services/content.import.js'
 
 function param(req: TenantRequest, key: string): string {
   const v = req.params[key]
@@ -103,6 +104,20 @@ export async function listQuestions(req: TenantRequest, res: Response, next: Nex
   }
 }
 
+export async function importQuestions(req: TenantRequest, res: Response, next: NextFunction) {
+  try {
+    const result = await contentImport.importQuestions(
+      orgId(req),
+      param(req, 'bankId'),
+      req.user!.id,
+      req.body.questions || []
+    )
+    return sendSuccess(res, result, 'Import completed', 201)
+  } catch (e) {
+    next(e)
+  }
+}
+
 export async function createQuestion(req: TenantRequest, res: Response, next: NextFunction) {
   try {
     const question = await content.createQuestion(
@@ -132,6 +147,10 @@ export async function updateQuestion(req: TenantRequest, res: Response, next: Ne
 
 export async function deleteQuestion(req: TenantRequest, res: Response, next: NextFunction) {
   try {
+    await contentImport.assertQuestionNotInPublishedExam(
+      orgId(req),
+      param(req, 'questionId')
+    )
     await content.deleteQuestion(orgId(req), param(req, 'questionId'))
     return sendSuccess(res, null, 'Question archived')
   } catch (e) {
