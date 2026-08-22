@@ -1,8 +1,11 @@
 import type { Response, NextFunction } from 'express'
-import { sendSuccess } from '../utils/apiResponse.js'
+import { sendSuccess, sendError } from '../utils/apiResponse.js'
 import type { TenantRequest } from '../middlewares/tenant.js'
 import * as examService from '../services/exam.service.js'
 import * as gradingService from '../services/grading.service.js'
+import * as examAvailability from '../services/exam.availability.js'
+import { Exam } from '../models/Exam.js'
+import { isExamAvailableNow } from '../services/exam.availability.js'
 
 function param(req: TenantRequest, key: string): string {
   const v = req.params[key]
@@ -19,6 +22,19 @@ export async function listExams(req: TenantRequest, res: Response, next: NextFun
   try {
     const data = await examService.listExams(orgId(req))
     return sendSuccess(res, { exams: data })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function listAvailableExams(
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const exams = await examAvailability.listAvailableExams(orgId(req), req.user!.id)
+    return sendSuccess(res, { exams })
   } catch (e) {
     next(e)
   }
@@ -75,6 +91,21 @@ export async function archiveExam(req: TenantRequest, res: Response, next: NextF
 
 export async function startAttempt(req: TenantRequest, res: Response, next: NextFunction) {
   try {
+    const exam = await Exam.findOne({
+      _id: param(req, 'examId'),
+      organizationId: orgId(req),
+    })
+    if (!exam || exam.status !== 'published') {
+      return sendError(res, 'Exam is not available', 404, 'EXAM_NOT_AVAILABLE')
+    }
+    if (!isExamAvailableNow(exam)) {
+      return sendError(
+        res,
+        'Exam is outside its availability window',
+        403,
+        'EXAM_NOT_IN_WINDOW'
+      )
+    }
     const attempt = await examService.startAttempt(
       orgId(req),
       param(req, 'examId'),
