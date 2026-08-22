@@ -168,3 +168,27 @@ export async function createLessonApi(
 export async function deleteLessonApi(token: string, orgId: string, lessonId: string) {
   return request<null>(`${base(orgId)}/lessons/${lessonId}`, token, { method: 'DELETE' })
 }
+
+export type LessonProgress = {
+  id: string
+  lessonId: string
+  status: 'viewed' | 'completed'
+  viewedAt: string
+  completedAt: string | null
+}
+
+export async function markLessonCompletedApi(token: string, orgId: string, lessonId: string) {
+  return request<{ progress: LessonProgress }>(
+    `${base(orgId)}/lessons/${lessonId}/progress/complete`,
+    token,
+    { method: 'POST' }
+  )
+}
+
+export async function listMyProgressApi(token: string, orgId: string) {
+  return request<{
+    items: LessonProgress[]
+    completedCount: number
+    viewedCount: number
+  }>(`${base(orgId)}/progress/me`, token)
+}
