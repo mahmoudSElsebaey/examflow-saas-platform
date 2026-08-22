@@ -32,6 +32,18 @@ export interface AttemptQuestionView {
   options: { id: string; text: string }[]
   points: number
   difficulty: string
+  correctAnswers?: string[]
+  userSelected?: string[]
+  outcome?: 'correct' | 'wrong' | 'skipped' | 'pending_manual'
+  pointsEarned?: number
+}
+
+export interface AttemptReviewSummary {
+  correctCount: number
+  wrongCount: number
+  skippedCount: number
+  pendingManualCount: number
+  timeTakenSeconds: number | null
 }
 
 export interface ExamAttemptDTO {
@@ -50,4 +62,7 @@ export interface ExamAttemptDTO {
   passed?: boolean | null
   questions?: AttemptQuestionView[]
   examTitle?: string
+  review?: AttemptReviewSummary
+  certificateId?: string | null
+  certificateCode?: string | null
 }

@@ -2,23 +2,25 @@
 
 **Multi-Tenant SaaS Platform for Online Examinations & Assessments**
 
-> Status: **CORE PRODUCT COMPLETION — Part 2 (Short answer + Auto-save)** done.
+> Status: **CORE PRODUCT COMPLETION — Parts 3–6** (Results, Certificates, Analytics check, Responsive results UX).
 
 ## Core completion
 
 | Part | Status |
 |------|--------|
-| 1 Dashboard + Organization workspace navigation | ✅ |
-| 2 Short answer + debounced auto-save | ✅ |
-| 3+ Results, certificates E2E, … | ⏳ |
+| 1 Dashboard + workspace nav | ✅ |
+| 2 Short answer + auto-save | ✅ |
+| 3 Results (score, breakdown, review) | ✅ |
+| 4 Certificates E2E (auto-issue on pass + UI) | ✅ |
+| 5 Analytics (DB-backed org stats) | ✅ verified |
+| 6 Responsive result / take UX | ✅ |
 
-### Part 2
+### Results & certificates
 
-- Short-answer questions: textarea, edit, autosave as `selected[0]`
-- Debounced PATCH (~700ms) on answer change
-- Flush save on question change and `pagehide`
-- UI status: Saving… / Saved / Save failed
-- Objective auto-grade unchanged; short answers excluded (manual later)
+- After submit: correct / wrong / skipped / time taken
+- Per-question review (answers + outcomes)
+- Auto-issue certificate when `passed`
+- Fallback issue button + view / public verify links
 
 ```bash
 cd client && npm install && npm run dev

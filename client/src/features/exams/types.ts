@@ -15,7 +15,6 @@ export interface Exam {
   maxAttempts: number
   totalPoints: number
   questionCount: number
-  createdBy: string
   createdAt: string
   updatedAt: string
 }
@@ -32,6 +31,18 @@ export interface AttemptQuestion {
   options: { id: string; text: string }[]
   points: number
   difficulty: string
+  correctAnswers?: string[]
+  userSelected?: string[]
+  outcome?: 'correct' | 'wrong' | 'skipped' | 'pending_manual'
+  pointsEarned?: number
+}
+
+export interface AttemptReviewSummary {
+  correctCount: number
+  wrongCount: number
+  skippedCount: number
+  pendingManualCount: number
+  timeTakenSeconds: number | null
 }
 
 export interface ExamAttempt {
@@ -50,4 +61,7 @@ export interface ExamAttempt {
   passed?: boolean | null
   questions?: AttemptQuestion[]
   examTitle?: string
+  review?: AttemptReviewSummary
+  certificateId?: string | null
+  certificateCode?: string | null
 }
