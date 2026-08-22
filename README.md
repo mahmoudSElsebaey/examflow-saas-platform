@@ -2,30 +2,27 @@
 
 **Multi-Tenant SaaS Platform for Online Examinations & Assessments**
 
-> Status: **Phase 0 + Phase 1** (Stabilization + Auth lifecycle)
+> Status: **Phase 2 — Manual Grading** complete
 
-## Recent phases
+## Phases
 
 | Phase | Status |
 |-------|--------|
 | CORE PRODUCT COMPLETION | ✅ |
-| **P0 Core Stabilization** | ✅ permissions module, tenant clarity, unit tests |
-| **P1 Auth Lifecycle** | ✅ verify email, reset password page, email adapter, invite email |
+| P0 Stabilization | ✅ |
+| P1 Auth lifecycle | ✅ |
+| **P2 Manual grading** | ✅ |
 
-### Phase 0
-- `server/src/lib/permissions.ts` — single source for org staff/admin checks
-- Unit tests: `npm test` in server
-- Membership role remains source of truth inside tenants
-
-### Phase 1
-- Email adapter (`email.service`) — logs in dev
-- `POST /auth/verify-email`, `POST /auth/resend-verification`
-- Client: `/verify-email`, `/reset-password`
-- Dashboard banner when email not verified
-- Org invite sends notification email (dev log)
+### Phase 2
+- Short-answer answers store `manualScore`, `feedback`, `gradedBy`
+- `needsManualGrading` on attempts after submit
+- Staff queue: `GET .../grading/queue`
+- Grade: `PATCH .../grading/attempts/:id`
+- UI: Organization → Grading
+- Re-score + optional certificate issue when fully graded & passed
 
 ```bash
-cd server && npm install && npm test && npm run typecheck && npm run build
+cd server && npm install && npm run typecheck && npm run build
 cd client && npm install && npm run build
 ```
 

@@ -23,6 +23,9 @@ export interface ExamDTO {
 export interface AttemptAnswer {
   questionId: string
   selected: string[]
+  manualScore?: number | null
+  feedback?: string | null
+  gradedAt?: string | null
 }
 
 export interface AttemptQuestionView {
@@ -36,6 +39,7 @@ export interface AttemptQuestionView {
   userSelected?: string[]
   outcome?: 'correct' | 'wrong' | 'skipped' | 'pending_manual'
   pointsEarned?: number
+  feedback?: string | null
 }
 
 export interface AttemptReviewSummary {
@@ -60,9 +64,25 @@ export interface ExamAttemptDTO {
   maxScore?: number | null
   percent?: number | null
   passed?: boolean | null
+  needsManualGrading?: boolean
   questions?: AttemptQuestionView[]
   examTitle?: string
+  studentName?: string
   review?: AttemptReviewSummary
   certificateId?: string | null
   certificateCode?: string | null
+}
+
+export interface GradingQueueItem {
+  id: string
+  examId: string
+  examTitle: string
+  userId: string
+  studentName: string
+  status: AttemptStatus
+  submittedAt: string | null
+  pendingManualCount: number
+  score: number | null
+  maxScore: number | null
+  percent: number | null
 }

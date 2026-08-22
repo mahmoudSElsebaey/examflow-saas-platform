@@ -1,6 +1,15 @@
 import mongoose, { Schema, type Document, type Model, type Types } from 'mongoose'
 import type { AttemptStatus } from '../types/exam.js'
 
+export interface IAttemptAnswer {
+  questionId: string
+  selected: string[]
+  manualScore?: number | null
+  feedback?: string | null
+  gradedAt?: Date | null
+  gradedBy?: Types.ObjectId | null
+}
+
 export interface IExamAttempt extends Document {
   examId: Types.ObjectId
   organizationId: Types.ObjectId
@@ -9,7 +18,7 @@ export interface IExamAttempt extends Document {
   startedAt: Date
   submittedAt?: Date | null
   expiresAt?: Date | null
-  answers: { questionId: string; selected: string[] }[]
+  answers: IAttemptAnswer[]
   questionSnapshot: {
     id: string
     type: string
@@ -23,6 +32,7 @@ export interface IExamAttempt extends Document {
   maxScore?: number | null
   percent?: number | null
   passed?: boolean | null
+  needsManualGrading?: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -60,6 +70,10 @@ const examAttemptSchema = new Schema<IExamAttempt>(
       {
         questionId: { type: String, required: true },
         selected: [{ type: String }],
+        manualScore: { type: Number, default: null },
+        feedback: { type: String, default: null, maxlength: 2000 },
+        gradedAt: { type: Date, default: null },
+        gradedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
       },
     ],
     questionSnapshot: [
@@ -77,11 +91,13 @@ const examAttemptSchema = new Schema<IExamAttempt>(
     maxScore: { type: Number, default: null },
     percent: { type: Number, default: null },
     passed: { type: Boolean, default: null },
+    needsManualGrading: { type: Boolean, default: false, index: true },
   },
   { timestamps: true }
 )
 
 examAttemptSchema.index({ examId: 1, userId: 1 })
+examAttemptSchema.index({ organizationId: 1, needsManualGrading: 1, submittedAt: -1 })
 
 examAttemptSchema.set('toJSON', {
   virtuals: true,
