@@ -7,7 +7,7 @@ export function isStaffRole(role?: OrgMemberRole | null): boolean {
 }
 
 export function canManageContent(role?: OrgMemberRole | null): boolean {
-  return !!role && STAFF.includes(role)
+  return isStaffRole(role)
 }
 
 export function canManageMembers(role?: OrgMemberRole | null): boolean {
@@ -16,6 +16,18 @@ export function canManageMembers(role?: OrgMemberRole | null): boolean {
 
 export function canViewAnalytics(role?: OrgMemberRole | null): boolean {
   return isStaffRole(role)
+}
+
+export function canGrade(role?: OrgMemberRole | null): boolean {
+  return isStaffRole(role)
+}
+
+export function canManageBilling(role?: OrgMemberRole | null): boolean {
+  return !!role && ['owner', 'admin'].includes(role)
+}
+
+export function canManageSettings(role?: OrgMemberRole | null): boolean {
+  return canManageMembers(role)
 }
 
 export type WorkspaceNavId =
@@ -29,7 +41,12 @@ export type WorkspaceNavId =
   | 'members'
   | 'settings'
   | 'grading'
+  | 'billing'
 
+/**
+ * Nav items visible for a given membership role.
+ * Student sees a minimal student portal; staff sees management modules.
+ */
 export function visibleNavIds(role?: OrgMemberRole | null): WorkspaceNavId[] {
   if (!role) return ['overview']
   if (role === 'student') {
@@ -46,7 +63,7 @@ export function visibleNavIds(role?: OrgMemberRole | null): WorkspaceNavId[] {
     'analytics',
   ]
   if (canManageMembers(role)) {
-    ids.push('members', 'settings')
+    ids.push('members', 'settings', 'billing')
   }
   return ids
 }
