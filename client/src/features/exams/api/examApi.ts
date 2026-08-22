@@ -1,6 +1,6 @@
 import { appConfig } from '@/config/app'
 import type { ApiResponse } from '@/features/auth/types'
-import type { Exam, ExamAttempt, AttemptAnswer } from '../types'
+import type { Exam, ExamAttempt, AttemptAnswer, GradingQueueItem } from '../types'
 
 const base = (orgId: string) => `${appConfig.API_BASE_URL}/organizations/${orgId}`
 
@@ -117,5 +117,36 @@ export async function submitAttemptApi(
     `${base(orgId)}/attempts/${attemptId}/submit`,
     token,
     { method: 'POST', body: JSON.stringify({ answers }) }
+  )
+}
+
+export async function listGradingQueueApi(token: string, orgId: string) {
+  return request<{ items: GradingQueueItem[] }>(
+    `${base(orgId)}/grading/queue`,
+    token
+  )
+}
+
+export async function getAttemptForGradingApi(
+  token: string,
+  orgId: string,
+  attemptId: string
+) {
+  return request<{ attempt: ExamAttempt }>(
+    `${base(orgId)}/grading/attempts/${attemptId}`,
+    token
+  )
+}
+
+export async function applyManualGradesApi(
+  token: string,
+  orgId: string,
+  attemptId: string,
+  grades: { questionId: string; points: number; feedback?: string | null }[]
+) {
+  return request<{ attempt: ExamAttempt }>(
+    `${base(orgId)}/grading/attempts/${attemptId}`,
+    token,
+    { method: 'PATCH', body: JSON.stringify({ grades }) }
   )
 }
