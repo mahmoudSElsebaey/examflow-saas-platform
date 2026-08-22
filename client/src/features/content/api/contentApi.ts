@@ -1,6 +1,6 @@
 import { appConfig } from '@/config/app'
 import type { ApiResponse } from '@/features/auth/types'
-import type { Course, Question, QuestionBank, QuestionType, Difficulty } from '../types'
+import type { Course, Question, QuestionBank, QuestionType, Difficulty, Subject, Topic, Lesson } from '../types'
 
 const base = (orgId: string) => `${appConfig.API_BASE_URL}/organizations/${orgId}`
 
@@ -91,12 +91,76 @@ export async function createQuestionApi(
   )
 }
 
-export async function deleteQuestionApi(
-  token: string,
-  orgId: string,
-  questionId: string
-) {
+export async function deleteQuestionApi(token: string, orgId: string, questionId: string) {
   return request<null>(`${base(orgId)}/questions/${questionId}`, token, {
     method: 'DELETE',
   })
+}
+
+// Hierarchy APIs
+
+export async function listSubjectsApi(token: string, orgId: string, courseId?: string) {
+  const q = courseId ? `?courseId=${courseId}` : ''
+  return request<{ subjects: Subject[] }>(`${base(orgId)}/subjects${q}`, token)
+}
+
+export async function createSubjectApi(
+  token: string,
+  orgId: string,
+  body: { courseId: string; title: string; code?: string; description?: string; order?: number }
+) {
+  return request<{ subject: Subject }>(`${base(orgId)}/subjects`, token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
+export async function deleteSubjectApi(token: string, orgId: string, subjectId: string) {
+  return request<null>(`${base(orgId)}/subjects/${subjectId}`, token, { method: 'DELETE' })
+}
+
+export async function listTopicsApi(token: string, orgId: string, subjectId?: string) {
+  const q = subjectId ? `?subjectId=${subjectId}` : ''
+  return request<{ topics: Topic[] }>(`${base(orgId)}/topics${q}`, token)
+}
+
+export async function createTopicApi(
+  token: string,
+  orgId: string,
+  body: { subjectId: string; title: string; description?: string; order?: number }
+) {
+  return request<{ topic: Topic }>(`${base(orgId)}/topics`, token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
+export async function deleteTopicApi(token: string, orgId: string, topicId: string) {
+  return request<null>(`${base(orgId)}/topics/${topicId}`, token, { method: 'DELETE' })
+}
+
+export async function listLessonsApi(token: string, orgId: string, topicId?: string) {
+  const q = topicId ? `?topicId=${topicId}` : ''
+  return request<{ lessons: Lesson[] }>(`${base(orgId)}/lessons${q}`, token)
+}
+
+export async function createLessonApi(
+  token: string,
+  orgId: string,
+  body: {
+    topicId: string
+    title: string
+    content?: string
+    durationMinutes?: number
+    order?: number
+  }
+) {
+  return request<{ lesson: Lesson }>(`${base(orgId)}/lessons`, token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  })
+}
+
+export async function deleteLessonApi(token: string, orgId: string, lessonId: string) {
+  return request<null>(`${base(orgId)}/lessons/${lessonId}`, token, { method: 'DELETE' })
 }
