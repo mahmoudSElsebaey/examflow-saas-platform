@@ -5,6 +5,8 @@ import { Exam } from '../models/Exam.js'
 import { User } from '../models/User.js'
 import { Organization } from '../models/Organization.js'
 import { AppError } from '../middlewares/errorHandler.js'
+import * as notifService from './notification.service.js'
+import { sendEmail, certificateIssuedEmail } from './email.service.js'
 import type { CertificateDTO } from '../types/certificate.js'
 
 function toDTO(
@@ -24,14 +26,12 @@ function toDTO(
     maxScore: c.maxScore,
     percent: c.percent,
     issuedAt: c.issuedAt.toISOString(),
-    organizationName,
+    organizationName: organizationName || undefined,
   }
 }
 
 function generateCode(): string {
-  return `EF-${randomBytes(4).toString('hex').toUpperCase()}-${randomBytes(2)
-    .toString('hex')
-    .toUpperCase()}`
+  return randomBytes(4).toString('hex').toUpperCase()
 }
 
 export async function issueCertificateForAttempt(
@@ -84,6 +84,30 @@ export async function issueCertificateForAttempt(
     percent: attempt.percent ?? 0,
     issuedAt: new Date(),
   })
+
+  try {
+    const link = `/app/organizations/${orgId}/certificates/${cert.id}`
+    await notifService.createNotification({
+      userId: attempt.userId.toString(),
+      organizationId: orgId,
+      type: 'certificate_issued',
+      title: 'Certificate issued',
+      body: `You received a certificate for "${exam?.title || 'Exam'}".`,
+      link,
+    })
+    if (user.email) {
+      void sendEmail(
+        certificateIssuedEmail(
+          user.email,
+          exam?.title || 'Exam',
+          orgId,
+          cert.id
+        )
+      )
+    }
+  } catch {
+    // non-blocking
+  }
 
   return toDTO(cert, org?.name)
 }
