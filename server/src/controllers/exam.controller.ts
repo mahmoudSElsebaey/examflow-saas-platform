@@ -2,6 +2,7 @@ import type { Response, NextFunction } from 'express'
 import { sendSuccess } from '../utils/apiResponse.js'
 import type { TenantRequest } from '../middlewares/tenant.js'
 import * as examService from '../services/exam.service.js'
+import * as gradingService from '../services/grading.service.js'
 
 function param(req: TenantRequest, key: string): string {
   const v = req.params[key]
@@ -136,6 +137,53 @@ export async function listMyAttempts(req: TenantRequest, res: Response, next: Ne
       req.user!.id
     )
     return sendSuccess(res, { attempts })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function listPendingGrading(
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const items = await gradingService.listPendingGrading(orgId(req))
+    return sendSuccess(res, { items })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function getAttemptForGrading(
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const attempt = await gradingService.getAttemptForGrading(
+      orgId(req),
+      param(req, 'attemptId')
+    )
+    return sendSuccess(res, { attempt })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function applyManualGrades(
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const attempt = await gradingService.applyManualGrades(
+      orgId(req),
+      param(req, 'attemptId'),
+      req.user!.id,
+      req.body.grades
+    )
+    return sendSuccess(res, { attempt }, 'Grades saved')
   } catch (e) {
     next(e)
   }
