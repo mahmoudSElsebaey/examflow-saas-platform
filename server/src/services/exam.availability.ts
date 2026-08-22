@@ -14,18 +14,33 @@ export function isExamAvailableNow(exam: {
   return true
 }
 
-export function toExamScheduleFields(e: InstanceType<typeof Exam>) {
+function toExamDTO(e: InstanceType<typeof Exam>): ExamDTO {
   return {
+    id: e.id,
+    organizationId: e.organizationId.toString(),
+    title: e.title,
+    description: e.description ?? null,
+    status: e.status,
+    questionIds: (e.questionIds || []).map((id) => id.toString()),
+    timeLimitMinutes: e.timeLimitMinutes ?? null,
+    passingScorePercent: e.passingScorePercent,
+    shuffleQuestions: e.shuffleQuestions,
+    shuffleOptions: e.shuffleOptions,
+    maxAttempts: e.maxAttempts,
+    totalPoints: e.totalPoints ?? 0,
+    questionCount: (e.questionIds || []).length,
     availableFrom: e.availableFrom ? e.availableFrom.toISOString() : null,
     availableTo: e.availableTo ? e.availableTo.toISOString() : null,
     isAvailableNow: isExamAvailableNow(e),
+    createdBy: e.createdBy.toString(),
+    createdAt: e.createdAt.toISOString(),
+    updatedAt: e.updatedAt.toISOString(),
   }
 }
 
 export async function listAvailableExams(
   orgId: string,
-  userId: string,
-  toExamDTO: (e: InstanceType<typeof Exam>) => ExamDTO
+  userId: string
 ): Promise<ExamDTO[]> {
   const exams = await Exam.find({
     organizationId: orgId,
