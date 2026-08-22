@@ -5,13 +5,19 @@ import {
   ClipboardList,
   BarChart3,
   Award,
+  BookOpen,
   Users,
+  UserCog,
+  Settings,
   type LucideIcon,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
+import type { OrgMemberRole } from '@/features/organizations/types'
+import { visibleNavIds, type WorkspaceNavId } from '@/features/organizations/lib/roles'
 
 type Module = {
+  id: WorkspaceNavId
   to: string
   labelKey: string
   descKey: string
@@ -20,50 +26,80 @@ type Module = {
 
 type Props = {
   orgId: string
+  role?: OrgMemberRole | null
   className?: string
 }
 
-export function OrgModuleGrid({ orgId, className }: Props) {
+export function OrgModuleGrid({ orgId, role, className }: Props) {
   const { t } = useTranslation()
   const base = `/app/organizations/${orgId}`
+  const allowed = new Set(visibleNavIds(role))
 
-  const modules: Module[] = [
+  const allModules: Module[] = [
     {
-      to: `${base}/content`,
-      labelKey: 'content.manageContent',
-      descKey: 'phase9.modContentDesc',
+      id: 'courses',
+      to: `${base}/content?tab=courses`,
+      labelKey: 'workspace.nav.courses',
+      descKey: 'workspace.mod.courses',
+      icon: BookOpen,
+    },
+    {
+      id: 'banks',
+      to: `${base}/content?tab=banks`,
+      labelKey: 'workspace.nav.banks',
+      descKey: 'workspace.mod.banks',
       icon: Library,
     },
     {
+      id: 'exams',
       to: `${base}/exams`,
-      labelKey: 'exam.manageExams',
-      descKey: 'phase9.modExamsDesc',
+      labelKey: 'workspace.nav.exams',
+      descKey: 'workspace.mod.exams',
       icon: ClipboardList,
     },
     {
+      id: 'students',
+      to: `${base}/students`,
+      labelKey: 'workspace.nav.students',
+      descKey: 'workspace.mod.students',
+      icon: Users,
+    },
+    {
+      id: 'analytics',
       to: `${base}/analytics`,
-      labelKey: 'analytics.manage',
-      descKey: 'phase9.modAnalyticsDesc',
+      labelKey: 'workspace.nav.analytics',
+      descKey: 'workspace.mod.analytics',
       icon: BarChart3,
     },
     {
+      id: 'certificates',
       to: `${base}/certificates`,
-      labelKey: 'cert.manage',
-      descKey: 'phase9.modCertDesc',
+      labelKey: 'workspace.nav.certificates',
+      descKey: 'workspace.mod.certificates',
       icon: Award,
     },
     {
-      to: base,
-      labelKey: 'org.members',
-      descKey: 'phase9.modMembersDesc',
-      icon: Users,
+      id: 'members',
+      to: `${base}/members`,
+      labelKey: 'workspace.nav.members',
+      descKey: 'workspace.mod.members',
+      icon: UserCog,
+    },
+    {
+      id: 'settings',
+      to: `${base}/settings`,
+      labelKey: 'workspace.nav.settings',
+      descKey: 'workspace.mod.settings',
+      icon: Settings,
     },
   ]
 
+  const modules = allModules.filter((m) => allowed.has(m.id))
+
   return (
     <div className={cn('grid gap-4 sm:grid-cols-2 lg:grid-cols-3', className)}>
-      {modules.map(({ to, labelKey, descKey, icon: Icon }) => (
-        <Link key={to + labelKey} to={to} className="group">
+      {modules.map(({ to, labelKey, descKey, icon: Icon, id }) => (
+        <Link key={id} to={to} className="group">
           <Card className="h-full border-border/60 transition-all group-hover:border-primary/40 group-hover:shadow-md">
             <CardContent className="pt-6">
               <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-primary-muted text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">

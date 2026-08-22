@@ -2,28 +2,26 @@
 
 **Multi-Tenant SaaS Platform for Online Examinations & Assessments**
 
-> Status: **PHASE 11 — White-label Branding** completed.
+> Status: **CORE PRODUCT COMPLETION — Part 1 (Dashboard + Workspace Nav)** done.
 
-## Roadmap
+## Core completion
 
-| Phase | Status |
-|-------|--------|
-| 0–9 Core product → Polish | ✅ |
-| 10 Production Deployment | ✅ |
-| 11 White-label Branding | ✅ |
+| Part | Status |
+|------|--------|
+| 1 Dashboard + Organization workspace navigation | ✅ |
+| 2+ Short answer, autosave, results, certificates… | ⏳ |
 
-## White-label (per organization)
+### Part 1
 
-- Primary color (`#RRGGBB`) applied via CSS variables in the org workspace
-- Logo URL shown in header and org hub
-- Owner/Admin: PATCH `/api/v1/organizations/:orgId` with `primaryColor` / `logoUrl`
-
-## Docker
+- Role-aware Dashboard (staff vs student)
+- **Open workspace** into the organization
+- **OrgWorkspaceNav** (role-filtered): Overview · Courses · Banks · Exams · Students · Analytics · Certificates · Members · Settings
+- Routes: `/students`, `/members`, `/settings`
+- Content deep-links: `?tab=courses|banks|questions`
 
 ```bash
-cp .env.example .env && docker compose up -d --build
+cd client && npm install && npm run dev
+cd server && npm install && npm run dev
 ```
-
-See [DEPLOY.md](./DEPLOY.md).
 
 **ExamFlow** — Smart Assessments. Real Insights.
