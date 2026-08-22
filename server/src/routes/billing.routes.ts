@@ -7,18 +7,17 @@ import * as ctrl from '../controllers/billing.controller.js'
 
 const router = Router({ mergeParams: true })
 
-const changePlanSchema = z.object({
+router.use(authenticate)
+router.use(requireOrgMember)
+
+const canBill = requireOrgRoles('owner', 'admin')
+
+const planSchema = z.object({
   plan: z.enum(['free', 'professional', 'enterprise']),
 })
 
-router.use(authenticate)
-router.use(requireOrgMember)
 router.get('/billing', ctrl.getOrgBilling)
-router.post(
-  '/billing/plan',
-  requireOrgRoles('owner', 'admin'),
-  validateBody(changePlanSchema),
-  ctrl.changePlan
-)
+router.post('/billing/plan', canBill, validateBody(planSchema), ctrl.changePlan)
+router.post('/billing/portal', canBill, ctrl.billingPortal)
 
 export default router

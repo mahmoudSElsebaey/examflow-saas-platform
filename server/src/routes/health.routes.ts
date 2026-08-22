@@ -2,6 +2,7 @@ import { Router } from 'express'
 import mongoose from 'mongoose'
 import { sendSuccess } from '../utils/apiResponse.js'
 import { config } from '../config/index.js'
+import { isStripeConfigured, resolveBillingMode } from '../services/stripe.service.js'
 
 const router = Router()
 const startedAt = Date.now()
@@ -24,6 +25,8 @@ router.get('/', (_req, res) => {
       emailConfigured:
         config.email.provider === 'log' ||
         (config.email.provider === 'resend' && !!config.email.resendApiKey),
+      billingMode: resolveBillingMode(),
+      stripeConfigured: isStripeConfigured(),
     },
     'ExamFlow API health'
   )

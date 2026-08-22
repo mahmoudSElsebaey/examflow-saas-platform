@@ -17,6 +17,7 @@ import notificationRoutes from './routes/notification.routes.js'
 import adminRoutes from './routes/admin.routes.js'
 import billingRoutes from './routes/billing.routes.js'
 import plansRoutes from './routes/plans.routes.js'
+import * as billingCtrl from './controllers/billing.controller.js'
 import { notFoundHandler, errorHandler } from './middlewares/errorHandler.js'
 
 const app = express()
@@ -36,6 +37,13 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 })
 app.use('/api/', apiLimiter)
+
+// Stripe webhook needs raw body for signature verification
+app.post(
+  '/api/v1/billing/webhook',
+  express.raw({ type: 'application/json' }),
+  billingCtrl.stripeWebhook
+)
 
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true }))
