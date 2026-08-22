@@ -71,6 +71,15 @@ export function DashboardPage() {
           <p className="mt-1 text-muted">
             {isStaff ? t('dashboard.staffSubtitle') : t('dashboard.studentSubtitle')}
           </p>
+          {user?.role === 'super_admin' && (
+            <div className="mt-3">
+              <Link to="/app/admin">
+                <Button size="sm" variant="outline" className="gap-1.5">
+                  {t('nav.admin')}
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
 
         {loading ? (
