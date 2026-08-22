@@ -16,6 +16,11 @@ const envSchema = z.object({
   EMAIL_PROVIDER: z.enum(['log', 'resend']).default('log'),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default('ExamFlow <onboarding@resend.dev>'),
+  BILLING_MODE: z.enum(['auto', 'mock', 'stripe']).default('auto'),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  STRIPE_PRICE_PROFESSIONAL: z.string().optional(),
+  STRIPE_PRICE_ENTERPRISE: z.string().optional(),
 })
 
 const parsed = envSchema.safeParse(process.env)
@@ -70,5 +75,12 @@ export const config = {
     provider: env.EMAIL_PROVIDER,
     resendApiKey: env.RESEND_API_KEY,
     from: env.EMAIL_FROM,
+  },
+  billing: {
+    mode: env.BILLING_MODE,
+    stripeSecretKey: env.STRIPE_SECRET_KEY,
+    stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET,
+    priceProfessional: env.STRIPE_PRICE_PROFESSIONAL,
+    priceEnterprise: env.STRIPE_PRICE_ENTERPRISE,
   },
 } as const

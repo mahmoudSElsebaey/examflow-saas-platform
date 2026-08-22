@@ -8,6 +8,8 @@ export interface IOrganization extends Document {
   ownerId: Types.ObjectId
   plan: OrgPlan
   isActive: boolean
+  stripeCustomerId?: string | null
+  stripeSubscriptionId?: string | null
   branding: {
     logoUrl?: string | null
     primaryColor?: string | null
@@ -53,6 +55,8 @@ const organizationSchema = new Schema<IOrganization>(
       type: Boolean,
       default: true,
     },
+    stripeCustomerId: { type: String, default: null, index: true },
+    stripeSubscriptionId: { type: String, default: null },
     branding: {
       logoUrl: { type: String, default: null },
       primaryColor: { type: String, default: null },
