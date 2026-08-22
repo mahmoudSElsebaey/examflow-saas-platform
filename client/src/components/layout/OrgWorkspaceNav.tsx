@@ -12,6 +12,7 @@ import {
   UserCog,
   Settings,
   PenLine,
+  CreditCard,
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
@@ -39,6 +40,7 @@ const NAV: {
   { id: 'certificates', path: '/certificates', labelKey: 'workspace.nav.certificates', icon: Award },
   { id: 'members', path: '/members', labelKey: 'workspace.nav.members', icon: UserCog },
   { id: 'settings', path: '/settings', labelKey: 'workspace.nav.settings', icon: Settings },
+  { id: 'billing', path: '/billing', labelKey: 'workspace.nav.billing', icon: CreditCard },
 ]
 
 function isActive(pathname: string, search: string, base: string, path: string): boolean {
