@@ -36,6 +36,14 @@ function toOrgDTO(
   }
 }
 
+export async function getMembership(orgId: string, userId: string) {
+  return Membership.findOne({
+    organizationId: orgId,
+    userId,
+    status: { $in: ['active', 'invited'] },
+  })
+}
+
 export async function createOrganization(
   userId: string,
   data: { name: string; slug?: string; description?: string }
@@ -62,7 +70,6 @@ export async function createOrganization(
     userId,
     role: 'owner',
     status: 'active',
-    joinedAt: new Date(),
   })
 
   return toOrgDTO(org, 'owner')
@@ -86,15 +93,14 @@ export async function listOrganizations(userId: string): Promise<OrganizationDTO
   return orgs.map((org) => toOrgDTO(org, roleMap.get(org.id)))
 }
 
+/** Alias used by organization.controller */
+export const listMyOrganizations = listOrganizations
+
 export async function getOrganization(
   orgId: string,
   userId: string
 ): Promise<OrganizationDTO> {
-  const membership = await Membership.findOne({
-    organizationId: orgId,
-    userId,
-    status: { $in: ['active', 'invited'] },
-  })
+  const membership = await getMembership(orgId, userId)
   if (!membership) throw new AppError('Organization not found', 404, 'ORG_NOT_FOUND')
 
   const org = await Organization.findById(orgId)
@@ -102,6 +108,9 @@ export async function getOrganization(
 
   return toOrgDTO(org, membership.role)
 }
+
+/** Alias used by organization.controller */
+export const getOrganizationForMember = getOrganization
 
 export async function updateOrganization(
   orgId: string,
@@ -166,7 +175,7 @@ export async function listMembers(orgId: string, userId: string): Promise<Member
       lastName: u?.lastName ?? '',
       role: m.role,
       status: m.status,
-      joinedAt: (m.joinedAt || m.createdAt).toISOString(),
+      joinedAt: m.createdAt.toISOString(),
     }
   })
 }
@@ -185,7 +194,9 @@ export async function inviteMember(
   if (!actor) throw new AppError('Insufficient permissions', 403, 'FORBIDDEN')
 
   const user = await User.findOne({ email: data.email.toLowerCase().trim() })
-  if (!user) throw new AppError('User not found. They must register first.', 404, 'USER_NOT_FOUND')
+  if (!user) {
+    throw new AppError('User not found. They must register first.', 404, 'USER_NOT_FOUND')
+  }
 
   const existing = await Membership.findOne({
     organizationId: orgId,
@@ -201,7 +212,6 @@ export async function inviteMember(
     role: data.role,
     status: 'active',
     invitedBy: actorId,
-    joinedAt: new Date(),
   })
 
   return {
@@ -212,6 +222,6 @@ export async function inviteMember(
     lastName: user.lastName,
     role: membership.role,
     status: membership.status,
-    joinedAt: membership.joinedAt!.toISOString(),
+    joinedAt: membership.createdAt.toISOString(),
   }
 }
