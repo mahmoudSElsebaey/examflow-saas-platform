@@ -2,31 +2,31 @@
 
 **Multi-Tenant SaaS Platform for Online Examinations & Assessments**
 
-> Status: **CORE PRODUCT COMPLETION — complete (Parts 1–9)**
+> Status: **Phase 0 + Phase 1** (Stabilization + Auth lifecycle)
 
-## Core completion
+## Recent phases
 
-| Part | Status |
-|------|--------|
-| 1 Dashboard + workspace nav | ✅ |
-| 2 Short answer + auto-save | ✅ |
-| 3 Results (score, breakdown, review) | ✅ |
-| 4 Certificates E2E (auto-issue on pass + UI) | ✅ |
-| 5 Analytics (DB-backed) | ✅ |
-| 6 Responsive result / take UX | ✅ |
-| 9 Quality (server typecheck + client/server build) | ✅ |
+| Phase | Status |
+|-------|--------|
+| CORE PRODUCT COMPLETION | ✅ |
+| **P0 Core Stabilization** | ✅ permissions module, tenant clarity, unit tests |
+| **P1 Auth Lifecycle** | ✅ verify email, reset password page, email adapter, invite email |
 
-### Quality (Part 9)
+### Phase 0
+- `server/src/lib/permissions.ts` — single source for org staff/admin checks
+- Unit tests: `npm test` in server
+- Membership role remains source of truth inside tenants
 
-- Restored `getMembership`, `listMyOrganizations`, `getOrganizationForMember`
-- Removed invalid `joinedAt` field (use Membership `createdAt`)
-- Server `tsc --noEmit` clean
-- Client `tsc -b && vite build` clean
-- Server `tsc` build clean
+### Phase 1
+- Email adapter (`email.service`) — logs in dev
+- `POST /auth/verify-email`, `POST /auth/resend-verification`
+- Client: `/verify-email`, `/reset-password`
+- Dashboard banner when email not verified
+- Org invite sends notification email (dev log)
 
 ```bash
+cd server && npm install && npm test && npm run typecheck && npm run build
 cd client && npm install && npm run build
-cd server && npm install && npm run typecheck && npm run build
 ```
 
 **ExamFlow** — Smart Assessments. Real Insights.
