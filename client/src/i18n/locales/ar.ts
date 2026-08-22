@@ -140,6 +140,8 @@ const ar = {
     confirmDeleteTopic: 'أرشفة هذا الموضوع ودروسه؟',
     confirmDeleteLesson: 'أرشفة هذا الدرس؟',
     min: 'د',
+    durationMinutes: 'المدة (دقائق)',
+    lessonContent: 'محتوى الدرس (اختياري)',
   },
   exam: {
     title: 'الاختبارات', subtitle: 'بناء وتقديم.',
@@ -182,11 +184,12 @@ const ar = {
   workspace: {
     navLabel: 'قائمة المؤسسة',
     nav: {
-      overview: 'نظرة عامة', courses: 'المقررات', banks: 'بنوك الأسئلة', exams: 'الاختبارات',
+      overview: 'نظرة عامة', learn: 'التعلم', courses: 'المقررات', banks: 'بنوك الأسئلة', exams: 'الاختبارات',
       grading: 'التصحيح', students: 'الطلاب', analytics: 'التحليلات', certificates: 'الشهادات',
       members: 'الأعضاء', settings: 'الإعدادات', billing: 'الفوترة',
     },
     mod: {
+      learn: 'تصفح المواد والمواضيع والدروس.',
       courses: 'إنشاء وإدارة المقررات.',
       banks: 'تنظيم الأسئلة.',
       exams: 'بناء ونشر الاختبارات.',
@@ -215,6 +218,15 @@ const ar = {
     dashboardSubtitle: 'ادخل مساحة عمل المؤسسة.',
     modContentDesc: 'مقررات وبنوك.', modExamsDesc: 'اختبارات.',
     modAnalyticsDesc: 'تحليلات.', modCertDesc: 'شهادات.', modMembersDesc: 'أعضاء.',
+  },
+  learn: {
+    title: 'التعلم',
+    subtitle: 'تصفح المنهج وافتح الدروس.',
+    noCourses: 'لا مقررات متاحة بعد.',
+    noSubjects: 'لا مواد منشورة لهذا المقرر بعد.',
+    backToCurriculum: 'العودة إلى المنهج',
+    lessonNotFound: 'الدرس غير موجود.',
+    noContent: 'لا يوجد محتوى لهذا الدرس بعد.',
   },
   errors: {
     generic: 'حدث خطأ ما',
