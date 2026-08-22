@@ -41,3 +41,17 @@ export const submitAttemptSchema = z.object({
     )
     .optional(),
 })
+
+export const manualGradeSchema = z.object({
+  grades: z
+    .array(
+      z.object({
+        questionId: z.string().min(1),
+        points: z.number().min(0),
+        feedback: z.string().max(2000).optional().nullable(),
+      })
+    )
+    .min(1),
+})
+
+export type ManualGradeInput = z.infer<typeof manualGradeSchema>
