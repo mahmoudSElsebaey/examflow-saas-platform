@@ -139,6 +139,10 @@ export async function deleteTopicApi(token: string, orgId: string, topicId: stri
   return request<null>(`${base(orgId)}/topics/${topicId}`, token, { method: 'DELETE' })
 }
 
+export async function getLessonApi(token: string, orgId: string, lessonId: string) {
+  return request<{ lesson: Lesson }>(`${base(orgId)}/lessons/${lessonId}`, token)
+}
+
 export async function listLessonsApi(token: string, orgId: string, topicId?: string) {
   const q = topicId ? `?topicId=${topicId}` : ''
   return request<{ lessons: Lesson[] }>(`${base(orgId)}/lessons${q}`, token)

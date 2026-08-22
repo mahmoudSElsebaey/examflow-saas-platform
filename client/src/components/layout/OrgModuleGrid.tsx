@@ -11,6 +11,7 @@ import {
   Settings,
   PenLine,
   CreditCard,
+  GraduationCap,
   type LucideIcon,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -38,6 +39,13 @@ export function OrgModuleGrid({ orgId, role, className }: Props) {
   const allowed = new Set(visibleNavIds(role))
 
   const allModules: Module[] = [
+    {
+      id: 'learn',
+      to: `${base}/learn`,
+      labelKey: 'workspace.nav.learn',
+      descKey: 'workspace.mod.learn',
+      icon: GraduationCap,
+    },
     {
       id: 'courses',
       to: `${base}/content?tab=courses`,
