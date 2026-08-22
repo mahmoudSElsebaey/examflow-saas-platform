@@ -2,29 +2,30 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '@/features/auth/AuthContext'
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
 import { LandingPage } from '@/pages/LandingPage'
+import { DashboardPage } from '@/pages/DashboardPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage'
 import { VerifyEmailPage } from '@/features/auth/pages/VerifyEmailPage'
-import { DashboardPage } from '@/pages/DashboardPage'
 import { OrganizationsPage } from '@/features/organizations/pages/OrganizationsPage'
 import { OrganizationDetailPage } from '@/features/organizations/pages/OrganizationDetailPage'
 import { OrgContentPage } from '@/features/content/pages/OrgContentPage'
+import { OrgLearnPage } from '@/features/content/pages/OrgLearnPage'
 import { OrgExamsPage } from '@/features/exams/pages/OrgExamsPage'
-import { ExamTakePage } from '@/features/exams/pages/ExamTakePage'
 import { OrgGradingPage } from '@/features/exams/pages/OrgGradingPage'
+import { ExamTakePage } from '@/features/exams/pages/ExamTakePage'
 import { OrgAnalyticsPage } from '@/features/analytics/pages/OrgAnalyticsPage'
 import { OrgCertificatesPage } from '@/features/certificates/pages/OrgCertificatesPage'
+import { CertificateViewPage } from '@/features/certificates/pages/CertificateViewPage'
+import { VerifyCertificatePage } from '@/features/certificates/pages/VerifyCertificatePage'
 import { OrgStudentsPage } from '@/features/organizations/pages/OrgStudentsPage'
 import { OrgMembersPage } from '@/features/organizations/pages/OrgMembersPage'
 import { OrgSettingsPage } from '@/features/organizations/pages/OrgSettingsPage'
-import { CertificateViewPage } from '@/features/certificates/pages/CertificateViewPage'
-import { VerifyCertificatePage } from '@/features/certificates/pages/VerifyCertificatePage'
-import { AdminPage } from '@/features/admin/pages/AdminPage'
 import { OrgBillingPage } from '@/features/billing/pages/OrgBillingPage'
+import { AdminPage } from '@/features/admin/pages/AdminPage'
 
-function App() {
+export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
@@ -41,6 +42,7 @@ function App() {
           <Route path="/app/organizations" element={<ProtectedRoute><OrganizationsPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId" element={<ProtectedRoute><OrganizationDetailPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/content" element={<ProtectedRoute><OrgContentPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/learn" element={<ProtectedRoute><OrgLearnPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/exams" element={<ProtectedRoute><OrgExamsPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/grading" element={<ProtectedRoute><OrgGradingPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/grading/:attemptId" element={<ProtectedRoute><OrgGradingPage /></ProtectedRoute>} />
@@ -57,5 +59,3 @@ function App() {
     </AuthProvider>
   )
 }
-
-export default App
