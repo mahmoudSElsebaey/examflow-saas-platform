@@ -3,6 +3,7 @@ import { sendSuccess } from '../utils/apiResponse.js'
 import type { TenantRequest } from '../middlewares/tenant.js'
 import * as content from '../services/content.service.js'
 import * as contentImport from '../services/content.import.js'
+import * as progressService from '../services/progress.service.js'
 
 function param(req: TenantRequest, key: string): string {
   const v = req.params[key]
@@ -237,6 +238,11 @@ export async function deleteTopic(req: TenantRequest, res: Response, next: NextF
 export async function getLesson(req: TenantRequest, res: Response, next: NextFunction) {
   try {
     const lesson = await content.getLesson(orgId(req), param(req, 'lessonId'))
+    try {
+      await progressService.markLessonViewed(orgId(req), req.user!.id, param(req, 'lessonId'))
+    } catch {
+      // non-blocking
+    }
     return sendSuccess(res, { lesson })
   } catch (e) {
     next(e)
