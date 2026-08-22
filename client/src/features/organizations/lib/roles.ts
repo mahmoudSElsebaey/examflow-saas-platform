@@ -28,6 +28,7 @@ export type WorkspaceNavId =
   | 'analytics'
   | 'members'
   | 'settings'
+  | 'grading'
 
 export function visibleNavIds(role?: OrgMemberRole | null): WorkspaceNavId[] {
   if (!role) return ['overview']
@@ -39,6 +40,7 @@ export function visibleNavIds(role?: OrgMemberRole | null): WorkspaceNavId[] {
     'courses',
     'banks',
     'exams',
+    'grading',
     'students',
     'certificates',
     'analytics',

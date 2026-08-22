@@ -7,6 +7,7 @@ import {
   updateExamSchema,
   saveAnswersSchema,
   submitAttemptSchema,
+  manualGradeSchema,
 } from '../validators/exam.validators.js'
 import * as ctrl from '../controllers/exam.controller.js'
 
@@ -42,6 +43,15 @@ router.post(
   '/attempts/:attemptId/submit',
   validateBody(submitAttemptSchema),
   ctrl.submitAttempt
+)
+
+router.get('/grading/queue', canManage, ctrl.listPendingGrading)
+router.get('/grading/attempts/:attemptId', canManage, ctrl.getAttemptForGrading)
+router.patch(
+  '/grading/attempts/:attemptId',
+  canManage,
+  validateBody(manualGradeSchema),
+  ctrl.applyManualGrades
 )
 
 export default router
