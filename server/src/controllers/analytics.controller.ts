@@ -12,7 +12,11 @@ function orgId(req: TenantRequest): string {
   return req.organizationId || param(req, 'orgId')
 }
 
-export async function orgAnalytics(req: TenantRequest, res: Response, next: NextFunction) {
+export async function orgAnalytics(
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await analytics.getOrgAnalytics(orgId(req))
     return sendSuccess(res, { analytics: data })
@@ -21,9 +25,34 @@ export async function orgAnalytics(req: TenantRequest, res: Response, next: Next
   }
 }
 
-export async function examAnalytics(req: TenantRequest, res: Response, next: NextFunction) {
+export async function examAnalytics(
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const data = await analytics.getExamAnalytics(orgId(req), param(req, 'examId'))
+    const data = await analytics.getExamAnalytics(
+      orgId(req),
+      param(req, 'examId')
+    )
+
+    return sendSuccess(res, { analytics: data })
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function studentHistory(
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const data = await analytics.getStudentHistory(
+      req.user!.id,
+      orgId(req)
+    )
+
     return sendSuccess(res, { analytics: data })
   } catch (e) {
     next(e)
