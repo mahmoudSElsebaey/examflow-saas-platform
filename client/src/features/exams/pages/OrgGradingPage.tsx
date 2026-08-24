@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as examApi from '../api/examApi'
 import type { ExamAttempt, GradingQueueItem } from '../types'
@@ -18,6 +19,7 @@ import { AppHeader } from '@/components/layout/AppHeader'
 export function OrgGradingPage() {
   const { orgId, attemptId } = useParams<{ orgId: string; attemptId?: string }>()
   const { t } = useTranslation()
+  const toast = useToast()
   const { accessToken } = useAuth()
   const [items, setItems] = useState<GradingQueueItem[]>([])
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null)
@@ -35,7 +37,7 @@ export function OrgGradingPage() {
       const res = await examApi.listGradingQueueApi(accessToken, orgId)
       setItems(res.data?.items ?? [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -62,7 +64,7 @@ export function OrgGradingPage() {
         setFeedback(f)
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -100,7 +102,7 @@ export function OrgGradingPage() {
       const res = await examApi.applyManualGradesApi(accessToken, orgId, attemptId, grades)
       setAttempt(res.data?.attempt ?? null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setSaving(false)
     }

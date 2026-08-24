@@ -13,9 +13,11 @@ import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Container } from '@/components/ui/Container'
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
+import { useToast } from '@/components/ui/Toast'
 
 export function RegisterPage() {
   const { t } = useTranslation()
+  const toast = useToast()
   const { register: registerUser } = useAuth()
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
@@ -58,7 +60,7 @@ export function RegisterPage() {
       })
       navigate('/app', { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.registerFailed'))
+      toast.fromError(err); setError(t('auth.registerFailed'))
     }
   }
 

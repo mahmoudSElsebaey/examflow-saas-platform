@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useToast } from '@/components/ui/Toast'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -26,6 +27,7 @@ type Tab = 'courses' | 'hierarchy' | 'banks' | 'questions'
 export function OrgContentPage() {
   const { orgId } = useParams<{ orgId: string }>()
   const { t } = useTranslation()
+  const toast = useToast()
   const { accessToken, logout, user } = useAuth()
   const [tab, setTab] = useState<Tab>('courses')
   const [courses, setCourses] = useState<Course[]>([])
@@ -85,7 +87,7 @@ export function OrgContentPage() {
       setCourses(cRes.data?.courses ?? [])
       setBanks(bRes.data?.banks ?? [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -97,7 +99,7 @@ export function OrgContentPage() {
       const res = await contentApi.listQuestionsApi(accessToken, orgId, bankId)
       setQuestions(res.data?.questions ?? [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   }
 
@@ -118,7 +120,7 @@ export function OrgContentPage() {
       setShowCourseForm(false)
       await loadCoursesAndBanks()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   }
 
@@ -138,7 +140,7 @@ export function OrgContentPage() {
       setShowBankForm(false)
       await loadCoursesAndBanks()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   }
 
@@ -179,7 +181,7 @@ export function OrgContentPage() {
       await loadQuestions(selectedBankId)
       await loadCoursesAndBanks()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   }
 
@@ -190,7 +192,7 @@ export function OrgContentPage() {
       await loadQuestions(selectedBankId)
       await loadCoursesAndBanks()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   }
 
@@ -466,10 +468,10 @@ export function OrgContentPage() {
                               className="flex h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm"
                               {...questionForm.register('type')}
                             >
-                              <option value="mcq_single">MCQ single</option>
-                              <option value="mcq_multiple">MCQ multiple</option>
-                              <option value="true_false">True / False</option>
-                              <option value="short_answer">Short answer</option>
+                              <option value="mcq_single">{t('qTypes.mcq_single')}</option>
+                              <option value="mcq_multiple">{t('qTypes.mcq_multiple')}</option>
+                              <option value="true_false">{t('qTypes.true_false')}</option>
+                              <option value="short_answer">{t('qTypes.short_answer')}</option>
                             </select>
                           </div>
                           <div className="space-y-2">
@@ -478,9 +480,9 @@ export function OrgContentPage() {
                               className="flex h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm"
                               {...questionForm.register('difficulty')}
                             >
-                              <option value="easy">easy</option>
-                              <option value="medium">medium</option>
-                              <option value="hard">hard</option>
+                              <option value="easy">{t('difficulty.easy')}</option>
+                              <option value="medium">{t('difficulty.medium')}</option>
+                              <option value="hard">{t('difficulty.hard')}</option>
                             </select>
                           </div>
                           <div className="space-y-2">
@@ -496,10 +498,10 @@ export function OrgContentPage() {
                           <Input {...questionForm.register('stem')} />
                         </div>
                         <div className="grid gap-3 sm:grid-cols-2">
-                          <Input placeholder="A" {...questionForm.register('optionA')} />
-                          <Input placeholder="B" {...questionForm.register('optionB')} />
-                          <Input placeholder="C" {...questionForm.register('optionC')} />
-                          <Input placeholder="D" {...questionForm.register('optionD')} />
+                          <Input placeholder={t('content.optionA')} {...questionForm.register('optionA')} />
+                          <Input placeholder={t('content.optionB')} {...questionForm.register('optionB')} />
+                          <Input placeholder={t('content.optionC')} {...questionForm.register('optionC')} />
+                          <Input placeholder={t('content.optionD')} {...questionForm.register('optionD')} />
                         </div>
                         <div className="space-y-2">
                           <Label>{t('content.correctIndex')}</Label>

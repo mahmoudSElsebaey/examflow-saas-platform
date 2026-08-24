@@ -13,9 +13,11 @@ import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Container } from '@/components/ui/Container'
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
+import { useToast } from '@/components/ui/Toast'
 
 export function LoginPage() {
   const { t } = useTranslation()
+  const toast = useToast()
   const { login } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -43,7 +45,8 @@ export function LoginPage() {
       await login(data.email, data.password)
       navigate(from, { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('auth.loginFailed'))
+      toast.fromError(err)
+      setError(t('auth.loginFailed'))
     }
   }
 

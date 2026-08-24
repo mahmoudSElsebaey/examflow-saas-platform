@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useToast } from '@/components/ui/Toast'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -22,6 +23,7 @@ import { appConfig } from '@/config/app'
 
 export function OrganizationsPage() {
   const { t } = useTranslation()
+  const toast = useToast()
   const { accessToken, logout, user } = useAuth()
   const [orgs, setOrgs] = useState<Organization[]>([])
   const [loading, setLoading] = useState(true)
@@ -78,9 +80,11 @@ export function OrganizationsPage() {
       })
       reset()
       setShowCreate(false)
+      toast.success(t('toast.created'))
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err)
+      setError(t('errors.generic'))
     }
   }
 

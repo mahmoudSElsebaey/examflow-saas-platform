@@ -27,10 +27,12 @@ import { OrgBillingPage } from '@/features/billing/pages/OrgBillingPage'
 import { AdminPage } from '@/features/admin/pages/AdminPage'
 import { OrgSearchPage } from '@/features/search/pages/OrgSearchPage'
 import { OrgActivityPage } from '@/features/activity/pages/OrgActivityPage'
+import { ToastProvider } from '@/components/ui/Toast'
 
 export default function App() {
   return (
     <AuthProvider>
+      <ToastProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -62,6 +64,7 @@ export default function App() {
           <Route path="/app/organizations/:orgId/activity" element={<ProtectedRoute><OrgActivityPage /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   )
 }

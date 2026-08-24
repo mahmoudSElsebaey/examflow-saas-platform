@@ -44,7 +44,7 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
       const res = await contentApi.listSubjectsApi(accessToken, orgId, courseId)
       setSubjects(res.data?.subjects ?? [])
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed')
+      setError(e instanceof Error ? e.message : t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -68,7 +68,7 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
         const res = await contentApi.listTopicsApi(accessToken, orgId, id)
         setTopicsBySubject((m) => ({ ...m, [id]: res.data?.topics ?? [] }))
       } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : 'Failed')
+        setError(e instanceof Error ? e.message : t('errors.generic'))
       }
     }
   }
@@ -81,7 +81,7 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
         const res = await contentApi.listLessonsApi(accessToken, orgId, id)
         setLessonsByTopic((m) => ({ ...m, [id]: res.data?.lessons ?? [] }))
       } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : 'Failed')
+        setError(e instanceof Error ? e.message : t('errors.generic'))
       }
     }
   }
@@ -98,7 +98,7 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
       setSubjectTitle('')
       await loadSubjects()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed')
+      setError(e instanceof Error ? e.message : t('errors.generic'))
     } finally {
       setBusy(false)
     }
@@ -118,7 +118,7 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
       setTopicsBySubject((m) => ({ ...m, [topicSubjectId]: res.data?.topics ?? [] }))
       setExpandedSubjects((s) => ({ ...s, [topicSubjectId]: true }))
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed')
+      setError(e instanceof Error ? e.message : t('errors.generic'))
     } finally {
       setBusy(false)
     }
@@ -142,7 +142,7 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
       setLessonsByTopic((m) => ({ ...m, [lessonTopicId]: res.data?.lessons ?? [] }))
       setExpandedTopics((s) => ({ ...s, [lessonTopicId]: true }))
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed')
+      setError(e instanceof Error ? e.message : t('errors.generic'))
     } finally {
       setBusy(false)
     }
@@ -154,7 +154,7 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
       await contentApi.deleteSubjectApi(accessToken, orgId, id)
       await loadSubjects()
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed')
+      setError(e instanceof Error ? e.message : t('errors.generic'))
     }
   }
 
@@ -165,7 +165,7 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
       const res = await contentApi.listTopicsApi(accessToken, orgId, subjectId)
       setTopicsBySubject((m) => ({ ...m, [subjectId]: res.data?.topics ?? [] }))
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed')
+      setError(e instanceof Error ? e.message : t('errors.generic'))
     }
   }
 
@@ -176,7 +176,7 @@ export function HierarchyPanel({ orgId, accessToken, courses }: Props) {
       const res = await contentApi.listLessonsApi(accessToken, orgId, topicId)
       setLessonsByTopic((m) => ({ ...m, [topicId]: res.data?.lessons ?? [] }))
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Failed')
+      setError(e instanceof Error ? e.message : t('errors.generic'))
     }
   }
 

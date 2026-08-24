@@ -48,7 +48,17 @@ Multi-tenant assessment SaaS (MERN).
 ```bash
 cd server && npm run seed
 ```
-Accounts (password `Demo1234!`): `owner@demo.examflow`, `teacher@demo.examflow`, `student@demo.examflow` — org **Demo Academy**.
+Password for **all** demo accounts: `Demo1234!`
+
+| Account | Role |
+|---|---|
+| `admin@demo.examflow` | Platform admin |
+| `owner@demo.examflow` | Owner of Demo Academy |
+| `teacher@demo.examflow` … `teacher5@demo.examflow` | Teachers |
+| `examiner1@demo.examflow` … `examiner5@demo.examflow` | Examiners |
+| `student@demo.examflow` … `student8@demo.examflow` | Students |
+
+Full usage map (Arabic): [`docs/USAGE.md`](docs/USAGE.md)
 
 ## Setup
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useToast } from '@/components/ui/Toast'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -31,6 +32,7 @@ const ROLE_OPTIONS: Exclude<OrgMemberRole, 'owner'>[] = [
 export function OrgMembersPage() {
   const { orgId } = useParams<{ orgId: string }>()
   const { t } = useTranslation()
+  const toast = useToast()
   const { accessToken } = useAuth()
   const [org, setOrg] = useState<Organization | null>(null)
   const [members, setMembers] = useState<OrgMember[]>([])
@@ -77,9 +79,11 @@ export function OrgMembersPage() {
     try {
       await orgApi.inviteMemberApi(accessToken, orgId, data)
       reset({ email: '', role: 'student' })
+      toast.success(t('toast.invited'))
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err)
+      setError(t('errors.generic'))
     }
   }
 
@@ -115,10 +119,7 @@ export function OrgMembersPage() {
   const onRemove = async (m: OrgMember) => {
     if (!accessToken || !orgId) return
     const ok = window.confirm(
-      t('org.confirmRemove', {
-        defaultValue: `Remove ${m.firstName} ${m.lastName} from this organization?`,
-        name: `${m.firstName} ${m.lastName}`,
-      })
+      t('org.confirmRemove', { name: `${m.firstName} ${m.lastName}` })
     )
     if (!ok) return
     setBusyId(m.id)
@@ -240,7 +241,7 @@ export function OrgMembersPage() {
                                   onClick={() => void onRemove(m)}
                                   className="text-destructive"
                                 >
-                                  {t('org.remove', { defaultValue: 'Remove' })}
+                                  {t('common.remove')}
                                 </Button>
                               </>
                             )}
@@ -270,10 +271,10 @@ export function OrgMembersPage() {
                           className="flex h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
                           {...register('role')}
                         >
-                          <option value="admin">admin</option>
-                          <option value="teacher">teacher</option>
-                          <option value="examiner">examiner</option>
-                          <option value="student">student</option>
+                          <option value="admin">{t('roles.admin')}</option>
+                          <option value="teacher">{t('roles.teacher')}</option>
+                          <option value="examiner">{t('roles.examiner')}</option>
+                          <option value="student">{t('roles.student')}</option>
                         </select>
                       </div>
                       <Button type="submit" className="w-full" disabled={isSubmitting}>

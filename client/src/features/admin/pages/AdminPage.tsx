@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as adminApi from '../api'
 import { AppHeader } from '@/components/layout/AppHeader'
@@ -11,6 +12,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 
 export function AdminPage() {
+  const { t } = useTranslation()
   const { user, accessToken } = useAuth()
   const [metrics, setMetrics] = useState<Record<string, number> | null>(null)
   const [orgs, setOrgs] = useState<
@@ -38,7 +40,7 @@ export function AdminPage() {
       setMetrics((m.data as Record<string, number>) ?? null)
       setOrgs(o.data?.organizations ?? [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load admin data')
+      setError(err instanceof Error ? err.message : t('admin.loadFailed'))
     } finally {
       setLoading(false)
     }
@@ -54,10 +56,10 @@ export function AdminPage() {
         <AppHeader />
         <Container className="py-12">
           <Alert variant="error">
-            <AlertDescription>Super admin access required.</AlertDescription>
+            <AlertDescription>{t('admin.accessRequired')}</AlertDescription>
           </Alert>
           <Link to="/app" className="mt-4 inline-block text-primary underline">
-            Back to app
+            {t('admin.backToApp')}
           </Link>
         </Container>
       </div>
@@ -68,7 +70,7 @@ export function AdminPage() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <Container className="space-y-6 py-8">
-        <h1 className="text-2xl font-bold">Platform Admin</h1>
+        <h1 className="text-2xl font-bold">{t('admin.title')}</h1>
         {error && (
           <Alert variant="error">
             <AlertDescription>{error}</AlertDescription>
@@ -83,14 +85,14 @@ export function AdminPage() {
                 Object.entries(metrics).map(([k, v]) => (
                   <Card key={k}>
                     <CardContent className="py-4">
-                      <p className="text-xs uppercase text-muted">{k}</p>
+                      <p className="text-xs uppercase text-muted">{t(`admin.metrics.${k}`, { defaultValue: k })}</p>
                       <p className="text-2xl font-bold">{v}</p>
                     </CardContent>
                   </Card>
                 ))}
             </div>
             <div className="space-y-2">
-              <h2 className="text-lg font-semibold">Organizations</h2>
+              <h2 className="text-lg font-semibold">{t('admin.organizations')}</h2>
               {orgs.map((o) => (
                 <Card key={o.id}>
                   <CardContent className="flex flex-wrap items-center justify-between gap-2 py-3">
@@ -104,7 +106,7 @@ export function AdminPage() {
                     <div className="flex items-center gap-2">
                       <Badge variant="info">{o.plan}</Badge>
                       <Badge variant={o.isActive ? 'success' : 'warning'}>
-                        {o.isActive ? 'active' : 'suspended'}
+                        {o.isActive ? t('status.active') : t('status.suspended')}
                       </Badge>
                       {o.isActive ? (
                         <Button
@@ -114,7 +116,7 @@ export function AdminPage() {
                             void adminApi.adminSuspendOrgApi(accessToken!, o.id).then(load)
                           }
                         >
-                          Suspend
+                          {t('admin.suspend')}
                         </Button>
                       ) : (
                         <Button
@@ -123,7 +125,7 @@ export function AdminPage() {
                             void adminApi.adminActivateOrgApi(accessToken!, o.id).then(load)
                           }
                         >
-                          Activate
+                          {t('admin.activate')}
                         </Button>
                       )}
                     </div>

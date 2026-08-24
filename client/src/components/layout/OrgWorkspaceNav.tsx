@@ -115,14 +115,7 @@ export function OrgWorkspaceNav({ role: roleProp, className }: Props) {
             )}
           >
             <Icon className="h-4 w-4" />
-            {t(labelKey, {
-              defaultValue:
-                id === 'search'
-                  ? 'Search'
-                  : id === 'activity'
-                    ? 'Activity'
-                    : id,
-            })}
+            {t(labelKey)}
           </Link>
         )
       })}

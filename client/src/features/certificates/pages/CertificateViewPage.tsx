@@ -31,7 +31,7 @@ export function CertificateViewPage() {
           }
         )
         const json = await res.json()
-        if (!res.ok) throw new Error(json.message || 'Failed')
+        if (!res.ok) throw new Error(json.message || t('errors.generic'))
         setCert(json.data?.certificate ?? null)
       } catch (err) {
         setError(err instanceof Error ? err.message : t('errors.generic'))

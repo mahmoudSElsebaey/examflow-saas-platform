@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useToast } from '@/components/ui/Toast'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -24,6 +25,7 @@ export function OrgSettingsPage() {
   const { orgId } = useParams<{ orgId: string }>()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const toast = useToast()
   const { accessToken } = useAuth()
   const [org, setOrg] = useState<Organization | null>(null)
   const [members, setMembers] = useState<OrgMember[]>([])
@@ -63,7 +65,7 @@ export function OrgSettingsPage() {
           })
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('errors.generic'))
+        toast.fromError(err); setError(t('errors.generic'))
       } finally {
         setLoading(false)
       }
@@ -81,9 +83,9 @@ export function OrgSettingsPage() {
         logoUrl: data.logoUrl || null,
       })
       if (res.data?.organization) setOrg(res.data.organization)
-      setSaved(true)
+      setSaved(true); toast.success(t('toast.saved'))
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   }
 
@@ -114,7 +116,7 @@ export function OrgSettingsPage() {
       await orgApi.leaveOrganizationApi(accessToken, orgId)
       navigate('/app/organizations')
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setLeaving(false)
     }
@@ -131,7 +133,7 @@ export function OrgSettingsPage() {
       const m = await orgApi.listMembersApi(accessToken, orgId)
       setMembers(m.data?.members ?? [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setTransferring(false)
     }
@@ -202,7 +204,7 @@ export function OrgSettingsPage() {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="logoUrl">{t('whiteLabel.logoUrl')}</Label>
-                        <Input id="logoUrl" placeholder="https://… or upload below" {...register('logoUrl')} />
+                        <Input id="logoUrl" placeholder={t('whiteLabel.logoPlaceholder')} {...register('logoUrl')} />
                         <input
                           type="file"
                           accept="image/*"
@@ -210,7 +212,7 @@ export function OrgSettingsPage() {
                           onChange={(e) => onLogoFile(e.target.files?.[0] ?? null)}
                         />
                         {logoPreview && logoPreview.startsWith('data:image') && (
-                          <img src={logoPreview} alt="Logo preview" className="mt-2 h-12 w-12 rounded-lg object-contain border border-border" />
+                          <img src={logoPreview} alt={t('whiteLabel.logoPreview')} className="mt-2 h-12 w-12 rounded-lg object-contain border border-border" />
                         )}
                       </div>
                       <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -240,7 +242,7 @@ export function OrgSettingsPage() {
                       .map((m) => (
                         <div key={m.id} className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
                           <span className="text-sm">
-                            {m.firstName} {m.lastName} <span className="text-muted">({m.role})</span>
+                            {m.firstName} {m.lastName} <span className="text-muted">({t(`roles.${m.role}`)})</span>
                           </span>
                           <Button
                             size="sm"

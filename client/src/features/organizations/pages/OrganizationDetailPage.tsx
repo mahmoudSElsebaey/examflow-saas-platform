@@ -313,10 +313,10 @@ export function OrganizationDetailPage() {
                               className="flex h-11 w-full rounded-lg border border-border bg-surface px-3.5 text-sm"
                               {...inviteForm.register('role')}
                             >
-                              <option value="admin">admin</option>
-                              <option value="teacher">teacher</option>
-                              <option value="examiner">examiner</option>
-                              <option value="student">student</option>
+                              <option value="admin">{t('roles.admin')}</option>
+                              <option value="teacher">{t('roles.teacher')}</option>
+                              <option value="examiner">{t('roles.examiner')}</option>
+                              <option value="student">{t('roles.student')}</option>
                             </select>
                           </div>
                           <Button

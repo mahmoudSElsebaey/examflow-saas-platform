@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as examApi from '../api/examApi'
 import type { ExamAttempt, AttemptAnswer } from '../types'
@@ -27,6 +28,7 @@ function formatRemaining(ms: number): string {
 export function ExamTakePage() {
   const { orgId, attemptId } = useParams<{ orgId: string; attemptId: string }>()
   const { t } = useTranslation()
+  const toast = useToast()
   const { accessToken } = useAuth()
 
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null)
@@ -60,7 +62,7 @@ export function ExamTakePage() {
         inProgressRef.current = a.status === 'in_progress'
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -111,7 +113,7 @@ export function ExamTakePage() {
       setSaveStatus('saved')
     } catch (err) {
       setSaveStatus('error')
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   }, [accessToken, orgId, attemptId, buildPayload, t])
 
@@ -214,7 +216,7 @@ export function ExamTakePage() {
       inProgressRef.current = false
       setAttempt(res.data?.attempt ?? null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setSubmitting(false)
     }

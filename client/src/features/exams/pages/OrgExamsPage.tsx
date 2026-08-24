@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useToast } from '@/components/ui/Toast'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -26,6 +27,7 @@ import { OrgWorkspaceLayout } from '@/components/layout/OrgWorkspaceLayout'
 export function OrgExamsPage() {
   const { orgId } = useParams<{ orgId: string }>()
   const { t } = useTranslation()
+  const toast = useToast()
   const { accessToken } = useAuth()
   const navigate = useNavigate()
 
@@ -86,7 +88,7 @@ export function OrgExamsPage() {
         setAvailable(availRes.data?.exams ?? [])
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -114,9 +116,10 @@ export function OrgExamsPage() {
       setSelectedQ([])
       setShowForm(false)
       setEditingId(null)
+      toast.success(t('toast.saved'))
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   })
 
@@ -124,9 +127,10 @@ export function OrgExamsPage() {
     if (!accessToken || !orgId || !isStaff) return
     try {
       await examApi.publishExamApi(accessToken, orgId, examId)
+      toast.success(t('toast.published'))
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   }
 
@@ -137,7 +141,7 @@ export function OrgExamsPage() {
       const id = res.data?.attempt?.id
       if (id) navigate(`/app/organizations/${orgId}/attempts/${id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     }
   }
 
@@ -298,7 +302,7 @@ export function OrgExamsPage() {
                             : 'info'
                       }
                     >
-                      {exam.status}
+                      {t(`status.${exam.status}`, { defaultValue: exam.status })}
                     </Badge>
                   </div>
                   {exam.description && (

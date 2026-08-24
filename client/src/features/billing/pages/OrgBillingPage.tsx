@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as billingApi from '../api'
 import { Button } from '@/components/ui/Button'
@@ -16,6 +17,7 @@ export function OrgBillingPage() {
   const { orgId } = useParams<{ orgId: string }>()
   const [searchParams] = useSearchParams()
   const { t } = useTranslation()
+  const toast = useToast()
   const { accessToken } = useAuth()
   const [data, setData] = useState<billingApi.BillingData | null>(null)
   const [plans, setPlans] = useState<
@@ -38,7 +40,7 @@ export function OrgBillingPage() {
       setData(b.data ?? null)
       setPlans(p.data?.plans ?? [])
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -66,7 +68,7 @@ export function OrgBillingPage() {
       }
       await load()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setBusy(false)
     }
@@ -80,7 +82,7 @@ export function OrgBillingPage() {
       const res = await billingApi.billingPortalApi(accessToken, orgId)
       if (res.data?.url) window.location.href = res.data.url
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      toast.fromError(err); setError(t('errors.generic'))
     } finally {
       setBusy(false)
     }

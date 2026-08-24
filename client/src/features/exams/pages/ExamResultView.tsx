@@ -120,11 +120,8 @@ export function ExamResultView({
 
             {attempt.security && (
               <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center text-xs text-muted">
-                {t('exam.securitySummary', {
-                  defaultValue: 'Integrity signals',
-                })}
-                : focus {attempt.security.focusLossCount} · tabs{' '}
-                {attempt.security.tabSwitchCount} · paste {attempt.security.pasteCount}
+                {t('exam.securitySummary')}: {t('exam.focusLoss')} {attempt.security.focusLossCount} · {t('exam.tabSwitch')}{' '}
+                {attempt.security.tabSwitchCount} · {t('exam.paste')} {attempt.security.pasteCount}
               </div>
             )}
 
