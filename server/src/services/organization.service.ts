@@ -5,6 +5,7 @@ import { AppError } from '../middlewares/errorHandler.js'
 import type { OrganizationDTO, MemberDTO, OrgMemberRole } from '../types/organization.js'
 import { sendEmail, orgInviteEmail } from './email.service.js'
 import * as notifService from './notification.service.js'
+import { logActivity } from './activity.service.js'
 
 function slugify(name: string): string {
   return name
@@ -111,7 +112,6 @@ export async function listOrganizations(userId: string): Promise<OrganizationDTO
   return orgs.map((org) => toOrgDTO(org, roleMap.get(org.id)))
 }
 
-/** Alias used by organization.controller */
 export const listMyOrganizations = listOrganizations
 
 export async function getOrganization(
@@ -127,7 +127,6 @@ export async function getOrganization(
   return toOrgDTO(org, membership.role)
 }
 
-/** Alias used by organization.controller */
 export const getOrganizationForMember = getOrganization
 
 export async function updateOrganization(
@@ -165,6 +164,16 @@ export async function updateOrganization(
   }
 
   await org.save()
+
+  await logActivity({
+    organizationId: orgId,
+    actorId: userId,
+    action: 'org.updated',
+    summary: `Organization settings updated (${org.name})`,
+    entityType: 'organization',
+    entityId: orgId,
+  })
+
   return toOrgDTO(org, membership.role)
 }
 
@@ -216,6 +225,15 @@ export async function inviteMember(
       existing.status = 'active'
       existing.role = data.role
       await existing.save()
+      await logActivity({
+        organizationId: orgId,
+        actorId,
+        action: 'member.reactivated',
+        summary: `Reactivated ${user.email} as ${data.role}`,
+        entityType: 'membership',
+        entityId: existing.id,
+        meta: { email: user.email, role: data.role },
+      })
       return toMemberDTO(existing, user)
     }
     throw new AppError('User is already a member', 409, 'ALREADY_MEMBER')
@@ -246,10 +264,19 @@ export async function inviteMember(
     // non-blocking
   }
 
+  await logActivity({
+    organizationId: orgId,
+    actorId,
+    action: 'member.invited',
+    summary: `Added ${user.email} as ${data.role}`,
+    entityType: 'membership',
+    entityId: membership.id,
+    meta: { email: user.email, role: data.role },
+  })
+
   return toMemberDTO(membership, user)
 }
 
-/** Change role of an existing member (not owner). Owner/admin only. */
 export async function updateMemberRole(
   orgId: string,
   actorId: string,
@@ -278,14 +305,24 @@ export async function updateMemberRole(
     throw new AppError('Admins cannot change their own role', 400, 'CANNOT_SELF_CHANGE')
   }
 
+  const prevRole = target.role
   target.role = role
   await target.save()
 
   const user = await User.findById(target.userId).select('email firstName lastName')
+  await logActivity({
+    organizationId: orgId,
+    actorId,
+    action: 'member.role_changed',
+    summary: `Changed role of ${user?.email || target.userId} from ${prevRole} to ${role}`,
+    entityType: 'membership',
+    entityId: target.id,
+    meta: { from: prevRole, to: role, email: user?.email },
+  })
+
   return toMemberDTO(target, user)
 }
 
-/** Remove member from organization. Cannot remove owner. */
 export async function removeMember(
   orgId: string,
   actorId: string,
@@ -313,11 +350,23 @@ export async function removeMember(
     throw new AppError('Cannot remove yourself', 400, 'CANNOT_REMOVE_SELF')
   }
 
+  const user = await User.findById(target.userId).select('email firstName lastName')
+  const email = user?.email || target.userId.toString()
   await target.deleteOne()
+
+  await logActivity({
+    organizationId: orgId,
+    actorId,
+    action: 'member.removed',
+    summary: `Removed member ${email}`,
+    entityType: 'membership',
+    entityId: membershipId,
+    meta: { email },
+  })
+
   return { removed: true }
 }
 
-/** Suspend or reactivate a member. */
 export async function setMemberStatus(
   orgId: string,
   actorId: string,
@@ -350,5 +399,18 @@ export async function setMemberStatus(
   await target.save()
 
   const user = await User.findById(target.userId).select('email firstName lastName')
+  await logActivity({
+    organizationId: orgId,
+    actorId,
+    action: status === 'suspended' ? 'member.suspended' : 'member.reactivated',
+    summary:
+      status === 'suspended'
+        ? `Suspended ${user?.email || target.userId}`
+        : `Reactivated ${user?.email || target.userId}`,
+    entityType: 'membership',
+    entityId: target.id,
+    meta: { email: user?.email, status },
+  })
+
   return toMemberDTO(target, user)
 }
