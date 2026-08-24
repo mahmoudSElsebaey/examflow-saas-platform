@@ -1,6 +1,7 @@
 import { Exam } from '../models/Exam.js'
 import { ExamAttempt } from '../models/ExamAttempt.js'
 import { Question } from '../models/Question.js'
+import { User } from '../models/User.js'
 import { AppError } from '../middlewares/errorHandler.js'
 import type { OrgAnalyticsDTO, ExamAnalyticsDTO, StudentHistoryDTO } from '../types/analytics.js'
 import { LessonProgress } from '../models/LessonProgress.js'
@@ -29,11 +30,16 @@ export async function getOrgAnalytics(orgId: string): Promise<OrgAnalyticsDTO> {
 
   const examTitleMap = new Map(exams.map((e) => [e.id, e.title]))
 
+  const userIds = [...new Set(attempts.slice(0, 10).map((a) => a.userId.toString()))]
+  const users = await User.find({ _id: { $in: userIds } }).select('firstName lastName')
+  const nameMap = new Map(users.map((u) => [u.id, `${u.firstName} ${u.lastName}`.trim()]))
+
   const recentAttempts = attempts.slice(0, 10).map((a) => ({
     id: a.id,
     examId: a.examId.toString(),
     examTitle: examTitleMap.get(a.examId.toString()) || 'Exam',
     userId: a.userId.toString(),
+    studentName: nameMap.get(a.userId.toString()) || undefined,
     status: a.status,
     percent: a.percent ?? null,
     passed: a.passed ?? null,
@@ -77,6 +83,12 @@ export async function getExamAnalytics(
     .filter((p): p is number => p != null)
   const passed = completed.filter((a) => a.passed === true).length
 
+  const userIds = [...new Set(attempts.map((a) => a.userId.toString()))]
+  const users = await User.find({ _id: { $in: userIds } }).select('firstName lastName email')
+  const nameMap = new Map(
+    users.map((u) => [u.id, `${u.firstName} ${u.lastName}`.trim() || u.email])
+  )
+
   return {
     examId: exam.id,
     examTitle: exam.title,
@@ -92,11 +104,15 @@ export async function getExamAnalytics(
     attempts: attempts.map((a) => ({
       id: a.id,
       userId: a.userId.toString(),
+      studentName: nameMap.get(a.userId.toString()) || undefined,
       status: a.status,
       score: a.score ?? null,
       maxScore: a.maxScore ?? null,
       percent: a.percent ?? null,
       passed: a.passed ?? null,
+      focusLossCount: a.focusLossCount ?? 0,
+      tabSwitchCount: a.tabSwitchCount ?? 0,
+      pasteCount: a.pasteCount ?? 0,
       startedAt: a.startedAt.toISOString(),
       submittedAt: a.submittedAt?.toISOString() ?? null,
     })),
