@@ -26,6 +26,7 @@ import { OrgSettingsPage } from '@/features/organizations/pages/OrgSettingsPage'
 import { OrgBillingPage } from '@/features/billing/pages/OrgBillingPage'
 import { AdminPage } from '@/features/admin/pages/AdminPage'
 import { OrgSearchPage } from '@/features/search/pages/OrgSearchPage'
+import { OrgActivityPage } from '@/features/activity/pages/OrgActivityPage'
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/app/organizations/:orgId/settings" element={<ProtectedRoute><OrgSettingsPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/billing" element={<ProtectedRoute><OrgBillingPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/search" element={<ProtectedRoute><OrgSearchPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/activity" element={<ProtectedRoute><OrgActivityPage /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

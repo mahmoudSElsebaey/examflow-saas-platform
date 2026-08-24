@@ -1,6 +1,6 @@
 # ExamFlow
 
-> Status: **Phase 10 complete** — Team Management (roles / suspend / remove)
+> Status: **Phase 11 complete** — Org Activity Audit Log
 
 Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exams, grading, certificates, analytics, billing, platform admin.
 
@@ -31,15 +31,17 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 | Reports & CSV export | Done (Phase 08) |
 | Org-wide search | Done (Phase 09) |
 | Team management (role / suspend / remove) | Done (Phase 10) |
+| Activity audit log | Done (Phase 11) |
 
-## Phase 10 highlights
+## Phase 11 highlights
 
-- **Update role**: `PATCH /organizations/:orgId/members/:membershipId`
-- **Suspend / reactivate**: `PATCH /organizations/:orgId/members/:membershipId/status`
-- **Remove member**: `DELETE /organizations/:orgId/members/:membershipId`
-- Guards: cannot change/remove/suspend **owner**; cannot self-remove; owner/admin only.
-- Members UI: role select, Suspend/Reactivate, Remove + confirm.
-- Re-invite of suspended user reactivates membership.
+- **ActivityLog** model (tenant-scoped, indexed by `createdAt`).
+- Non-blocking `logActivity` on:
+  - member invite / role change / remove / suspend / reactivate
+  - organization settings update
+- API: `GET /organizations/:orgId/activity?limit=` (staff only).
+- UI: `/app/organizations/:orgId/activity` with actor name, action badge, timestamp.
+- Nav entry **Activity** for staff roles.
 
 ## Setup
 
@@ -49,16 +51,15 @@ cd server && npm install && npm run dev
 cd client && npm install && npm run dev
 ```
 
-## Testing Phase 10
+## Testing Phase 11
 
-1. As owner/admin open **Members**.
-2. Change a teacher → student via the role dropdown.
-3. Suspend a member → status badge updates; Reactivate works.
-4. Remove a non-owner member (confirm dialog).
-5. Confirm owner row has no destructive actions.
+1. As owner/admin invite or change a member role.
+2. Open **Activity** in workspace nav.
+3. Confirm events appear with actor + summary.
+4. Students should not see Activity nav / get 403 from API.
 
 ## Next phase
 
-**Phase 11** — when ordered (see product backlog).
+**Phase 12** — when ordered (see product backlog).
 
 **ExamFlow** — Smart Assessments. Real Insights.

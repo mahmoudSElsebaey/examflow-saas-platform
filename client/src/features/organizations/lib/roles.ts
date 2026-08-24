@@ -45,11 +45,8 @@ export type WorkspaceNavId =
   | 'learn'
   | 'progress'
   | 'search'
+  | 'activity'
 
-/**
- * Nav items visible for a given membership role.
- * Student sees a minimal student portal; staff sees management modules.
- */
 export function visibleNavIds(role?: OrgMemberRole | null): WorkspaceNavId[] {
   if (!role) return ['overview']
   if (role === 'student') {
@@ -67,6 +64,7 @@ export function visibleNavIds(role?: OrgMemberRole | null): WorkspaceNavId[] {
     'students',
     'certificates',
     'analytics',
+    'activity',
   ]
   if (canManageMembers(role)) {
     ids.push('members', 'settings', 'billing')
