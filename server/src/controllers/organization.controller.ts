@@ -1,6 +1,7 @@
 import type { Response, NextFunction } from 'express'
 import { sendSuccess } from '../utils/apiResponse.js'
 import type { AuthenticatedRequest } from '../types/auth.js'
+import { AppError } from '../middlewares/errorHandler.js'
 import * as orgService from '../services/organization.service.js'
 import * as inviteService from '../services/invite.service.js'
 
@@ -89,7 +90,6 @@ export async function inviteMember(
   next: NextFunction
 ) {
   try {
-    // Prefer pending invite for unknown emails; fall back to direct add
     try {
       const member = await orgService.inviteMember(
         orgIdParam(req),
@@ -97,8 +97,8 @@ export async function inviteMember(
         req.body
       )
       return sendSuccess(res, { member }, 'Member added', 201)
-    } catch (err: any) {
-      if (err?.errorCode === 'USER_NOT_FOUND' || err?.code === 'USER_NOT_FOUND') {
+    } catch (err) {
+      if (err instanceof AppError && err.errorCode === 'USER_NOT_FOUND') {
         const invite = await inviteService.createPendingInvite(
           orgIdParam(req),
           req.user!.id,

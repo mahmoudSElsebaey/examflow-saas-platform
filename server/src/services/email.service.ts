@@ -7,11 +7,6 @@ export type EmailPayload = {
   html?: string
 }
 
-/**
- * Send email via configured provider.
- * - provider=log (default): console only
- * - provider=resend + RESEND_API_KEY: Resend HTTP API
- */
 export async function sendEmail(payload: EmailPayload): Promise<void> {
   const provider = config.email.provider
   const key = config.email.resendApiKey
@@ -43,7 +38,6 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
     }
   }
 
-  // Dev / fallback: log only
   if (config.isProd && provider !== 'log') {
     console.info(
       JSON.stringify({
@@ -86,14 +80,22 @@ export function passwordResetEmail(to: string, token: string): EmailPayload {
 export function orgInviteEmail(
   to: string,
   orgName: string,
-  role: string
+  role: string,
+  acceptLink?: string
 ): EmailPayload {
-  const link = `${config.clientUrl}/login`
+  const link = acceptLink || `${config.clientUrl}/login`
+  const isPending = Boolean(acceptLink)
   return {
     to,
-    subject: `You were added to ${orgName} on ExamFlow`,
-    text: `You have been added to "${orgName}" as ${role}.\n\nSign in: ${link}`,
-    html: `<p>You have been added to <strong>${orgName}</strong> as <strong>${role}</strong>.</p><p><a href="${link}">Sign in to ExamFlow</a></p>`,
+    subject: isPending
+      ? `You're invited to ${orgName} on ExamFlow`
+      : `You were added to ${orgName} on ExamFlow`,
+    text: isPending
+      ? `You are invited to "${orgName}" as ${role}.\n\nCreate an account or sign in with this email:\n${link}`
+      : `You have been added to "${orgName}" as ${role}.\n\nSign in: ${link}`,
+    html: isPending
+      ? `<p>You are invited to <strong>${orgName}</strong> as <strong>${role}</strong>.</p><p><a href="${link}">Accept invite / Register</a></p>`
+      : `<p>You have been added to <strong>${orgName}</strong> as <strong>${role}</strong>.</p><p><a href="${link}">Sign in to ExamFlow</a></p>`,
   }
 }
 
