@@ -15,6 +15,11 @@ export interface Exam {
   maxAttempts: number
   totalPoints: number
   questionCount: number
+  trackTabSwitch?: boolean
+  trackPaste?: boolean
+  warnOnLeave?: boolean
+  showResultsImmediately?: boolean
+  resultsDelayMinutes?: number | null
   createdAt: string
   updatedAt: string
 }
@@ -49,6 +54,13 @@ export interface AttemptReviewSummary {
   timeTakenSeconds: number | null
 }
 
+export interface AttemptSecuritySummary {
+  focusLossCount: number
+  tabSwitchCount: number
+  pasteCount: number
+  events?: { type: string; at: string; meta?: string | null }[]
+}
+
 export interface ExamAttempt {
   id: string
   examId: string
@@ -70,6 +82,8 @@ export interface ExamAttempt {
   review?: AttemptReviewSummary
   certificateId?: string | null
   certificateCode?: string | null
+  security?: AttemptSecuritySummary
+  resultsLockedUntil?: string | null
 }
 
 export interface GradingQueueItem {

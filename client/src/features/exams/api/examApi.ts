@@ -4,11 +4,9 @@ import type { Exam, ExamAttempt, AttemptAnswer, GradingQueueItem } from '../type
 
 const base = (orgId: string) => `${appConfig.API_BASE_URL}/organizations/${orgId}`
 
-async function request<T>(
-  path: string,
-  accessToken: string,
-  options: RequestInit = {}
-): Promise<ApiResponse<T>> {
+async function request<
+  T
+>(path: string, accessToken: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
   const res = await fetch(path, {
     ...options,
     credentials: 'include',
@@ -32,7 +30,6 @@ export async function listExamsApi(token: string, orgId: string) {
   return request<{ exams: Exam[] }>(`${base(orgId)}/exams`, token)
 }
 
-/** Student-facing list of published exams currently available to the user. */
 export async function listAvailableExamsApi(token: string, orgId: string) {
   return request<{ exams: Exam[] }>(`${base(orgId)}/exams/available`, token)
 }
@@ -51,6 +48,11 @@ export async function createExamApi(
     timeLimitMinutes?: number | null
     passingScorePercent?: number
     maxAttempts?: number
+    trackTabSwitch?: boolean
+    trackPaste?: boolean
+    warnOnLeave?: boolean
+    showResultsImmediately?: boolean
+    resultsDelayMinutes?: number | null
   }
 ) {
   return request<{ exam: Exam }>(`${base(orgId)}/exams`, token, {
@@ -70,6 +72,11 @@ export async function updateExamApi(
     timeLimitMinutes: number | null
     passingScorePercent: number
     maxAttempts: number
+    trackTabSwitch: boolean
+    trackPaste: boolean
+    warnOnLeave: boolean
+    showResultsImmediately: boolean
+    resultsDelayMinutes: number | null
   }>
 ) {
   return request<{ exam: Exam }>(`${base(orgId)}/exams/${examId}`, token, {
@@ -122,6 +129,20 @@ export async function submitAttemptApi(
     `${base(orgId)}/attempts/${attemptId}/submit`,
     token,
     { method: 'POST', body: JSON.stringify({ answers }) }
+  )
+}
+
+export async function logSecurityEventApi(
+  token: string,
+  orgId: string,
+  attemptId: string,
+  type: 'focus_loss' | 'tab_switch' | 'visibility_hidden' | 'paste' | 'copy' | 'leave_warn',
+  meta?: string | null
+) {
+  return request<{ security: { focusLossCount: number; tabSwitchCount: number; pasteCount: number; eventCount: number } }>(
+    `${base(orgId)}/attempts/${attemptId}/security-events`,
+    token,
+    { method: 'POST', body: JSON.stringify({ type, meta }) }
   )
 }
 
