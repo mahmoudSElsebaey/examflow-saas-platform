@@ -11,7 +11,9 @@ router.use(requireOrgMember)
 const staff = requireOrgRoles('owner', 'admin', 'teacher', 'examiner')
 
 router.get('/analytics', staff, ctrl.orgAnalytics)
+router.get('/analytics/export/attempts.csv', staff, ctrl.exportOrgAttemptsCsv)
 router.get('/exams/:examId/analytics', staff, ctrl.examAnalytics)
+router.get('/exams/:examId/analytics/export.csv', staff, ctrl.exportExamAttemptsCsv)
 router.get('/analytics/me', ctrl.studentHistory)
 
 export default router
