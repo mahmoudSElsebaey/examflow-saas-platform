@@ -3,6 +3,7 @@ import { ExamAttempt } from '../models/ExamAttempt.js'
 import { Question } from '../models/Question.js'
 import { AppError } from '../middlewares/errorHandler.js'
 import { onExamPublished, onAttemptSubmitted } from './exam.notifications.js'
+import { securitySummaryFromAttempt } from './exam.security.js'
 import type {
   ExamDTO,
   ExamAttemptDTO,
@@ -36,6 +37,11 @@ function toExamDTO(e: InstanceType<typeof Exam>): ExamDTO {
     maxAttempts: e.maxAttempts,
     totalPoints: e.totalPoints ?? 0,
     questionCount: (e.questionIds || []).length,
+    trackTabSwitch: e.trackTabSwitch !== false,
+    trackPaste: e.trackPaste !== false,
+    warnOnLeave: e.warnOnLeave !== false,
+    showResultsImmediately: e.showResultsImmediately !== false,
+    resultsDelayMinutes: e.resultsDelayMinutes ?? null,
     createdBy: e.createdBy.toString(),
     createdAt: e.createdAt.toISOString(),
     updatedAt: e.updatedAt.toISOString(),
@@ -48,6 +54,26 @@ function arraysEqualAsSet(a: string[], b: string[]): boolean {
   return b.every((x) => sa.has(x))
 }
 
+function resultsLockedUntil(
+  exam: InstanceType<typeof Exam> | null | undefined,
+  submittedAt: Date | null | undefined
+): string | null {
+  if (!exam || !submittedAt) return null
+  if (exam.showResultsImmediately !== false) return null
+  const delay = exam.resultsDelayMinutes ?? 0
+  if (delay <= 0) return null
+  return new Date(submittedAt.getTime() + delay * 60_000).toISOString()
+}
+
+function isResultsLocked(
+  exam: InstanceType<typeof Exam> | null | undefined,
+  submittedAt: Date | null | undefined
+): boolean {
+  const until = resultsLockedUntil(exam, submittedAt)
+  if (!until) return false
+  return new Date(until) > new Date()
+}
+
 export function toAttemptDTO(
   a: InstanceType<typeof ExamAttempt>,
   opts?: {
@@ -55,9 +81,13 @@ export function toAttemptDTO(
     examTitle?: string
     certificateId?: string | null
     certificateCode?: string | null
+    exam?: InstanceType<typeof Exam> | null
+    isStaff?: boolean
   }
 ): ExamAttemptDTO {
   const closed = a.status === 'submitted' || a.status === 'timed_out'
+  const locked =
+    closed && !opts?.isStaff && isResultsLocked(opts?.exam, a.submittedAt)
   let review: AttemptReviewSummary | undefined
   let questions: AttemptQuestionView[] | undefined
 
@@ -79,7 +109,7 @@ export function toAttemptDTO(
         difficulty: q.difficulty,
       }
 
-      if (!closed) return base
+      if (!closed || locked) return base
 
       const correct = q.correctAnswers || []
       let outcome: AttemptQuestionView['outcome']
@@ -121,21 +151,25 @@ export function toAttemptDTO(
       }
     })
 
-    const started = a.startedAt ? new Date(a.startedAt).getTime() : null
-    const ended = a.submittedAt ? new Date(a.submittedAt).getTime() : null
-    const timeTakenSeconds =
-      started != null && ended != null
-        ? Math.max(0, Math.round((ended - started) / 1000))
-        : null
+    if (!locked) {
+      const started = a.startedAt ? new Date(a.startedAt).getTime() : null
+      const ended = a.submittedAt ? new Date(a.submittedAt).getTime() : null
+      const timeTakenSeconds =
+        started != null && ended != null
+          ? Math.max(0, Math.round((ended - started) / 1000))
+          : null
 
-    review = {
-      correctCount,
-      wrongCount,
-      skippedCount,
-      pendingManualCount,
-      timeTakenSeconds,
+      review = {
+        correctCount,
+        wrongCount,
+        skippedCount,
+        pendingManualCount,
+        timeTakenSeconds,
+      }
     }
   }
+
+  const security = securitySummaryFromAttempt(a)
 
   return {
     id: a.id,
@@ -150,20 +184,27 @@ export function toAttemptDTO(
       a.answers?.map((x) => ({
         questionId: x.questionId,
         selected: x.selected ?? [],
-        manualScore: x.manualScore ?? null,
-        feedback: x.feedback ?? null,
+        manualScore: locked ? null : x.manualScore ?? null,
+        feedback: locked ? null : x.feedback ?? null,
         gradedAt: x.gradedAt ? new Date(x.gradedAt).toISOString() : null,
       })) ?? [],
-    score: a.score ?? null,
+    score: locked ? null : a.score ?? null,
     maxScore: a.maxScore ?? null,
-    percent: a.percent ?? null,
-    passed: a.passed ?? null,
+    percent: locked ? null : a.percent ?? null,
+    passed: locked ? null : a.passed ?? null,
     needsManualGrading: !!a.needsManualGrading,
     questions,
     examTitle: opts?.examTitle,
     review,
-    certificateId: opts?.certificateId ?? null,
-    certificateCode: opts?.certificateCode ?? null,
+    certificateId: locked ? null : opts?.certificateId ?? null,
+    certificateCode: locked ? null : opts?.certificateCode ?? null,
+    security: {
+      focusLossCount: security.focusLossCount,
+      tabSwitchCount: security.tabSwitchCount,
+      pasteCount: security.pasteCount,
+      events: opts?.isStaff ? security.events : undefined,
+    },
+    resultsLockedUntil: resultsLockedUntil(opts?.exam, a.submittedAt),
   }
 }
 
@@ -201,6 +242,11 @@ export async function createExam(
     shuffleQuestions?: boolean
     shuffleOptions?: boolean
     maxAttempts?: number
+    trackTabSwitch?: boolean
+    trackPaste?: boolean
+    warnOnLeave?: boolean
+    showResultsImmediately?: boolean
+    resultsDelayMinutes?: number | null
   }
 ): Promise<ExamDTO> {
   const questionIds = data.questionIds ?? []
@@ -230,6 +276,11 @@ export async function createExam(
     shuffleQuestions: data.shuffleQuestions ?? true,
     shuffleOptions: data.shuffleOptions ?? true,
     maxAttempts: data.maxAttempts ?? 1,
+    trackTabSwitch: data.trackTabSwitch ?? true,
+    trackPaste: data.trackPaste ?? true,
+    warnOnLeave: data.warnOnLeave ?? true,
+    showResultsImmediately: data.showResultsImmediately ?? true,
+    resultsDelayMinutes: data.resultsDelayMinutes ?? null,
     totalPoints,
     createdBy: userId,
     status: 'draft',
@@ -249,6 +300,11 @@ export async function updateExam(
     shuffleQuestions?: boolean
     shuffleOptions?: boolean
     maxAttempts?: number
+    trackTabSwitch?: boolean
+    trackPaste?: boolean
+    warnOnLeave?: boolean
+    showResultsImmediately?: boolean
+    resultsDelayMinutes?: number | null
   }
 ): Promise<ExamDTO> {
   const exam = await Exam.findOne({ _id: examId, organizationId: orgId })
@@ -263,6 +319,13 @@ export async function updateExam(
   if (data.shuffleQuestions !== undefined) exam.shuffleQuestions = data.shuffleQuestions
   if (data.shuffleOptions !== undefined) exam.shuffleOptions = data.shuffleOptions
   if (data.maxAttempts !== undefined) exam.maxAttempts = data.maxAttempts
+  if (data.trackTabSwitch !== undefined) exam.trackTabSwitch = data.trackTabSwitch
+  if (data.trackPaste !== undefined) exam.trackPaste = data.trackPaste
+  if (data.warnOnLeave !== undefined) exam.warnOnLeave = data.warnOnLeave
+  if (data.showResultsImmediately !== undefined)
+    exam.showResultsImmediately = data.showResultsImmediately
+  if (data.resultsDelayMinutes !== undefined)
+    exam.resultsDelayMinutes = data.resultsDelayMinutes
 
   if (data.questionIds !== undefined) {
     const count = await Question.countDocuments({
@@ -365,6 +428,7 @@ export async function startAttempt(
       return toAttemptDTO(inProgress, {
         includeQuestions: true,
         examTitle: exam.title,
+        exam,
       })
     }
   }
@@ -420,9 +484,13 @@ export async function startAttempt(
     answers: [],
     questionSnapshot: snapshot,
     maxScore: snapshot.reduce((s, q) => s + (q.points || 0), 0),
+    focusLossCount: 0,
+    tabSwitchCount: 0,
+    pasteCount: 0,
+    securityEvents: [],
   })
 
-  return toAttemptDTO(attempt, { includeQuestions: true, examTitle: exam.title })
+  return toAttemptDTO(attempt, { includeQuestions: true, examTitle: exam.title, exam })
 }
 
 export async function getAttempt(
@@ -465,6 +533,8 @@ export async function getAttempt(
     examTitle: exam?.title,
     certificateId,
     certificateCode,
+    exam,
+    isStaff,
   })
 }
 
@@ -499,7 +569,7 @@ export async function saveAnswers(
   await attempt.save()
 
   const exam = await Exam.findById(attempt.examId)
-  return toAttemptDTO(attempt, { includeQuestions: true, examTitle: exam?.title })
+  return toAttemptDTO(attempt, { includeQuestions: true, examTitle: exam?.title, exam })
 }
 
 export async function submitAttempt(
@@ -566,6 +636,7 @@ export async function submitAttempt(
     examTitle: exam?.title,
     certificateId,
     certificateCode,
+    exam,
   })
 }
 
