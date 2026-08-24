@@ -1,6 +1,6 @@
 # ExamFlow
 
-> Status: **Phase 09 complete** — Org-wide Search
+> Status: **Phase 10 complete** — Team Management (roles / suspend / remove)
 
 Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exams, grading, certificates, analytics, billing, platform admin.
 
@@ -30,13 +30,16 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 | Exam security + attempt integrity | Done (Phase 07) |
 | Reports & CSV export | Done (Phase 08) |
 | Org-wide search | Done (Phase 09) |
+| Team management (role / suspend / remove) | Done (Phase 10) |
 
-## Phase 09 highlights
+## Phase 10 highlights
 
-- Unified search across **exams, questions, courses, banks, members** within a tenant.
-- API: `GET /organizations/:orgId/search?q=&types=exam,question,...`
-- UI: `/app/organizations/:orgId/search` with type filters + nav entry for staff and students.
-- Results link to the relevant workspace module.
+- **Update role**: `PATCH /organizations/:orgId/members/:membershipId`
+- **Suspend / reactivate**: `PATCH /organizations/:orgId/members/:membershipId/status`
+- **Remove member**: `DELETE /organizations/:orgId/members/:membershipId`
+- Guards: cannot change/remove/suspend **owner**; cannot self-remove; owner/admin only.
+- Members UI: role select, Suspend/Reactivate, Remove + confirm.
+- Re-invite of suspended user reactivates membership.
 
 ## Setup
 
@@ -46,15 +49,16 @@ cd server && npm install && npm run dev
 cd client && npm install && npm run dev
 ```
 
-## Testing Phase 09
+## Testing Phase 10
 
-1. Open **Search** in org nav.
-2. Query an exam title / question stem / member email.
-3. Filter by type chips.
-4. Click a hit → navigates to the right module.
+1. As owner/admin open **Members**.
+2. Change a teacher → student via the role dropdown.
+3. Suspend a member → status badge updates; Reactivate works.
+4. Remove a non-owner member (confirm dialog).
+5. Confirm owner row has no destructive actions.
 
 ## Next phase
 
-**Phase 10** — when ordered (see product backlog).
+**Phase 11** — when ordered (see product backlog).
 
 **ExamFlow** — Smart Assessments. Real Insights.

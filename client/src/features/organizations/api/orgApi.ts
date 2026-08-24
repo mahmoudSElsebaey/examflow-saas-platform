@@ -77,3 +77,47 @@ export async function inviteMemberApi(
     body: JSON.stringify(body),
   })
 }
+
+export async function updateMemberRoleApi(
+  accessToken: string,
+  orgId: string,
+  membershipId: string,
+  role: Exclude<OrgMemberRole, 'owner'>
+) {
+  return request<{ member: OrgMember }>(
+    `/${orgId}/members/${membershipId}`,
+    accessToken,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+    }
+  )
+}
+
+export async function setMemberStatusApi(
+  accessToken: string,
+  orgId: string,
+  membershipId: string,
+  status: 'active' | 'suspended'
+) {
+  return request<{ member: OrgMember }>(
+    `/${orgId}/members/${membershipId}/status`,
+    accessToken,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }
+  )
+}
+
+export async function removeMemberApi(
+  accessToken: string,
+  orgId: string,
+  membershipId: string
+) {
+  return request<{ removed: true }>(
+    `/${orgId}/members/${membershipId}`,
+    accessToken,
+    { method: 'DELETE' }
+  )
+}
