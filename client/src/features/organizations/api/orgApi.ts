@@ -72,7 +72,7 @@ export async function inviteMemberApi(
   orgId: string,
   body: { email: string; role: Exclude<OrgMemberRole, 'owner'> }
 ) {
-  return request<{ member: OrgMember }>(`/${orgId}/members`, accessToken, {
+  return request<{ member?: OrgMember; invite?: unknown }>(`/${orgId}/members`, accessToken, {
     method: 'POST',
     body: JSON.stringify(body),
   })
@@ -120,4 +120,40 @@ export async function removeMemberApi(
     accessToken,
     { method: 'DELETE' }
   )
+}
+
+export async function leaveOrganizationApi(accessToken: string, orgId: string) {
+  return request<{ left: true }>(`/${orgId}/leave`, accessToken, {
+    method: 'POST',
+    body: JSON.stringify({}),
+  })
+}
+
+export async function transferOwnershipApi(
+  accessToken: string,
+  orgId: string,
+  newOwnerMembershipId: string
+) {
+  return request<{ organization: Organization }>(
+    `/${orgId}/transfer-ownership`,
+    accessToken,
+    {
+      method: 'POST',
+      body: JSON.stringify({ newOwnerMembershipId }),
+    }
+  )
+}
+
+export async function listPendingInvitesApi(accessToken: string, orgId: string) {
+  return request<{ invites: { id: string; email: string; role: string; expiresAt: string }[] }>(
+    `/${orgId}/invites`,
+    accessToken
+  )
+}
+
+export async function acceptInviteApi(accessToken: string, token: string) {
+  return request<{ organizationId: string; role: string }>(`/accept-invite`, accessToken, {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  })
 }

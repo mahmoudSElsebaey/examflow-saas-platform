@@ -1,65 +1,70 @@
 # ExamFlow
 
-> Status: **Phase 11 complete** — Org Activity Audit Log
+> Status: **Phase 15 complete** — Phases 12–15 shipped (leave/transfer, pending invites, logo upload, demo seed)
 
-Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exams, grading, certificates, analytics, billing, platform admin.
+Multi-tenant assessment SaaS (MERN).
 
-## Current Status
+## Current Status (product surface)
 
 | Area | Status |
 |------|--------|
 | Auth + JWT + verify/reset | Done |
 | Multi-tenant orgs + roles | Done |
-| Design System (Scholar Glow) | Done |
-| i18n EN/AR + RTL | Done |
-| Dashboard + role-aware home | Done (Phase 01) |
-| Org workspace nav (staff vs student) | Done (Phase 01) |
-| Courses / Banks / Questions | Done |
-| Exam builder + student available exams | Done (Phase 01 role split) |
-| Auto + manual grading | Done |
+| Design System + i18n EN/AR + RTL | Done |
+| Courses / Banks / Questions / Curriculum | Done |
+| Exams + take + auto/manual grading | Done |
 | Certificates + public verify | Done |
-| Analytics | Done |
-| Notifications (header) | Done |
-| Mock billing + plan limits | Done |
+| Analytics + CSV export | Done |
+| Search (org-wide) | Done |
+| Notifications + email (Resend) | Done |
+| Stripe billing (+ mock fallback) | Done |
 | Platform admin | Done |
-| Subjects / Topics / Lessons | Done (Phase 02) |
-| Student Learn (curriculum viewer) | Done (Phase 03) |
-| Email provider (Resend) + event notifications | Done (Phase 04) |
-| Stripe billing (Checkout / Portal / Webhook) | Done (Phase 05) |
-| Student progress + history analytics | Done (Phase 06) |
-| Exam security + attempt integrity | Done (Phase 07) |
-| Reports & CSV export | Done (Phase 08) |
-| Org-wide search | Done (Phase 09) |
-| Team management (role / suspend / remove) | Done (Phase 10) |
-| Activity audit log | Done (Phase 11) |
+| Exam security / integrity | Done |
+| Team management (role/suspend/remove) | Done |
+| Activity audit log | Done |
+| Leave org + transfer ownership | Done (Phase 12) |
+| Pending email invites (unregistered) | Done (Phase 13) |
+| Logo file upload (data URL) + branding | Done (Phase 14) |
+| Demo seed script | Done (Phase 15) |
 
-## Phase 11 highlights
+## Phases 12–15 summary
 
-- **ActivityLog** model (tenant-scoped, indexed by `createdAt`).
-- Non-blocking `logActivity` on:
-  - member invite / role change / remove / suspend / reactivate
-  - organization settings update
-- API: `GET /organizations/:orgId/activity?limit=` (staff only).
-- UI: `/app/organizations/:orgId/activity` with actor name, action badge, timestamp.
-- Nav entry **Activity** for staff roles.
+### Phase 12 — Leave & Transfer
+- `POST /organizations/:orgId/leave` (non-owner)
+- `POST /organizations/:orgId/transfer-ownership` `{ newOwnerMembershipId }` (owner only)
+- Settings UI: leave button; transfer list for owner
+
+### Phase 13 — Pending invites
+- Model `OrgInvite` + token (14-day expiry)
+- Invite unknown email → pending invite + email link `/register?invite=TOKEN`
+- `POST /organizations/accept-invite` `{ token }`
+- `GET /organizations/:orgId/invites`
+
+### Phase 14 — Logo upload
+- Settings: file picker → data URL (max ~200KB)
+- Server accepts `http(s)` or `data:image/…` for `logoUrl`
+
+### Phase 15 — Seed
+```bash
+cd server && npm run seed
+```
+Accounts (password `Demo1234!`): `owner@demo.examflow`, `teacher@demo.examflow`, `student@demo.examflow` — org **Demo Academy**.
 
 ## Setup
 
 ```bash
 cp .env.example .env
-cd server && npm install && npm run dev
+cd server && npm install && npm run seed && npm run dev
 cd client && npm install && npm run dev
 ```
 
-## Testing Phase 11
+## Remaining backlog (optional Phase 16+)
 
-1. As owner/admin invite or change a member role.
-2. Open **Activity** in workspace nav.
-3. Confirm events appear with actor + summary.
-4. Students should not see Activity nav / get 403 from API.
-
-## Next phase
-
-**Phase 12** — when ordered (see product backlog).
+- E2E test suite (Playwright/Cypress)
+- Object storage for logos (S3) instead of data URLs
+- PDF certificate download polish
+- Invite revoke UI + accept on register page auto-wire
+- Transfer ownership confirmation email
+- Production launch checklist automation
 
 **ExamFlow** — Smart Assessments. Real Insights.
