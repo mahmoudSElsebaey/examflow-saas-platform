@@ -25,6 +25,7 @@ import { OrgMembersPage } from '@/features/organizations/pages/OrgMembersPage'
 import { OrgSettingsPage } from '@/features/organizations/pages/OrgSettingsPage'
 import { OrgBillingPage } from '@/features/billing/pages/OrgBillingPage'
 import { AdminPage } from '@/features/admin/pages/AdminPage'
+import { OrgSearchPage } from '@/features/search/pages/OrgSearchPage'
 
 export default function App() {
   return (
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/app/organizations/:orgId/members" element={<ProtectedRoute><OrgMembersPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/settings" element={<ProtectedRoute><OrgSettingsPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/billing" element={<ProtectedRoute><OrgBillingPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/search" element={<ProtectedRoute><OrgSearchPage /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

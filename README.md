@@ -1,6 +1,6 @@
 # ExamFlow
 
-> Status: **Phase 08 complete** — Reports & CSV Export
+> Status: **Phase 09 complete** — Org-wide Search
 
 Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exams, grading, certificates, analytics, billing, platform admin.
 
@@ -29,16 +29,14 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 | Student progress + history analytics | Done (Phase 06) |
 | Exam security + attempt integrity | Done (Phase 07) |
 | Reports & CSV export | Done (Phase 08) |
+| Org-wide search | Done (Phase 09) |
 
-## Phase 08 highlights
+## Phase 09 highlights
 
-- **CSV export** (staff): org-wide attempts and per-exam attempts.
-- Columns include student name, scores, pass/fail, integrity counters (focus/tab/paste).
-- Endpoints:
-  - `GET /organizations/:orgId/analytics/export/attempts.csv`
-  - `GET /organizations/:orgId/exams/:examId/analytics/export.csv`
-- Analytics UI: **Export CSV** button + student names on recent attempts.
-- Exam analytics enriched with `studentName` and security counts.
+- Unified search across **exams, questions, courses, banks, members** within a tenant.
+- API: `GET /organizations/:orgId/search?q=&types=exam,question,...`
+- UI: `/app/organizations/:orgId/search` with type filters + nav entry for staff and students.
+- Results link to the relevant workspace module.
 
 ## Setup
 
@@ -48,15 +46,15 @@ cd server && npm install && npm run dev
 cd client && npm install && npm run dev
 ```
 
-## Testing Phase 08
+## Testing Phase 09
 
-1. As owner/admin/teacher open Analytics.
-2. Click **Export CSV** → file downloads with BOM for Excel.
-3. Optional: `GET .../exams/:examId/analytics/export.csv` for one exam.
-4. Confirm student names and integrity columns appear.
+1. Open **Search** in org nav.
+2. Query an exam title / question stem / member email.
+3. Filter by type chips.
+4. Click a hit → navigates to the right module.
 
 ## Next phase
 
-**Phase 09** — when ordered (see product backlog).
+**Phase 10** — when ordered (see product backlog).
 
 **ExamFlow** — Smart Assessments. Real Insights.

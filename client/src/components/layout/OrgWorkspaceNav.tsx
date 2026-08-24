@@ -14,6 +14,7 @@ import {
   PenLine,
   CreditCard,
   GraduationCap,
+  Search,
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
@@ -32,6 +33,7 @@ const NAV: {
   icon: LucideIcon
 }[] = [
   { id: 'overview', path: '', labelKey: 'workspace.nav.overview', icon: LayoutDashboard },
+  { id: 'search', path: '/search', labelKey: 'workspace.nav.search', icon: Search },
   { id: 'learn', path: '/learn', labelKey: 'workspace.nav.learn', icon: GraduationCap },
   { id: 'courses', path: '/content?tab=courses', labelKey: 'workspace.nav.courses', icon: BookOpen },
   { id: 'banks', path: '/content?tab=banks', labelKey: 'workspace.nav.banks', icon: Library },
@@ -111,7 +113,7 @@ export function OrgWorkspaceNav({ role: roleProp, className }: Props) {
             )}
           >
             <Icon className="h-4 w-4" />
-            {t(labelKey)}
+            {t(labelKey, { defaultValue: id === 'search' ? 'Search' : id })}
           </Link>
         )
       })}

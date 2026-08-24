@@ -44,6 +44,7 @@ export type WorkspaceNavId =
   | 'billing'
   | 'learn'
   | 'progress'
+  | 'search'
 
 /**
  * Nav items visible for a given membership role.
@@ -52,10 +53,11 @@ export type WorkspaceNavId =
 export function visibleNavIds(role?: OrgMemberRole | null): WorkspaceNavId[] {
   if (!role) return ['overview']
   if (role === 'student') {
-    return ['overview', 'learn', 'progress', 'exams', 'certificates']
+    return ['overview', 'learn', 'progress', 'exams', 'certificates', 'search']
   }
   const ids: WorkspaceNavId[] = [
     'overview',
+    'search',
     'learn',
     'progress',
     'courses',

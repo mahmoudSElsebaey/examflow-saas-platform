@@ -17,6 +17,7 @@ import notificationRoutes from './routes/notification.routes.js'
 import adminRoutes from './routes/admin.routes.js'
 import billingRoutes from './routes/billing.routes.js'
 import plansRoutes from './routes/plans.routes.js'
+import searchRoutes from './routes/search.routes.js'
 import * as billingCtrl from './controllers/billing.controller.js'
 import { notFoundHandler, errorHandler } from './middlewares/errorHandler.js'
 
@@ -62,6 +63,7 @@ app.use('/api/v1/organizations/:orgId', contentRoutes)
 app.use('/api/v1/organizations/:orgId', examRoutes)
 app.use('/api/v1/organizations/:orgId', analyticsRoutes)
 app.use('/api/v1/organizations/:orgId', certificateRoutes)
+app.use('/api/v1/organizations/:orgId', searchRoutes)
 app.use('/api/v1/public', publicRoutes)
 app.use('/api/v1/notifications', notificationRoutes)
 app.use('/api/v1/admin', adminRoutes)
