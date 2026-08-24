@@ -2,6 +2,7 @@ import type { Response, NextFunction } from 'express'
 import { sendSuccess } from '../utils/apiResponse.js'
 import type { AuthenticatedRequest } from '../types/auth.js'
 import * as orgService from '../services/organization.service.js'
+import * as inviteService from '../services/invite.service.js'
 
 function orgIdParam(req: AuthenticatedRequest): string {
   const id = req.params.orgId
@@ -88,12 +89,25 @@ export async function inviteMember(
   next: NextFunction
 ) {
   try {
-    const member = await orgService.inviteMember(
-      orgIdParam(req),
-      req.user!.id,
-      req.body
-    )
-    return sendSuccess(res, { member }, 'Member added', 201)
+    // Prefer pending invite for unknown emails; fall back to direct add
+    try {
+      const member = await orgService.inviteMember(
+        orgIdParam(req),
+        req.user!.id,
+        req.body
+      )
+      return sendSuccess(res, { member }, 'Member added', 201)
+    } catch (err: any) {
+      if (err?.errorCode === 'USER_NOT_FOUND' || err?.code === 'USER_NOT_FOUND') {
+        const invite = await inviteService.createPendingInvite(
+          orgIdParam(req),
+          req.user!.id,
+          req.body
+        )
+        return sendSuccess(res, { invite }, 'Invite sent', 201)
+      }
+      throw err
+    }
   } catch (err) {
     next(err)
   }
@@ -147,6 +161,66 @@ export async function setMemberStatus(
       req.body.status
     )
     return sendSuccess(res, { member }, 'Member status updated')
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function leaveOrg(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const result = await orgService.leaveOrganization(orgIdParam(req), req.user!.id)
+    return sendSuccess(res, result, 'Left organization')
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function transferOwnership(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const result = await orgService.transferOwnership(
+      orgIdParam(req),
+      req.user!.id,
+      req.body.newOwnerMembershipId
+    )
+    return sendSuccess(res, result, 'Ownership transferred')
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function listPendingInvites(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const invites = await inviteService.listPendingInvites(
+      orgIdParam(req),
+      req.user!.id
+    )
+    return sendSuccess(res, { invites })
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function acceptInvite(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const token = typeof req.body.token === 'string' ? req.body.token : ''
+    const result = await inviteService.acceptInvite(token, req.user!.id)
+    return sendSuccess(res, result, 'Invite accepted')
   } catch (err) {
     next(err)
   }
