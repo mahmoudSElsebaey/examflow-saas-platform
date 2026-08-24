@@ -8,6 +8,7 @@ import {
   saveAnswersSchema,
   submitAttemptSchema,
   manualGradeSchema,
+  securityEventSchema,
 } from '../validators/exam.validators.js'
 import * as ctrl from '../controllers/exam.controller.js'
 
@@ -44,6 +45,11 @@ router.post(
   '/attempts/:attemptId/submit',
   validateBody(submitAttemptSchema),
   ctrl.submitAttempt
+)
+router.post(
+  '/attempts/:attemptId/security-events',
+  validateBody(securityEventSchema),
+  ctrl.logSecurityEvent
 )
 
 router.get('/grading/queue', canManage, ctrl.listPendingGrading)

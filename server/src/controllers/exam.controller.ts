@@ -4,6 +4,7 @@ import type { TenantRequest } from '../middlewares/tenant.js'
 import * as examService from '../services/exam.service.js'
 import * as gradingService from '../services/grading.service.js'
 import * as examAvailability from '../services/exam.availability.js'
+import * as examSecurity from '../services/exam.security.js'
 import { Exam } from '../models/Exam.js'
 import { isExamAvailableNow } from '../services/exam.availability.js'
 
@@ -155,6 +156,25 @@ export async function submitAttempt(req: TenantRequest, res: Response, next: Nex
       req.body.answers
     )
     return sendSuccess(res, { attempt }, 'Attempt submitted')
+  } catch (e) {
+    next(e)
+  }
+}
+
+export async function logSecurityEvent(
+  req: TenantRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const summary = await examSecurity.logSecurityEvent(
+      orgId(req),
+      param(req, 'attemptId'),
+      req.user!.id,
+      req.body.type,
+      req.body.meta
+    )
+    return sendSuccess(res, { security: summary }, 'Event logged')
   } catch (e) {
     next(e)
   }

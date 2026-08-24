@@ -18,6 +18,11 @@ export interface ExamDTO {
   availableFrom?: string | null
   availableTo?: string | null
   isAvailableNow?: boolean
+  trackTabSwitch?: boolean
+  trackPaste?: boolean
+  warnOnLeave?: boolean
+  showResultsImmediately?: boolean
+  resultsDelayMinutes?: number | null
   createdBy: string
   createdAt: string
   updatedAt: string
@@ -53,6 +58,13 @@ export interface AttemptReviewSummary {
   timeTakenSeconds: number | null
 }
 
+export interface AttemptSecuritySummary {
+  focusLossCount: number
+  tabSwitchCount: number
+  pasteCount: number
+  events?: { type: string; at: string; meta?: string | null }[]
+}
+
 export interface ExamAttemptDTO {
   id: string
   examId: string
@@ -74,6 +86,8 @@ export interface ExamAttemptDTO {
   review?: AttemptReviewSummary
   certificateId?: string | null
   certificateCode?: string | null
+  security?: AttemptSecuritySummary
+  resultsLockedUntil?: string | null
 }
 
 export interface GradingQueueItem {

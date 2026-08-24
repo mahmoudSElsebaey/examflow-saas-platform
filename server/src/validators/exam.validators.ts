@@ -9,6 +9,11 @@ export const createExamSchema = z.object({
   shuffleQuestions: z.boolean().optional(),
   shuffleOptions: z.boolean().optional(),
   maxAttempts: z.number().min(1).max(20).optional(),
+  trackTabSwitch: z.boolean().optional(),
+  trackPaste: z.boolean().optional(),
+  warnOnLeave: z.boolean().optional(),
+  showResultsImmediately: z.boolean().optional(),
+  resultsDelayMinutes: z.number().min(0).max(10080).nullable().optional(),
 })
 
 export const updateExamSchema = z.object({
@@ -20,6 +25,11 @@ export const updateExamSchema = z.object({
   shuffleQuestions: z.boolean().optional(),
   shuffleOptions: z.boolean().optional(),
   maxAttempts: z.number().min(1).max(20).optional(),
+  trackTabSwitch: z.boolean().optional(),
+  trackPaste: z.boolean().optional(),
+  warnOnLeave: z.boolean().optional(),
+  showResultsImmediately: z.boolean().optional(),
+  resultsDelayMinutes: z.number().min(0).max(10080).nullable().optional(),
 })
 
 export const saveAnswersSchema = z.object({
@@ -52,6 +62,11 @@ export const manualGradeSchema = z.object({
       })
     )
     .min(1),
+})
+
+export const securityEventSchema = z.object({
+  type: z.enum(['focus_loss', 'tab_switch', 'visibility_hidden', 'paste', 'copy', 'leave_warn']),
+  meta: z.string().max(200).optional().nullable(),
 })
 
 export type ManualGradeInput = z.infer<typeof manualGradeSchema>
