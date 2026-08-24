@@ -5,6 +5,8 @@ import {
   createOrganizationSchema,
   updateOrganizationSchema,
   inviteMemberSchema,
+  updateMemberRoleSchema,
+  updateMemberStatusSchema,
 } from '../validators/organization.validators.js'
 import * as ctrl from '../controllers/organization.controller.js'
 
@@ -22,5 +24,16 @@ router.post(
   validateBody(inviteMemberSchema),
   ctrl.inviteMember
 )
+router.patch(
+  '/:orgId/members/:membershipId',
+  validateBody(updateMemberRoleSchema),
+  ctrl.updateMemberRole
+)
+router.patch(
+  '/:orgId/members/:membershipId/status',
+  validateBody(updateMemberStatusSchema),
+  ctrl.setMemberStatus
+)
+router.delete('/:orgId/members/:membershipId', ctrl.removeMember)
 
 export default router

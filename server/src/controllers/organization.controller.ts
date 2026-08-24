@@ -8,6 +8,11 @@ function orgIdParam(req: AuthenticatedRequest): string {
   return Array.isArray(id) ? id[0]! : id!
 }
 
+function membershipIdParam(req: AuthenticatedRequest): string {
+  const id = req.params.membershipId
+  return Array.isArray(id) ? id[0]! : id!
+}
+
 export async function createOrg(
   req: AuthenticatedRequest,
   res: Response,
@@ -89,6 +94,59 @@ export async function inviteMember(
       req.body
     )
     return sendSuccess(res, { member }, 'Member added', 201)
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function updateMemberRole(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const member = await orgService.updateMemberRole(
+      orgIdParam(req),
+      req.user!.id,
+      membershipIdParam(req),
+      req.body.role
+    )
+    return sendSuccess(res, { member }, 'Member role updated')
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function removeMember(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const result = await orgService.removeMember(
+      orgIdParam(req),
+      req.user!.id,
+      membershipIdParam(req)
+    )
+    return sendSuccess(res, result, 'Member removed')
+  } catch (err) {
+    next(err)
+  }
+}
+
+export async function setMemberStatus(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const member = await orgService.setMemberStatus(
+      orgIdParam(req),
+      req.user!.id,
+      membershipIdParam(req),
+      req.body.status
+    )
+    return sendSuccess(res, { member }, 'Member status updated')
   } catch (err) {
     next(err)
   }

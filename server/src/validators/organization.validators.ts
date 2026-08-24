@@ -26,3 +26,11 @@ export const inviteMemberSchema = z.object({
   email: z.string().email(),
   role: z.enum(['admin', 'teacher', 'examiner', 'student']),
 })
+
+export const updateMemberRoleSchema = z.object({
+  role: z.enum(['admin', 'teacher', 'examiner', 'student']),
+})
+
+export const updateMemberStatusSchema = z.object({
+  status: z.enum(['active', 'suspended']),
+})

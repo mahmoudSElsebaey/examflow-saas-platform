@@ -38,6 +38,22 @@ function toOrgDTO(
   }
 }
 
+function toMemberDTO(
+  m: InstanceType<typeof Membership>,
+  u?: { email: string; firstName: string; lastName: string } | null
+): MemberDTO {
+  return {
+    id: m.id,
+    userId: m.userId.toString(),
+    email: u?.email ?? '',
+    firstName: u?.firstName ?? '',
+    lastName: u?.lastName ?? '',
+    role: m.role,
+    status: m.status,
+    joinedAt: m.createdAt.toISOString(),
+  }
+}
+
 export async function getMembership(orgId: string, userId: string) {
   return Membership.findOne({
     organizationId: orgId,
@@ -169,16 +185,7 @@ export async function listMembers(orgId: string, userId: string): Promise<Member
 
   return members.map((m) => {
     const u = userMap.get(m.userId.toString())
-    return {
-      id: m.id,
-      userId: m.userId.toString(),
-      email: u?.email ?? '',
-      firstName: u?.firstName ?? '',
-      lastName: u?.lastName ?? '',
-      role: m.role,
-      status: m.status,
-      joinedAt: m.createdAt.toISOString(),
-    }
+    return toMemberDTO(m, u)
   })
 }
 
@@ -205,6 +212,12 @@ export async function inviteMember(
     userId: user.id,
   })
   if (existing) {
+    if (existing.status === 'suspended') {
+      existing.status = 'active'
+      existing.role = data.role
+      await existing.save()
+      return toMemberDTO(existing, user)
+    }
     throw new AppError('User is already a member', 409, 'ALREADY_MEMBER')
   }
 
@@ -233,14 +246,109 @@ export async function inviteMember(
     // non-blocking
   }
 
-  return {
-    id: membership.id,
-    userId: user.id,
-    email: user.email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    role: membership.role,
-    status: membership.status,
-    joinedAt: membership.createdAt.toISOString(),
+  return toMemberDTO(membership, user)
+}
+
+/** Change role of an existing member (not owner). Owner/admin only. */
+export async function updateMemberRole(
+  orgId: string,
+  actorId: string,
+  membershipId: string,
+  role: Exclude<OrgMemberRole, 'owner'>
+): Promise<MemberDTO> {
+  const actor = await Membership.findOne({
+    organizationId: orgId,
+    userId: actorId,
+    status: 'active',
+    role: { $in: ['owner', 'admin'] },
+  })
+  if (!actor) throw new AppError('Insufficient permissions', 403, 'FORBIDDEN')
+
+  const target = await Membership.findOne({
+    _id: membershipId,
+    organizationId: orgId,
+  })
+  if (!target) throw new AppError('Member not found', 404, 'MEMBER_NOT_FOUND')
+
+  if (target.role === 'owner') {
+    throw new AppError('Cannot change the owner role', 400, 'CANNOT_CHANGE_OWNER')
   }
+
+  if (target.userId.toString() === actorId && actor.role !== 'owner') {
+    throw new AppError('Admins cannot change their own role', 400, 'CANNOT_SELF_CHANGE')
+  }
+
+  target.role = role
+  await target.save()
+
+  const user = await User.findById(target.userId).select('email firstName lastName')
+  return toMemberDTO(target, user)
+}
+
+/** Remove member from organization. Cannot remove owner. */
+export async function removeMember(
+  orgId: string,
+  actorId: string,
+  membershipId: string
+): Promise<{ removed: true }> {
+  const actor = await Membership.findOne({
+    organizationId: orgId,
+    userId: actorId,
+    status: 'active',
+    role: { $in: ['owner', 'admin'] },
+  })
+  if (!actor) throw new AppError('Insufficient permissions', 403, 'FORBIDDEN')
+
+  const target = await Membership.findOne({
+    _id: membershipId,
+    organizationId: orgId,
+  })
+  if (!target) throw new AppError('Member not found', 404, 'MEMBER_NOT_FOUND')
+
+  if (target.role === 'owner') {
+    throw new AppError('Cannot remove the organization owner', 400, 'CANNOT_REMOVE_OWNER')
+  }
+
+  if (target.userId.toString() === actorId) {
+    throw new AppError('Cannot remove yourself', 400, 'CANNOT_REMOVE_SELF')
+  }
+
+  await target.deleteOne()
+  return { removed: true }
+}
+
+/** Suspend or reactivate a member. */
+export async function setMemberStatus(
+  orgId: string,
+  actorId: string,
+  membershipId: string,
+  status: 'active' | 'suspended'
+): Promise<MemberDTO> {
+  const actor = await Membership.findOne({
+    organizationId: orgId,
+    userId: actorId,
+    status: 'active',
+    role: { $in: ['owner', 'admin'] },
+  })
+  if (!actor) throw new AppError('Insufficient permissions', 403, 'FORBIDDEN')
+
+  const target = await Membership.findOne({
+    _id: membershipId,
+    organizationId: orgId,
+  })
+  if (!target) throw new AppError('Member not found', 404, 'MEMBER_NOT_FOUND')
+
+  if (target.role === 'owner') {
+    throw new AppError('Cannot suspend the organization owner', 400, 'CANNOT_SUSPEND_OWNER')
+  }
+
+  if (target.userId.toString() === actorId) {
+    throw new AppError('Cannot suspend yourself', 400, 'CANNOT_SUSPEND_SELF')
+  }
+
+  target.status = status
+  await target.save()
+
+  const user = await User.findById(target.userId).select('email firstName lastName')
+  return toMemberDTO(target, user)
 }
