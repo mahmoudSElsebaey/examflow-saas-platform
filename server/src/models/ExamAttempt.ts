@@ -24,6 +24,21 @@ export interface ISecurityEvent {
   meta?: string | null
 }
 
+export interface IQuestionSnapshotOption {
+  id: string
+  text: string
+}
+
+export interface IQuestionSnapshot {
+  id: string
+  type: string
+  stem: string
+  options: IQuestionSnapshotOption[]
+  points: number
+  difficulty: string
+  correctAnswers: string[]
+}
+
 export interface IExamAttempt extends Document {
   examId: Types.ObjectId
   organizationId: Types.ObjectId
@@ -33,15 +48,7 @@ export interface IExamAttempt extends Document {
   submittedAt?: Date | null
   expiresAt?: Date | null
   answers: IAttemptAnswer[]
-  questionSnapshot: {
-    id: string
-    type: string
-    stem: string
-    options: { id: string; text: string }[]
-    points: number
-    difficulty: string
-    correctAnswers: string[]
-  }[]
+  questionSnapshot: IQuestionSnapshot[]
   score?: number | null
   maxScore?: number | null
   percent?: number | null
@@ -55,6 +62,27 @@ export interface IExamAttempt extends Document {
   createdAt: Date
   updatedAt: Date
 }
+
+const questionSnapshotOptionSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    text: { type: String, required: true },
+  },
+  { _id: false }
+)
+
+const questionSnapshotSchema = new Schema(
+  {
+    id: { type: String, required: true },
+    type: { type: String, required: true },
+    stem: { type: String, required: true },
+    options: { type: [questionSnapshotOptionSchema], default: [] },
+    points: { type: Number, default: 1 },
+    difficulty: { type: String, default: 'medium' },
+    correctAnswers: { type: [String], default: [] },
+  },
+  { _id: false }
+)
 
 const examAttemptSchema = new Schema<IExamAttempt>(
   {
@@ -95,17 +123,7 @@ const examAttemptSchema = new Schema<IExamAttempt>(
         gradedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
       },
     ],
-    questionSnapshot: [
-      {
-        id: String,
-        type: String,
-        stem: String,
-        options: [{ id: String, text: String }],
-        points: Number,
-        difficulty: String,
-        correctAnswers: [String],
-      },
-    ],
+    questionSnapshot: { type: [questionSnapshotSchema], default: [] },
     score: { type: Number, default: null },
     maxScore: { type: Number, default: null },
     percent: { type: Number, default: null },
