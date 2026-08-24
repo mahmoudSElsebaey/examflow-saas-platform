@@ -6,6 +6,7 @@ import * as certApi from '@/features/certificates/api/certificateApi'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
+import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Container } from '@/components/ui/Container'
 import { cn } from '@/lib/utils'
 
@@ -32,6 +33,8 @@ export function ExamResultView({
   const [issueError, setIssueError] = useState<string | null>(null)
   const [showReview, setShowReview] = useState(true)
   const review = attempt.review
+  const locked =
+    !!attempt.resultsLockedUntil && new Date(attempt.resultsLockedUntil) > new Date()
 
   const issueCert = async () => {
     if (!accessToken) return
@@ -62,87 +65,125 @@ export function ExamResultView({
               </p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-2">
-              <Badge variant={attempt.passed ? 'success' : 'error'} className="px-3 py-1 text-sm">
-                {attempt.passed ? t('exam.passed') : t('exam.failed')}
-              </Badge>
-              <Badge variant="info" className="px-3 py-1 text-sm">
-                {attempt.score}/{attempt.maxScore} ({attempt.percent}%)
-              </Badge>
-            </div>
+            {locked ? (
+              <Alert variant="info">
+                <AlertDescription>
+                  {t('exam.resultsLocked', {
+                    defaultValue:
+                      'Detailed results will be available after the release delay set by your instructor.',
+                  })}
+                  {attempt.resultsLockedUntil && (
+                    <span className="ms-1 text-xs">
+                      ({new Date(attempt.resultsLockedUntil).toLocaleString()})
+                    </span>
+                  )}
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <>
+                <div className="flex flex-wrap justify-center gap-2">
+                  <Badge
+                    variant={attempt.passed ? 'success' : 'error'}
+                    className="px-3 py-1 text-sm"
+                  >
+                    {attempt.passed ? t('exam.passed') : t('exam.failed')}
+                  </Badge>
+                  <Badge variant="info" className="px-3 py-1 text-sm">
+                    {attempt.score}/{attempt.maxScore} ({attempt.percent}%)
+                  </Badge>
+                </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
-                <p className="text-xl font-bold text-success">{review?.correctCount ?? '—'}</p>
-                <p className="text-xs text-muted">{t('exam.correct')}</p>
-              </div>
-              <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
-                <p className="text-xl font-bold text-error">{review?.wrongCount ?? '—'}</p>
-                <p className="text-xs text-muted">{t('exam.wrong')}</p>
-              </div>
-              <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
-                <p className="text-xl font-bold text-muted">{review?.skippedCount ?? '—'}</p>
-                <p className="text-xs text-muted">{t('exam.skipped')}</p>
-              </div>
-              <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
-                <p className="text-xl font-bold text-foreground">
-                  {formatDuration(review?.timeTakenSeconds)}
-                </p>
-                <p className="text-xs text-muted">{t('exam.timeTaken')}</p>
-              </div>
-            </div>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
+                    <p className="text-xl font-bold text-success">
+                      {review?.correctCount ?? '—'}
+                    </p>
+                    <p className="text-xs text-muted">{t('exam.correct')}</p>
+                  </div>
+                  <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
+                    <p className="text-xl font-bold text-error">{review?.wrongCount ?? '—'}</p>
+                    <p className="text-xs text-muted">{t('exam.wrong')}</p>
+                  </div>
+                  <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
+                    <p className="text-xl font-bold text-muted">{review?.skippedCount ?? '—'}</p>
+                    <p className="text-xs text-muted">{t('exam.skipped')}</p>
+                  </div>
+                  <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center">
+                    <p className="text-xl font-bold text-foreground">
+                      {formatDuration(review?.timeTakenSeconds)}
+                    </p>
+                    <p className="text-xs text-muted">{t('exam.timeTaken')}</p>
+                  </div>
+                </div>
+              </>
+            )}
 
-            {(review?.pendingManualCount ?? 0) > 0 && (
+            {attempt.security && (
+              <div className="rounded-xl border border-border bg-surface-subtle p-3 text-center text-xs text-muted">
+                {t('exam.securitySummary', {
+                  defaultValue: 'Integrity signals',
+                })}
+                : focus {attempt.security.focusLossCount} · tabs{' '}
+                {attempt.security.tabSwitchCount} · paste {attempt.security.pasteCount}
+              </div>
+            )}
+
+            {(review?.pendingManualCount ?? 0) > 0 && !locked && (
               <p className="text-center text-xs text-muted">
                 {t('exam.pendingManual', { count: review!.pendingManualCount })}
               </p>
             )}
 
-            <div className="rounded-xl border border-border bg-surface p-4">
-              <h2 className="text-sm font-semibold text-foreground">{t('cert.certificateOf')}</h2>
-              {attempt.passed ? (
-                attempt.certificateId ? (
-                  <div className="mt-2 space-y-2">
-                    <p className="text-sm text-success">{t('exam.certIssued')}</p>
-                    <p className="font-mono text-xs text-muted">
-                      {t('cert.code')}: {attempt.certificateCode}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <Link to={`/app/organizations/${orgId}/certificates/${attempt.certificateId}`}>
-                        <Button size="sm">{t('cert.view')}</Button>
-                      </Link>
-                      <Link to={`/verify/${attempt.certificateCode}`} target="_blank">
-                        <Button size="sm" variant="outline">{t('cert.verifyLink')}</Button>
-                      </Link>
+            {!locked && (
+              <div className="rounded-xl border border-border bg-surface p-4">
+                <h2 className="text-sm font-semibold text-foreground">{t('cert.certificateOf')}</h2>
+                {attempt.passed ? (
+                  attempt.certificateId ? (
+                    <div className="mt-2 space-y-2">
+                      <p className="text-sm text-success">{t('exam.certIssued')}</p>
+                      <p className="font-mono text-xs text-muted">
+                        {t('cert.code')}: {attempt.certificateCode}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Link
+                          to={`/app/organizations/${orgId}/certificates/${attempt.certificateId}`}
+                        >
+                          <Button size="sm">{t('cert.view')}</Button>
+                        </Link>
+                        <Link to={`/verify/${attempt.certificateCode}`} target="_blank">
+                          <Button size="sm" variant="outline">
+                            {t('cert.verifyLink')}
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="mt-2 space-y-2">
+                      <p className="text-sm text-muted">{t('exam.certEligible')}</p>
+                      <Button size="sm" onClick={() => void issueCert()} disabled={issuing}>
+                        {issuing ? t('common.loading') : t('cert.issue')}
+                      </Button>
+                      {issueError && <p className="text-xs text-error">{issueError}</p>}
+                    </div>
+                  )
                 ) : (
-                  <div className="mt-2 space-y-2">
-                    <p className="text-sm text-muted">{t('exam.certEligible')}</p>
-                    <Button size="sm" onClick={() => void issueCert()} disabled={issuing}>
-                      {issuing ? t('common.loading') : t('cert.issue')}
-                    </Button>
-                    {issueError && <p className="text-xs text-error">{issueError}</p>}
-                  </div>
-                )
-              ) : (
-                <p className="mt-2 text-sm text-muted">{t('exam.certNotEligible')}</p>
-              )}
-            </div>
+                  <p className="mt-2 text-sm text-muted">{t('exam.certNotEligible')}</p>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-wrap justify-center gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowReview((v) => !v)}>
-                {showReview ? t('exam.hideReview') : t('exam.showReview')}
-              </Button>
+              {!locked && (
+                <Button variant="outline" size="sm" onClick={() => setShowReview((v) => !v)}>
+                  {showReview ? t('exam.hideReview') : t('exam.showReview')}
+                </Button>
+              )}
               <Link to={`/app/organizations/${orgId}/exams`}>
                 <Button variant="outline" size="sm">{t('exam.backToExams')}</Button>
               </Link>
-              <Link to={`/app/organizations/${orgId}/analytics`}>
-                <Button variant="ghost" size="sm">{t('analytics.manage')}</Button>
-              </Link>
             </div>
 
-            {showReview && attempt.questions && (
+            {!locked && showReview && attempt.questions && (
               <ul className="space-y-4 border-t border-border pt-4">
                 {attempt.questions.map((q, i) => (
                   <li

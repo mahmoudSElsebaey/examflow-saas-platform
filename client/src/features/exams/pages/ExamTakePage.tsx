@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as examApi from '../api/examApi'
 import type { ExamAttempt, AttemptAnswer } from '../types'
+import { useExamSecurity } from '../hooks/useExamSecurity'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -68,6 +69,16 @@ export function ExamTakePage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useExamSecurity({
+    accessToken,
+    orgId,
+    attemptId,
+    enabled: !!attempt && attempt.status === 'in_progress',
+    trackTabSwitch: true,
+    trackPaste: true,
+    warnOnLeave: true,
+  })
 
   useEffect(() => {
     if (!attempt?.expiresAt || attempt.status !== 'in_progress') {
