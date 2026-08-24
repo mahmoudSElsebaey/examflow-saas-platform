@@ -6,11 +6,16 @@ import {
   BarChart3,
   BookOpen,
   ClipboardList,
+  Download,
   Target,
   Users,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
-import { getOrgAnalyticsApi, type OrgAnalytics } from '../api/analyticsApi'
+import {
+  getOrgAnalyticsApi,
+  downloadOrgAttemptsCsv,
+  type OrgAnalytics,
+} from '../api/analyticsApi'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -28,6 +33,7 @@ export function OrgAnalyticsPage() {
   const [data, setData] = useState<OrgAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     if (!accessToken || !orgId) return
@@ -44,6 +50,19 @@ export function OrgAnalyticsPage() {
       }
     })()
   }, [accessToken, orgId, t])
+
+  const onExport = async () => {
+    if (!accessToken || !orgId) return
+    setExporting(true)
+    setError(null)
+    try {
+      await downloadOrgAttemptsCsv(accessToken, orgId)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const stats = data
     ? [
@@ -110,16 +129,29 @@ export function OrgAnalyticsPage() {
           {t('analytics.backToOrg')}
         </Link>
 
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-muted text-primary">
-            <BarChart3 className="h-5 w-5" />
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-muted text-primary">
+              <BarChart3 className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                {t('analytics.title')}
+              </h1>
+              <p className="text-sm text-muted">{t('analytics.subtitle')}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {t('analytics.title')}
-            </h1>
-            <p className="text-sm text-muted">{t('analytics.subtitle')}</p>
-          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={exporting || loading}
+            onClick={() => void onExport()}
+          >
+            <Download className="me-1.5 h-4 w-4" />
+            {exporting
+              ? t('common.loading')
+              : t('analytics.exportCsv', { defaultValue: 'Export CSV' })}
+          </Button>
         </div>
 
         {error && (
@@ -165,7 +197,10 @@ export function OrgAnalyticsPage() {
                       >
                         <div>
                           <p className="text-sm font-medium text-foreground">{a.examTitle}</p>
-                          <p className="text-xs text-muted">{a.status}</p>
+                          <p className="text-xs text-muted">
+                            {a.studentName ? `${a.studentName} · ` : ''}
+                            {a.status}
+                          </p>
                         </div>
                         <div className="flex items-center gap-2">
                           {a.percent != null && (

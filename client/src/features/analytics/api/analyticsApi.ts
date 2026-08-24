@@ -14,6 +14,7 @@ export interface OrgAnalytics {
     examId: string
     examTitle: string
     userId: string
+    studentName?: string
     status: string
     percent: number | null
     passed: boolean | null
@@ -75,4 +76,56 @@ export interface StudentHistory {
 
 export async function getStudentHistoryApi(token: string, orgId: string) {
   return request<{ analytics: StudentHistory }>(`${base(orgId)}/analytics/me`, token)
+}
+
+/** Download org attempts as CSV (staff). */
+export async function downloadOrgAttemptsCsv(token: string, orgId: string) {
+  const res = await fetch(`${base(orgId)}/analytics/export/attempts.csv`, {
+    credentials: 'include',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}))
+    throw new Error((json as { message?: string }).message || 'Export failed')
+  }
+  const blob = await res.blob()
+  const cd = res.headers.get('Content-Disposition')
+  const match = cd?.match(/filename="?([^";]+)"?/)
+  const filename = match?.[1] || `examflow-attempts-${Date.now()}.csv`
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
+/** Download single-exam attempts as CSV (staff). */
+export async function downloadExamAttemptsCsv(
+  token: string,
+  orgId: string,
+  examId: string
+) {
+  const res = await fetch(`${base(orgId)}/exams/${examId}/analytics/export.csv`, {
+    credentials: 'include',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({}))
+    throw new Error((json as { message?: string }).message || 'Export failed')
+  }
+  const blob = await res.blob()
+  const cd = res.headers.get('Content-Disposition')
+  const match = cd?.match(/filename="?([^";]+)"?/)
+  const filename = match?.[1] || `examflow-exam-attempts-${Date.now()}.csv`
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
 }

@@ -11,6 +11,7 @@ export interface OrgAnalyticsDTO {
     examId: string
     examTitle: string
     userId: string
+    studentName?: string
     status: string
     percent: number | null
     passed: boolean | null
@@ -30,11 +31,15 @@ export interface ExamAnalyticsDTO {
   attempts: {
     id: string
     userId: string
+    studentName?: string
     status: string
     score: number | null
     maxScore: number | null
     percent: number | null
     passed: boolean | null
+    focusLossCount?: number
+    tabSwitchCount?: number
+    pasteCount?: number
     startedAt: string
     submittedAt: string | null
   }[]

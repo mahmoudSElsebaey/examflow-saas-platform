@@ -1,6 +1,6 @@
 # ExamFlow
 
-> Status: **Phase 07 complete** — Exam Security + Attempt Integrity
+> Status: **Phase 08 complete** — Reports & CSV Export
 
 Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exams, grading, certificates, analytics, billing, platform admin.
 
@@ -28,14 +28,17 @@ Multi-tenant assessment SaaS (MERN). Organizations, courses, question banks, exa
 | Stripe billing (Checkout / Portal / Webhook) | Done (Phase 05) |
 | Student progress + history analytics | Done (Phase 06) |
 | Exam security + attempt integrity | Done (Phase 07) |
+| Reports & CSV export | Done (Phase 08) |
 
-## Phase 07 highlights
+## Phase 08 highlights
 
-- Exam policies: `trackTabSwitch`, `trackPaste`, `warnOnLeave`, `showResultsImmediately`, `resultsDelayMinutes`.
-- Attempt integrity counters: `focusLossCount`, `tabSwitchCount`, `pasteCount` + event log.
-- API: `POST /attempts/:attemptId/security-events`.
-- Client `useExamSecurity` monitors visibility / blur / paste / leave during in-progress attempts.
-- Results delay: students see locked results until delay elapses; staff always see full review.
+- **CSV export** (staff): org-wide attempts and per-exam attempts.
+- Columns include student name, scores, pass/fail, integrity counters (focus/tab/paste).
+- Endpoints:
+  - `GET /organizations/:orgId/analytics/export/attempts.csv`
+  - `GET /organizations/:orgId/exams/:examId/analytics/export.csv`
+- Analytics UI: **Export CSV** button + student names on recent attempts.
+- Exam analytics enriched with `studentName` and security counts.
 
 ## Setup
 
@@ -45,16 +48,15 @@ cd server && npm install && npm run dev
 cd client && npm install && npm run dev
 ```
 
-## Testing Phase 07
+## Testing Phase 08
 
-1. Start an exam attempt as a student.
-2. Switch tabs / blur window → events recorded (check attempt.security).
-3. Paste into short answer → pasteCount increases.
-4. Create exam with `showResultsImmediately: false` and `resultsDelayMinutes: 60` → student results locked after submit.
-5. Staff grading view still sees full scores.
+1. As owner/admin/teacher open Analytics.
+2. Click **Export CSV** → file downloads with BOM for Excel.
+3. Optional: `GET .../exams/:examId/analytics/export.csv` for one exam.
+4. Confirm student names and integrity columns appear.
 
 ## Next phase
 
-**Phase 08** — when ordered (see product backlog).
+**Phase 09** — when ordered (see product backlog).
 
 **ExamFlow** — Smart Assessments. Real Insights.
