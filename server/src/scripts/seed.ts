@@ -95,16 +95,21 @@ async function main() {
     })
   }
 
-  let bank = await QuestionBank.findOne({ organizationId: org.id, title: 'Math Basics' })
-  if (!bank) {
-    bank = await QuestionBank.create({
-      organizationId: org.id,
-      title: 'Math Basics',
-      description: 'Demo bank',
-      isActive: true,
-      createdBy: owner.id,
-    })
-  }
+ let bank = await QuestionBank.findOne({
+  organizationId: org.id,
+  name: 'Math Basics',
+})
+
+if (!bank) {
+  bank = await QuestionBank.create({
+    organizationId: org.id,
+    name: 'Math Basics',
+    description: 'Demo bank',
+    createdBy: owner.id,
+  })
+
+  console.log('Created Question Bank Math Basics')
+}
 
   const qCount = await Question.countDocuments({ organizationId: org.id, bankId: bank.id })
   if (qCount === 0) {
@@ -150,8 +155,8 @@ async function main() {
         description: 'Seeded quiz',
         status: 'published',
         questionIds: [q1.id, q2.id],
-        durationMinutes: 15,
-        passPercent: 50,
+        timeLimitMinutes: 15,
+        passingScorePercent: 50,
         createdBy: teacher.id,
       })
       console.log('Created Demo Quiz')
