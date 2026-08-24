@@ -19,7 +19,19 @@ export const updateOrganizationSchema = z.object({
   name: z.string().min(2).max(120).optional(),
   description: z.string().max(500).nullable().optional(),
   primaryColor: hexColor.nullable().optional(),
-  logoUrl: z.string().url().max(500).nullable().optional(),
+  logoUrl: z
+    .string()
+    .max(400_000)
+    .refine(
+      (v) =>
+        !v ||
+        v.startsWith('https://') ||
+        v.startsWith('http://') ||
+        v.startsWith('data:image/'),
+      'logoUrl must be http(s) or data:image URL'
+    )
+    .nullable()
+    .optional(),
 })
 
 export const inviteMemberSchema = z.object({
@@ -33,4 +45,8 @@ export const updateMemberRoleSchema = z.object({
 
 export const updateMemberStatusSchema = z.object({
   status: z.enum(['active', 'suspended']),
+})
+
+export const transferOwnershipSchema = z.object({
+  newOwnerMembershipId: z.string().min(1),
 })

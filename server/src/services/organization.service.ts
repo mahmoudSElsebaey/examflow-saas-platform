@@ -158,7 +158,12 @@ export async function updateOrganization(
     primaryColor: org.branding?.primaryColor ?? null,
   }
   if (data.primaryColor !== undefined) branding.primaryColor = data.primaryColor
-  if (data.logoUrl !== undefined) branding.logoUrl = data.logoUrl
+  if (data.logoUrl !== undefined) {
+    if (data.logoUrl && data.logoUrl.startsWith('data:image/') && data.logoUrl.length > 350_000) {
+      throw new AppError('Logo image too large (max ~250KB)', 400, 'LOGO_TOO_LARGE')
+    }
+    branding.logoUrl = data.logoUrl
+  }
   if (data.primaryColor !== undefined || data.logoUrl !== undefined) {
     org.branding = branding
   }
@@ -413,4 +418,90 @@ export async function setMemberStatus(
   })
 
   return toMemberDTO(target, user)
+}
+
+/** Non-owner leaves the organization voluntarily. */
+export async function leaveOrganization(
+  orgId: string,
+  userId: string
+): Promise<{ left: true }> {
+  const membership = await Membership.findOne({
+    organizationId: orgId,
+    userId,
+    status: { $in: ['active', 'invited', 'suspended'] },
+  })
+  if (!membership) throw new AppError('Membership not found', 404, 'MEMBER_NOT_FOUND')
+
+  if (membership.role === 'owner') {
+    throw new AppError(
+      'Owner cannot leave. Transfer ownership first.',
+      400,
+      'OWNER_MUST_TRANSFER'
+    )
+  }
+
+  await membership.deleteOne()
+
+  await logActivity({
+    organizationId: orgId,
+    actorId: userId,
+    action: 'member.removed',
+    summary: 'Member left the organization',
+    entityType: 'membership',
+    entityId: membership.id,
+    meta: { selfLeave: true },
+  })
+
+  return { left: true }
+}
+
+/** Transfer ownership to another active member. Current owner becomes admin. */
+export async function transferOwnership(
+  orgId: string,
+  actorId: string,
+  newOwnerMembershipId: string
+): Promise<{ organization: OrganizationDTO }> {
+  const actor = await Membership.findOne({
+    organizationId: orgId,
+    userId: actorId,
+    status: 'active',
+    role: 'owner',
+  })
+  if (!actor) throw new AppError('Only the owner can transfer ownership', 403, 'FORBIDDEN')
+
+  const target = await Membership.findOne({
+    _id: newOwnerMembershipId,
+    organizationId: orgId,
+    status: 'active',
+  })
+  if (!target) throw new AppError('Target member not found or inactive', 404, 'MEMBER_NOT_FOUND')
+
+  if (target.userId.toString() === actorId) {
+    throw new AppError('Already the owner', 400, 'ALREADY_OWNER')
+  }
+
+  const org = await Organization.findById(orgId)
+  if (!org || !org.isActive) throw new AppError('Organization not found', 404, 'ORG_NOT_FOUND')
+
+  actor.role = 'admin'
+  target.role = 'owner'
+  org.ownerId = target.userId as typeof org.ownerId
+
+  await Promise.all([actor.save(), target.save(), org.save()])
+
+  const newOwnerUser = await User.findById(target.userId).select('email firstName lastName')
+  await logActivity({
+    organizationId: orgId,
+    actorId,
+    action: 'member.role_changed',
+    summary: `Ownership transferred to ${newOwnerUser?.email || target.userId}`,
+    entityType: 'organization',
+    entityId: orgId,
+    meta: {
+      newOwnerId: target.userId.toString(),
+      email: newOwnerUser?.email,
+    },
+  })
+
+  return { organization: toOrgDTO(org, 'admin') }
 }
