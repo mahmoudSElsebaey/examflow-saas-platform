@@ -10,6 +10,20 @@ export interface IAttemptAnswer {
   gradedBy?: Types.ObjectId | null
 }
 
+export type SecurityEventType =
+  | 'focus_loss'
+  | 'tab_switch'
+  | 'visibility_hidden'
+  | 'paste'
+  | 'copy'
+  | 'leave_warn'
+
+export interface ISecurityEvent {
+  type: SecurityEventType
+  at: Date
+  meta?: string | null
+}
+
 export interface IExamAttempt extends Document {
   examId: Types.ObjectId
   organizationId: Types.ObjectId
@@ -33,6 +47,11 @@ export interface IExamAttempt extends Document {
   percent?: number | null
   passed?: boolean | null
   needsManualGrading?: boolean
+  /** Phase 07 — integrity */
+  focusLossCount: number
+  tabSwitchCount: number
+  pasteCount: number
+  securityEvents: ISecurityEvent[]
   createdAt: Date
   updatedAt: Date
 }
@@ -92,6 +111,20 @@ const examAttemptSchema = new Schema<IExamAttempt>(
     percent: { type: Number, default: null },
     passed: { type: Boolean, default: null },
     needsManualGrading: { type: Boolean, default: false, index: true },
+    focusLossCount: { type: Number, default: 0, min: 0 },
+    tabSwitchCount: { type: Number, default: 0, min: 0 },
+    pasteCount: { type: Number, default: 0, min: 0 },
+    securityEvents: [
+      {
+        type: {
+          type: String,
+          enum: ['focus_loss', 'tab_switch', 'visibility_hidden', 'paste', 'copy', 'leave_warn'],
+          required: true,
+        },
+        at: { type: Date, required: true },
+        meta: { type: String, default: null, maxlength: 200 },
+      },
+    ],
   },
   { timestamps: true }
 )

@@ -15,6 +15,12 @@ export interface IExam extends Document {
   totalPoints: number
   availableFrom?: Date | null
   availableTo?: Date | null
+  /** Phase 07 — security policies */
+  trackTabSwitch: boolean
+  trackPaste: boolean
+  warnOnLeave: boolean
+  showResultsImmediately: boolean
+  resultsDelayMinutes?: number | null
   createdBy: Types.ObjectId
   createdAt: Date
   updatedAt: Date
@@ -45,6 +51,11 @@ const examSchema = new Schema<IExam>(
     totalPoints: { type: Number, default: 0, min: 0 },
     availableFrom: { type: Date, default: null },
     availableTo: { type: Date, default: null },
+    trackTabSwitch: { type: Boolean, default: true },
+    trackPaste: { type: Boolean, default: true },
+    warnOnLeave: { type: Boolean, default: true },
+    showResultsImmediately: { type: Boolean, default: true },
+    resultsDelayMinutes: { type: Number, default: null, min: 0, max: 10080 },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true }
