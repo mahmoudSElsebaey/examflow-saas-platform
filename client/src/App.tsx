@@ -27,12 +27,11 @@ import { OrgBillingPage } from '@/features/billing/pages/OrgBillingPage'
 import { AdminPage } from '@/features/admin/pages/AdminPage'
 import { OrgSearchPage } from '@/features/search/pages/OrgSearchPage'
 import { OrgActivityPage } from '@/features/activity/pages/OrgActivityPage'
-import { ToastProvider } from '@/components/ui/Toast'
+import { MemberProfilePage } from '@/features/organizations/pages/MemberProfilePage'
 
 export default function App() {
   return (
     <AuthProvider>
-      <ToastProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
@@ -58,13 +57,13 @@ export default function App() {
           <Route path="/app/organizations/:orgId/certificates/:certId" element={<ProtectedRoute><CertificateViewPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/students" element={<ProtectedRoute><OrgStudentsPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/members" element={<ProtectedRoute><OrgMembersPage /></ProtectedRoute>} />
+          <Route path="/app/organizations/:orgId/members/:userId" element={<ProtectedRoute><MemberProfilePage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/settings" element={<ProtectedRoute><OrgSettingsPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/billing" element={<ProtectedRoute><OrgBillingPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/search" element={<ProtectedRoute><OrgSearchPage /></ProtectedRoute>} />
           <Route path="/app/organizations/:orgId/activity" element={<ProtectedRoute><OrgActivityPage /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
-      </ToastProvider>
     </AuthProvider>
   )
 }

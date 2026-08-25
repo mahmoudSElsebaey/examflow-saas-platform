@@ -157,3 +157,56 @@ export async function acceptInviteApi(accessToken: string, token: string) {
     body: JSON.stringify({ token }),
   })
 }
+
+export interface MemberProfile {
+  userId: string
+  firstName: string
+  lastName: string
+  email?: string
+  role: string
+  status: string
+  joinedAt: string
+  stats: {
+    attemptsCount: number
+    completedCount: number
+    averagePercent: number | null
+    passRate: number | null
+    lessonsViewed: number
+    lessonsCompleted: number
+    certificatesCount: number
+  }
+  recentAttempts: {
+    id: string
+    examId: string
+    examTitle: string
+    status: string
+    percent: number | null
+    passed: boolean | null
+    submittedAt: string | null
+  }[]
+  recentLessons: {
+    lessonId: string
+    lessonTitle: string
+    status: string
+    viewedAt: string
+    completedAt: string | null
+  }[]
+  certificates: {
+    id: string
+    examTitle: string
+    issuedAt: string
+    code: string
+    percent: number
+  }[]
+}
+
+export async function getMemberProfileApi(
+  accessToken: string,
+  orgId: string,
+  userId: string
+) {
+  return request<{ profile: MemberProfile }>(
+    `/${orgId}/members/${userId}/profile`,
+    accessToken
+  )
+}
