@@ -33,13 +33,14 @@ export function OrgMembersPage() {
   const { orgId } = useParams<{ orgId: string }>()
   const { t } = useTranslation()
   const toast = useToast()
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
   const [org, setOrg] = useState<Organization | null>(null)
   const [members, setMembers] = useState<OrgMember[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const canInvite = canManageMembers(org?.myRole)
+  const canOpenProfile = canInvite || true
 
   const schema = z.object({
     email: z.string().email(t('validation.invalidEmail')),
@@ -134,6 +135,9 @@ export function OrgMembersPage() {
     }
   }
 
+  const canViewProfile = (m: OrgMember) =>
+    canManageMembers(org?.myRole) || user?.id === m.userId
+
   return (
     <OrgBrandScope branding={org?.branding}>
       <div className="min-h-screen bg-mesh">
@@ -176,18 +180,35 @@ export function OrgMembersPage() {
                     {members.map((m) => {
                       const isOwner = m.role === 'owner'
                       const busy = busyId === m.id
+                      const profileLink = `/app/organizations/${orgId}/members/${m.userId}`
                       return (
                         <li
                           key={m.id}
                           className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"
                         >
                           <div className="min-w-0">
-                            <p className="text-sm font-medium">
-                              {m.firstName} {m.lastName}
-                            </p>
+                            {canViewProfile(m) ? (
+                              <Link
+                                to={profileLink}
+                                className="text-sm font-medium text-primary hover:underline"
+                              >
+                                {m.firstName} {m.lastName}
+                              </Link>
+                            ) : (
+                              <p className="text-sm font-medium">
+                                {m.firstName} {m.lastName}
+                              </p>
+                            )}
                             <p className="text-xs text-muted">{m.email}</p>
                           </div>
                           <div className="flex flex-wrap items-center gap-2">
+                            {canViewProfile(m) && (
+                              <Link to={profileLink}>
+                                <Button type="button" size="sm" variant="outline">
+                                  {t('org.profile', { defaultValue: 'Profile' })}
+                                </Button>
+                              </Link>
+                            )}
                             {canInvite && !isOwner ? (
                               <select
                                 className="h-9 rounded-lg border border-border bg-surface px-2 text-xs"
