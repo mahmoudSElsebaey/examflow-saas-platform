@@ -11,7 +11,6 @@ export interface MemberProfileDTO {
   userId: string
   firstName: string
   lastName: string
-  /** Public org context only — email visible to owner/admin only */
   email?: string
   role: string
   status: string
@@ -43,18 +42,13 @@ export interface MemberProfileDTO {
   }[]
   certificates: {
     id: string
-    examTitle?: string
+    examTitle: string
     issuedAt: string
     code: string
+    percent: number
   }[]
 }
 
-/**
- * Profile is visible to:
- * - the member themselves
- * - org owner or admin
- * No private PII beyond first/last name for peers; email only for owner/admin/self.
- */
 export async function getMemberProfile(
   orgId: string,
   viewerId: string,
@@ -155,8 +149,10 @@ export async function getMemberProfile(
     })),
     certificates: certs.map((c) => ({
       id: c.id,
-      issuedAt: (c.issuedAt || c.createdAt).toISOString(),
-      code: c.code || c.verificationCode || c.id,
+      examTitle: c.examTitle,
+      issuedAt: c.issuedAt.toISOString(),
+      code: c.code,
+      percent: c.percent,
     })),
   }
 }

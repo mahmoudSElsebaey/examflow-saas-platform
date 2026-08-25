@@ -10,6 +10,7 @@ import {
   transferOwnershipSchema,
 } from '../validators/organization.validators.js'
 import * as ctrl from '../controllers/organization.controller.js'
+import * as profileCtrl from '../controllers/memberProfile.controller.js'
 import { z } from 'zod'
 
 const router = Router()
@@ -37,6 +38,7 @@ router.post(
   validateBody(inviteMemberSchema),
   ctrl.inviteMember
 )
+router.get('/:orgId/members/:userId/profile', profileCtrl.getMemberProfile)
 router.get('/:orgId/invites', ctrl.listPendingInvites)
 router.patch(
   '/:orgId/members/:membershipId',
