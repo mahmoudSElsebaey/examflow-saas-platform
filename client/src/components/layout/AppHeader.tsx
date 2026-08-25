@@ -50,6 +50,22 @@ export function AppHeader({ homeTo = '/app', brandTitle, logoUrl }: Props) {
     }
   }
 
+  const onClickNotification = async (n: NotificationItem) => {
+    setOpen(false)
+    if (!accessToken || n.readAt) return
+    try {
+      await notifApi.markNotificationReadApi(accessToken, n.id)
+      setItems((prev) =>
+        prev.map((x) =>
+          x.id === n.id ? { ...x, readAt: new Date().toISOString() } : x
+        )
+      )
+      setUnread((c) => Math.max(0, c - 1))
+    } catch {
+      /* ignore */
+    }
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/90 backdrop-blur">
       <Container className="flex h-14 items-center justify-between gap-3">
@@ -72,7 +88,7 @@ export function AppHeader({ homeTo = '/app', brandTitle, logoUrl }: Props) {
               to="/app"
               className="hidden text-xs font-medium text-muted hover:text-foreground sm:inline"
             >
-              {t('nav.appHome')}
+              {t('nav.appHome', { defaultValue: 'Dashboard' })}
             </Link>
           )}
         </div>
@@ -128,7 +144,7 @@ export function AppHeader({ homeTo = '/app', brandTitle, logoUrl }: Props) {
                         <Link
                           key={n.id}
                           to={n.link || '/app'}
-                          onClick={() => setOpen(false)}
+                          onClick={() => void onClickNotification(n)}
                           className={`block rounded-lg px-2 py-2 text-start text-sm hover:bg-surface-subtle ${
                             !n.readAt ? 'bg-primary-muted/40' : ''
                           }`}
@@ -148,9 +164,7 @@ export function AppHeader({ homeTo = '/app', brandTitle, logoUrl }: Props) {
 
           {user && (
             <div className="hidden items-center gap-2 sm:flex">
-              <span className="max-w-[8rem] truncate text-sm text-muted">
-                {user.firstName}
-              </span>
+              <span className="max-w-[8rem] truncate text-sm text-muted">{user.firstName}</span>
               <Button size="sm" variant="outline" onClick={() => void logout()}>
                 {t('auth.logout')}
               </Button>

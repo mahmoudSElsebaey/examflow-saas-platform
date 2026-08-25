@@ -4,23 +4,24 @@ import { useTranslation } from 'react-i18next'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as examApi from '../api/examApi'
+import * as orgApi from '@/features/organizations/api/orgApi'
 import type { ExamAttempt, GradingQueueItem } from '../types'
+import type { Organization } from '@/features/organizations/types'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
-import { Container } from '@/components/ui/Container'
 import { Spinner } from '@/components/ui/Spinner'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
-import { OrgWorkspaceNav } from '@/components/layout/OrgWorkspaceNav'
-import { AppHeader } from '@/components/layout/AppHeader'
+import { OrgWorkspaceLayout } from '@/components/layout/OrgWorkspaceLayout'
 
 export function OrgGradingPage() {
   const { orgId, attemptId } = useParams<{ orgId: string; attemptId?: string }>()
   const { t } = useTranslation()
   const toast = useToast()
   const { accessToken } = useAuth()
+  const [org, setOrg] = useState<Organization | null>(null)
   const [items, setItems] = useState<GradingQueueItem[]>([])
   const [attempt, setAttempt] = useState<ExamAttempt | null>(null)
   const [loading, setLoading] = useState(true)
@@ -28,6 +29,14 @@ export function OrgGradingPage() {
   const [saving, setSaving] = useState(false)
   const [scores, setScores] = useState<Record<string, string>>({})
   const [feedback, setFeedback] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    if (!accessToken || !orgId) return
+    void orgApi
+      .getOrganizationApi(accessToken, orgId)
+      .then((r) => setOrg(r.data?.organization ?? null))
+      .catch(() => {})
+  }, [accessToken, orgId])
 
   const loadQueue = useCallback(async () => {
     if (!accessToken || !orgId) return
@@ -37,11 +46,12 @@ export function OrgGradingPage() {
       const res = await examApi.listGradingQueueApi(accessToken, orgId)
       setItems(res.data?.items ?? [])
     } catch (err) {
-      toast.fromError(err); setError(t('errors.generic'))
+      toast.fromError(err)
+      setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
-  }, [accessToken, orgId, t])
+  }, [accessToken, orgId, t, toast])
 
   const loadAttempt = useCallback(async () => {
     if (!accessToken || !orgId || !attemptId) return
@@ -64,11 +74,12 @@ export function OrgGradingPage() {
         setFeedback(f)
       }
     } catch (err) {
-      toast.fromError(err); setError(t('errors.generic'))
+      toast.fromError(err)
+      setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
-  }, [accessToken, orgId, attemptId, t])
+  }, [accessToken, orgId, attemptId, t, toast])
 
   useEffect(() => {
     if (attemptId) void loadAttempt()
@@ -101,152 +112,166 @@ export function OrgGradingPage() {
     try {
       const res = await examApi.applyManualGradesApi(accessToken, orgId, attemptId, grades)
       setAttempt(res.data?.attempt ?? null)
+      toast.success(t('toast.saved'))
     } catch (err) {
-      toast.fromError(err); setError(t('errors.generic'))
+      toast.fromError(err)
+      setError(t('errors.generic'))
     } finally {
       setSaving(false)
     }
   }
 
+  if (!orgId) return null
+
   return (
-    <div className="min-h-screen bg-background">
-      <AppHeader />
-      <Container className="py-6 sm:py-8">
-        <OrgWorkspaceNav />
-        <div className="mb-6 mt-4">
-          <h1 className="text-2xl font-bold text-foreground">{t('grading.title')}</h1>
-          <p className="text-sm text-muted">{t('grading.subtitle')}</p>
+    <OrgWorkspaceLayout
+      orgId={orgId}
+      orgName={org?.name}
+      role={org?.myRole}
+      branding={org?.branding}
+    >
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">{t('grading.title')}</h1>
+        <p className="text-sm text-muted">{t('grading.subtitle')}</p>
+      </div>
+
+      {error && (
+        <Alert variant="error" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Spinner />
         </div>
-
-        {error && (
-          <Alert variant="error" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <Spinner />
-          </div>
-        ) : attemptId && attempt ? (
-          <div className="space-y-4">
-            <Card>
-              <CardContent className="space-y-2 pt-6">
-                <p className="text-lg font-semibold">{attempt.examTitle}</p>
-                <p className="text-sm text-muted">
-                  {t('grading.student')}: {attempt.studentName || attempt.userId}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="info">
-                    {attempt.score}/{attempt.maxScore} ({attempt.percent}%)
-                  </Badge>
-                  {attempt.needsManualGrading ? (
-                    <Badge variant="warning">{t('grading.pending')}</Badge>
-                  ) : (
-                    <Badge variant="success">{t('grading.complete')}</Badge>
-                  )}
+      ) : attemptId && attempt ? (
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="space-y-2 pt-6">
+              <p className="text-lg font-semibold">{attempt.examTitle}</p>
+              <p className="text-sm text-muted">
+                {t('grading.student')}: {attempt.studentName || attempt.userId}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="info">
+                  {attempt.score}/{attempt.maxScore} ({attempt.percent}%)
+                </Badge>
+                {attempt.needsManualGrading ? (
+                  <Badge variant="warning">{t('grading.pending')}</Badge>
+                ) : (
+                  <Badge variant="success">{t('grading.complete')}</Badge>
+                )}
+              </div>
+              {/* Staff-only integrity summary */}
+              {(attempt as any).security && (
+                <div className="mt-2 rounded-lg border border-border bg-surface-subtle p-3 text-xs text-muted">
+                  <p className="font-semibold text-foreground">{t('exam.integrityTitle')}</p>
+                  <p>
+                    {t('exam.tabSwitches')}: {(attempt as any).security?.tabBlurCount ?? 0}
+                    {' · '}
+                    {t('exam.pasteEvents')}: {(attempt as any).security?.pasteCount ?? 0}
+                  </p>
                 </div>
-                <Link to={`/app/organizations/${orgId}/grading`}>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    {t('grading.backQueue')}
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+              )}
+              <Link to={`/app/organizations/${orgId}/grading`}>
+                <Button variant="outline" size="sm" className="mt-2">
+                  {t('grading.backQueue')}
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
 
-            {(attempt.questions || [])
-              .filter((q) => q.type === 'short_answer')
-              .map((q, i) => (
-                <Card key={q.id}>
-                  <CardContent className="space-y-3 pt-6">
-                    <div className="flex flex-wrap gap-2">
-                      <Badge variant="info">#{i + 1}</Badge>
-                      <Badge variant="warning">
-                        {q.points} {t('exam.pts')}
-                      </Badge>
-                      {q.outcome === 'pending_manual' && (
-                        <Badge variant="warning">{t('exam.pendingReview')}</Badge>
-                      )}
+          {(attempt.questions || [])
+            .filter((q) => q.type === 'short_answer')
+            .map((q, i) => (
+              <Card key={q.id}>
+                <CardContent className="space-y-3 pt-6">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="info">#{i + 1}</Badge>
+                    <Badge variant="warning">
+                      {q.points} {t('exam.pts')}
+                    </Badge>
+                    {q.outcome === 'pending_manual' && (
+                      <Badge variant="warning">{t('exam.pendingReview')}</Badge>
+                    )}
+                  </div>
+                  <p className="font-medium text-foreground">{q.stem}</p>
+                  <div className="rounded-lg bg-surface-subtle p-3 text-sm">
+                    <p className="text-xs text-muted">{t('exam.yourAnswer')}</p>
+                    <p className="mt-1 whitespace-pre-wrap text-foreground">
+                      {(q.userSelected?.[0] || '—').slice(0, 5000)}
+                    </p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <div className="space-y-1">
+                      <Label htmlFor={`pts-${q.id}`}>
+                        {t('grading.points')} (0–{q.points})
+                      </Label>
+                      <Input
+                        id={`pts-${q.id}`}
+                        type="number"
+                        min={0}
+                        max={q.points}
+                        step={0.5}
+                        value={scores[q.id] ?? ''}
+                        onChange={(e) =>
+                          setScores((prev) => ({ ...prev, [q.id]: e.target.value }))
+                        }
+                      />
                     </div>
-                    <p className="font-medium text-foreground">{q.stem}</p>
-                    <div className="rounded-lg bg-surface-subtle p-3 text-sm">
-                      <p className="text-xs text-muted">{t('exam.yourAnswer')}</p>
-                      <p className="mt-1 whitespace-pre-wrap text-foreground">
-                        {(q.userSelected?.[0] || '—').slice(0, 5000)}
-                      </p>
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label htmlFor={`fb-${q.id}`}>{t('grading.feedback')}</Label>
+                      <textarea
+                        id={`fb-${q.id}`}
+                        rows={2}
+                        className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm"
+                        value={feedback[q.id] ?? ''}
+                        onChange={(e) =>
+                          setFeedback((prev) => ({ ...prev, [q.id]: e.target.value }))
+                        }
+                      />
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <Label htmlFor={`pts-${q.id}`}>
-                          {t('grading.points')} (0–{q.points})
-                        </Label>
-                        <Input
-                          id={`pts-${q.id}`}
-                          type="number"
-                          min={0}
-                          max={q.points}
-                          step={0.5}
-                          value={scores[q.id] ?? ''}
-                          onChange={(e) =>
-                            setScores((prev) => ({ ...prev, [q.id]: e.target.value }))
-                          }
-                        />
-                      </div>
-                      <div className="space-y-1 sm:col-span-2">
-                        <Label htmlFor={`fb-${q.id}`}>{t('grading.feedback')}</Label>
-                        <textarea
-                          id={`fb-${q.id}`}
-                          rows={2}
-                          className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm"
-                          value={feedback[q.id] ?? ''}
-                          onChange={(e) =>
-                            setFeedback((prev) => ({ ...prev, [q.id]: e.target.value }))
-                          }
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-            <Button onClick={() => void saveGrades()} disabled={saving}>
-              {saving ? t('common.loading') : t('grading.save')}
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {items.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center text-muted">
-                  {t('grading.empty')}
+                  </div>
                 </CardContent>
               </Card>
-            ) : (
-              items.map((item) => (
-                <Card key={item.id}>
-                  <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div>
-                      <p className="font-semibold text-foreground">{item.examTitle}</p>
-                      <p className="text-sm text-muted">
-                        {item.studentName} · {item.pendingManualCount}{' '}
-                        {t('grading.pendingItems')}
+            ))}
+
+          <Button onClick={() => void saveGrades()} disabled={saving}>
+            {saving ? t('common.loading') : t('grading.save')}
+          </Button>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {items.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center text-muted">{t('grading.empty')}</CardContent>
+            </Card>
+          ) : (
+            items.map((item) => (
+              <Card key={item.id}>
+                <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-semibold text-foreground">{item.examTitle}</p>
+                    <p className="text-sm text-muted">
+                      {item.studentName} · {item.pendingManualCount}{' '}
+                      {t('grading.pendingItems')}
+                    </p>
+                    {item.submittedAt && (
+                      <p className="text-xs text-muted">
+                        {new Date(item.submittedAt).toLocaleString()}
                       </p>
-                      {item.submittedAt && (
-                        <p className="text-xs text-muted">
-                          {new Date(item.submittedAt).toLocaleString()}
-                        </p>
-                      )}
-                    </div>
-                    <Link to={`/app/organizations/${orgId}/grading/${item.id}`}>
-                      <Button size="sm">{t('grading.review')}</Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        )}
-      </Container>
-    </div>
+                    )}
+                  </div>
+                  <Link to={`/app/organizations/${orgId}/grading/${item.id}`}>
+                    <Button size="sm">{t('grading.review')}</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </div>
+      )}
+    </OrgWorkspaceLayout>
   )
 }
