@@ -14,7 +14,7 @@ import type { Exam } from '../types'
 import type { Question } from '@/features/content/types'
 import type { OrgMemberRole, Organization } from '@/features/organizations/types'
 import { isStaffRole } from '@/features/organizations/lib/roles'
-import { buildPreStartMessage } from '../lib/preStartConfirm'
+import { PreStartModal } from '../components/PreStartModal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
@@ -42,6 +42,8 @@ export function OrgExamsPage() {
   const [showForm, setShowForm] = useState(false)
   const [selectedQ, setSelectedQ] = useState<string[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [preStartExam, setPreStartExam] = useState<Exam | null>(null)
+  const [starting, setStarting] = useState(false)
 
   const isStaff = isStaffRole(role)
 
@@ -138,17 +140,19 @@ export function OrgExamsPage() {
     }
   }
 
-  const onStart = async (exam: Exam) => {
-    if (!accessToken || !orgId) return
-    const ok = window.confirm(buildPreStartMessage(t, exam))
-    if (!ok) return
+  const confirmStart = async () => {
+    if (!accessToken || !orgId || !preStartExam) return
+    setStarting(true)
     try {
-      const res = await examApi.startAttemptApi(accessToken, orgId, exam.id)
+      const res = await examApi.startAttemptApi(accessToken, orgId, preStartExam.id)
       const id = res.data?.attempt?.id
+      setPreStartExam(null)
       if (id) navigate(`/app/organizations/${orgId}/attempts/${id}`)
     } catch (err) {
       toast.fromError(err)
       setError(t('errors.generic'))
+    } finally {
+      setStarting(false)
     }
   }
 
@@ -165,6 +169,15 @@ export function OrgExamsPage() {
       role={role}
       branding={org?.branding}
     >
+      <PreStartModal
+        open={!!preStartExam}
+        examTitle={preStartExam?.title || ''}
+        timeLimitMinutes={preStartExam?.timeLimitMinutes}
+        onConfirm={() => void confirmStart()}
+        onCancel={() => setPreStartExam(null)}
+        loading={starting}
+      />
+
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -346,7 +359,7 @@ export function OrgExamsPage() {
                       </Button>
                     )}
                     {exam.status === 'published' && (
-                      <Button size="sm" className="gap-1" onClick={() => void onStart(exam)}>
+                      <Button size="sm" className="gap-1" onClick={() => setPreStartExam(exam)}>
                         <Play className="h-3.5 w-3.5" />
                         {t('exam.start')}
                       </Button>
@@ -414,7 +427,7 @@ export function OrgExamsPage() {
                   </span>
                 </div>
                 <div className="mt-4">
-                  <Button size="sm" className="gap-1" onClick={() => void onStart(exam)}>
+                  <Button size="sm" className="gap-1" onClick={() => setPreStartExam(exam)}>
                     <Play className="h-3.5 w-3.5" />
                     {t('exam.start')}
                   </Button>
