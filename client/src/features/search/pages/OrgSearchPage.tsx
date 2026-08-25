@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
-  ArrowLeft,
   BookOpen,
   ClipboardList,
   Library,
@@ -11,6 +10,8 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
+import * as orgApi from '@/features/organizations/api/orgApi'
+import type { Organization } from '@/features/organizations/types'
 import {
   searchOrgApi,
   type SearchHit,
@@ -20,11 +21,8 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
-import { Container } from '@/components/ui/Container'
 import { Spinner } from '@/components/ui/Spinner'
-import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
-import { OrgSubNav } from '@/components/layout/OrgSubNav'
-import { appConfig } from '@/config/app'
+import { OrgWorkspaceLayout } from '@/components/layout/OrgWorkspaceLayout'
 import { cn } from '@/lib/utils'
 
 const TYPE_FILTERS: { id: SearchResultType | 'all'; labelKey: string }[] = [
@@ -64,7 +62,8 @@ export function OrgSearchPage() {
   const { orgId } = useParams<{ orgId: string }>()
   const [params, setParams] = useSearchParams()
   const { t } = useTranslation()
-  const { accessToken, logout, user } = useAuth()
+  const { accessToken } = useAuth()
+  const [org, setOrg] = useState<Organization | null>(null)
 
   const initialQ = params.get('q') || ''
   const [q, setQ] = useState(initialQ)
@@ -78,6 +77,14 @@ export function OrgSearchPage() {
     () => (typeFilter === 'all' ? undefined : [typeFilter]),
     [typeFilter]
   )
+
+  useEffect(() => {
+    if (!accessToken || !orgId) return
+    void orgApi
+      .getOrganizationApi(accessToken, orgId)
+      .then((r) => setOrg(r.data?.organization ?? null))
+      .catch(() => {})
+  }, [accessToken, orgId])
 
   useEffect(() => {
     if (!accessToken || !orgId) return
@@ -115,144 +122,104 @@ export function OrgSearchPage() {
     setParams(sp)
   }
 
+  if (!orgId) return null
+
   return (
-    <div className="min-h-screen bg-mesh">
-      <header className="sticky top-0 z-40 border-b border-border/50 glass">
-        <Container>
-          <div className="flex h-14 items-center justify-between gap-3">
-            <Link to="/app" className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary-800 text-xs font-bold text-primary-foreground">
-                EF
-              </span>
-              <span className="font-bold text-foreground">{appConfig.APP_NAME}</span>
-            </Link>
-            <div className="flex items-center gap-3">
-              <LanguageSwitcher variant="compact" />
-              <span className="hidden text-sm text-muted sm:inline">{user?.firstName}</span>
-              <Button variant="outline" size="sm" onClick={() => logout()}>
-                {t('common.logOut')}
-              </Button>
-            </div>
-          </div>
-        </Container>
-      </header>
-
-      <Container className="py-10">
-        <OrgSubNav />
-
-        <Link
-          to={`/app/organizations/${orgId}`}
-          className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-          {t('search.back', { defaultValue: 'Back to organization' })}
-        </Link>
-
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-muted text-primary">
-            <Search className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {t('search.title', { defaultValue: 'Search' })}
-            </h1>
-            <p className="text-sm text-muted">
-              {t('search.subtitle', {
-                defaultValue: 'Find exams, questions, courses, banks, and members',
-              })}
-            </p>
-          </div>
+    <OrgWorkspaceLayout
+      orgId={orgId}
+      orgName={org?.name}
+      role={org?.myRole}
+      branding={org?.branding}
+    >
+      <div className="mb-6 flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary-muted text-primary">
+          <Search className="h-5 w-5" />
         </div>
-
-        <form onSubmit={runSearch} className="mb-4 flex flex-col gap-3 sm:flex-row">
-          <input
-            type="search"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t('search.placeholder', {
-              defaultValue: 'Type at least one character…',
-            })}
-            className="w-full flex-1 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            autoFocus
-          />
-          <Button type="submit" disabled={loading}>
-            {loading ? t('common.loading') : t('search.action', { defaultValue: 'Search' })}
-          </Button>
-        </form>
-
-        <div className="mb-6 flex flex-wrap gap-1.5">
-          {TYPE_FILTERS.map((f) => (
-            <button
-              key={f.id}
-              type="button"
-              onClick={() => setTypeFilter(f.id)}
-              className={cn(
-                'rounded-lg px-3 py-1 text-xs font-medium transition-colors',
-                typeFilter === f.id
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-surface-subtle text-muted hover:text-foreground'
-              )}
-            >
-              {t(f.labelKey, {
-                defaultValue:
-                  f.id === 'all'
-                    ? 'All'
-                    : f.id.charAt(0).toUpperCase() + f.id.slice(1) + 's',
-              })}
-            </button>
-          ))}
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            {t('search.title')}
+          </h1>
+          <p className="text-sm text-muted">{t('search.subtitle')}</p>
         </div>
+      </div>
 
-        {error && (
-          <Alert variant="error" className="mb-6">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+      <form onSubmit={runSearch} className="mb-4 flex flex-col gap-3 sm:flex-row">
+        <input
+          type="search"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={t('search.placeholder')}
+          className="w-full flex-1 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          autoFocus
+        />
+        <Button type="submit" disabled={loading}>
+          {loading ? t('common.loading') : t('search.action')}
+        </Button>
+      </form>
 
-        {loading ? (
-          <div className="flex justify-center py-16">
-            <Spinner />
-          </div>
-        ) : !searched ? (
-          <p className="text-sm text-muted">
-            {t('search.hint', { defaultValue: 'Enter a query to search this organization.' })}
-          </p>
-        ) : hits.length === 0 ? (
-          <p className="text-sm text-muted">
-            {t('search.empty', { defaultValue: 'No results found.' })}
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {hits.map((hit) => {
-              const Icon = ICONS[hit.type]
-              return (
-                <li key={`${hit.type}-${hit.id}`}>
-                  <Link to={hrefFor(orgId!, hit)}>
-                    <Card className="border-border/60 transition-colors hover:border-primary/40">
-                      <CardContent className="flex items-start gap-3 py-4">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-muted text-primary">
-                          <Icon className="h-4 w-4" />
+      <div className="mb-6 flex flex-wrap gap-1.5">
+        {TYPE_FILTERS.map((f) => (
+          <button
+            key={f.id}
+            type="button"
+            onClick={() => setTypeFilter(f.id)}
+            className={cn(
+              'rounded-lg px-3 py-1 text-xs font-medium transition-colors',
+              typeFilter === f.id
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-surface-subtle text-muted hover:text-foreground'
+            )}
+          >
+            {t(f.labelKey)}
+          </button>
+        ))}
+      </div>
+
+      {error && (
+        <Alert variant="error" className="mb-6">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Spinner />
+        </div>
+      ) : !searched ? (
+        <p className="text-sm text-muted">{t('search.hint')}</p>
+      ) : hits.length === 0 ? (
+        <p className="text-sm text-muted">{t('search.empty')}</p>
+      ) : (
+        <ul className="space-y-2">
+          {hits.map((hit) => {
+            const Icon = ICONS[hit.type]
+            return (
+              <li key={`${hit.type}-${hit.id}`}>
+                <Link to={hrefFor(orgId, hit)}>
+                  <Card className="border-border/60 transition-colors hover:border-primary/40">
+                    <CardContent className="flex items-start gap-3 py-4">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-muted text-primary">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex flex-wrap items-center gap-2">
+                          <Badge variant="info">{hit.type}</Badge>
+                          {hit.subtitle && (
+                            <span className="text-xs text-muted">{hit.subtitle}</span>
+                          )}
                         </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="mb-1 flex flex-wrap items-center gap-2">
-                            <Badge variant="info">{hit.type}</Badge>
-                            {hit.subtitle && (
-                              <span className="text-xs text-muted">{hit.subtitle}</span>
-                            )}
-                          </div>
-                          <p className="text-sm font-medium text-foreground line-clamp-2">
-                            {hit.title}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </Container>
-    </div>
+                        <p className="line-clamp-2 text-sm font-medium text-foreground">
+                          {hit.title}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </OrgWorkspaceLayout>
   )
 }
