@@ -36,6 +36,16 @@ function uid() {
   return Math.random().toString(36).slice(2, 10)
 }
 
+const noopToast: ToastContextValue = {
+  toasts: [],
+  push: () => {},
+  success: () => {},
+  error: () => {},
+  info: () => {},
+  fromError: () => {},
+  dismiss: () => {},
+}
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   const [toasts, setToasts] = useState<ToastItem[]>([])
@@ -58,15 +68,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       toasts,
       push,
       success: (message, title) =>
-        push({ variant: 'success', message, title: title || t('toast.success') }),
+        push({ variant: 'success', message, title: title || t('toast.success', { defaultValue: 'Success' }) }),
       error: (message, title) =>
-        push({ variant: 'error', message, title: title || t('toast.error') }),
+        push({ variant: 'error', message, title: title || t('toast.error', { defaultValue: 'Error' }) }),
       info: (message, title) =>
-        push({ variant: 'info', message, title: title || t('toast.info') }),
+        push({ variant: 'info', message, title: title || t('toast.info', { defaultValue: 'Info' }) }),
       fromError: (err) =>
         push({
           variant: 'error',
-          title: t('toast.error'),
+          title: t('toast.error', { defaultValue: 'Error' }),
           message: translateApiError(err, t),
         }),
       dismiss,
@@ -106,7 +116,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               type="button"
               className="rounded-md p-1 text-muted hover:bg-black/5 hover:text-foreground"
               onClick={() => dismiss(toast.id)}
-              aria-label={t('common.close')}
+              aria-label={t('common.close', { defaultValue: 'Close' })}
             >
               <X className="h-4 w-4" />
             </button>
@@ -117,10 +127,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   )
 }
 
+/** Safe: returns no-op helpers if provider is missing (avoids blank crash screens). */
 export function useToast() {
   const ctx = useContext(ToastContext)
-  if (!ctx) {
-    throw new Error('useToast must be used within ToastProvider')
-  }
-  return ctx
+  return ctx ?? noopToast
 }

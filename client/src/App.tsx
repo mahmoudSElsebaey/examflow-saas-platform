@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from '@/features/auth/AuthContext'
+import { ToastProvider } from '@/components/ui/Toast'
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
 import { LandingPage } from '@/pages/LandingPage'
 import { DashboardPage } from '@/pages/DashboardPage'
@@ -32,38 +33,46 @@ import { MemberProfilePage } from '@/features/organizations/pages/MemberProfileP
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPage />} />
-          <Route path="/verify/:code" element={<VerifyCertificatePage />} />
-          <Route path="/app" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-          <Route path="/app/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
-          <Route path="/app/organizations" element={<ProtectedRoute><OrganizationsPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId" element={<ProtectedRoute><OrganizationDetailPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/content" element={<ProtectedRoute><OrgContentPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/learn" element={<ProtectedRoute><OrgLearnPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/exams" element={<ProtectedRoute><OrgExamsPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/grading" element={<ProtectedRoute><OrgGradingPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/grading/:attemptId" element={<ProtectedRoute><OrgGradingPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/attempts/:attemptId" element={<ProtectedRoute><ExamTakePage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/analytics" element={<ProtectedRoute><OrgAnalyticsPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/progress" element={<ProtectedRoute><StudentProgressPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/certificates" element={<ProtectedRoute><OrgCertificatesPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/certificates/:certId" element={<ProtectedRoute><CertificateViewPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/students" element={<ProtectedRoute><OrgStudentsPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/members" element={<ProtectedRoute><OrgMembersPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/members/:userId" element={<ProtectedRoute><MemberProfilePage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/settings" element={<ProtectedRoute><OrgSettingsPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/billing" element={<ProtectedRoute><OrgBillingPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/search" element={<ProtectedRoute><OrgSearchPage /></ProtectedRoute>} />
-          <Route path="/app/organizations/:orgId/activity" element={<ProtectedRoute><OrgActivityPage /></ProtectedRoute>} />
-        </Routes>
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/verify/:code" element={<VerifyCertificatePage />} />
+
+            {/* App (auth required) */}
+            <Route path="/app" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/app/admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+            <Route path="/app/organizations" element={<ProtectedRoute><OrganizationsPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId" element={<ProtectedRoute><OrganizationDetailPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/content" element={<ProtectedRoute><OrgContentPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/learn" element={<ProtectedRoute><OrgLearnPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/exams" element={<ProtectedRoute><OrgExamsPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/grading" element={<ProtectedRoute><OrgGradingPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/grading/:attemptId" element={<ProtectedRoute><OrgGradingPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/attempts/:attemptId" element={<ProtectedRoute><ExamTakePage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/analytics" element={<ProtectedRoute><OrgAnalyticsPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/progress" element={<ProtectedRoute><StudentProgressPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/certificates" element={<ProtectedRoute><OrgCertificatesPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/certificates/:certId" element={<ProtectedRoute><CertificateViewPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/students" element={<ProtectedRoute><OrgStudentsPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/members" element={<ProtectedRoute><OrgMembersPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/members/:userId" element={<ProtectedRoute><MemberProfilePage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/settings" element={<ProtectedRoute><OrgSettingsPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/billing" element={<ProtectedRoute><OrgBillingPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/search" element={<ProtectedRoute><OrgSearchPage /></ProtectedRoute>} />
+            <Route path="/app/organizations/:orgId/activity" element={<ProtectedRoute><OrgActivityPage /></ProtectedRoute>} />
+
+            {/* Fallback: unknown paths → landing */}
+            <Route path="*" element={<LandingPage />} />
+          </Routes>
+        </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   )
 }
