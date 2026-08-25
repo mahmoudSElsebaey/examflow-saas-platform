@@ -5,7 +5,7 @@ import { useToast } from '@/components/ui/Toast'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, UserCog } from 'lucide-react'
+import { UserCog } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as orgApi from '../api/orgApi'
 import type { OrgMember, Organization, OrgMemberRole } from '../types'
@@ -15,11 +15,8 @@ import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
 import { Badge } from '@/components/ui/Badge'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
-import { Container } from '@/components/ui/Container'
 import { Spinner } from '@/components/ui/Spinner'
-import { AppHeader } from '@/components/layout/AppHeader'
-import { OrgWorkspaceNav } from '@/components/layout/OrgWorkspaceNav'
-import { OrgBrandScope } from '@/components/layout/OrgBrandScope'
+import { OrgWorkspaceLayout } from '@/components/layout/OrgWorkspaceLayout'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card'
 
 const ROLE_OPTIONS: Exclude<OrgMemberRole, 'owner'>[] = [
@@ -40,7 +37,6 @@ export function OrgMembersPage() {
   const [error, setError] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<string | null>(null)
   const canInvite = canManageMembers(org?.myRole)
-  const canOpenProfile = canInvite || true
 
   const schema = z.object({
     email: z.string().email(t('validation.invalidEmail')),
@@ -138,177 +134,167 @@ export function OrgMembersPage() {
   const canViewProfile = (m: OrgMember) =>
     canManageMembers(org?.myRole) || user?.id === m.userId
 
+  if (!orgId) return null
+
   return (
-    <OrgBrandScope branding={org?.branding}>
-      <div className="min-h-screen bg-mesh">
-        <AppHeader
-          homeTo={orgId ? `/app/organizations/${orgId}` : '/app'}
-          brandTitle={org?.name}
-          logoUrl={org?.branding?.logoUrl}
-        />
-        <Container className="py-8">
-          <Link
-            to={`/app/organizations/${orgId}`}
-            className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-            {t('workspace.nav.overview')}
-          </Link>
-          <OrgWorkspaceNav role={org?.myRole} />
-          <div className="mb-6 flex items-center gap-3">
-            <UserCog className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">{t('workspace.nav.members')}</h1>
-          </div>
-          {error && (
-            <Alert variant="error" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {loading ? (
-            <div className="flex justify-center py-16">
-              <Spinner />
-            </div>
-          ) : (
-            <div className="grid gap-6 lg:grid-cols-3">
-              <Card className="border-border/60 lg:col-span-2">
-                <CardHeader>
-                  <CardTitle className="text-base">{t('org.members')}</CardTitle>
-                  <CardDescription>{t('org.membersHint')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <ul className="divide-y divide-border">
-                    {members.map((m) => {
-                      const isOwner = m.role === 'owner'
-                      const busy = busyId === m.id
-                      const profileLink = `/app/organizations/${orgId}/members/${m.userId}`
-                      return (
-                        <li
-                          key={m.id}
-                          className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"
-                        >
-                          <div className="min-w-0">
-                            {canViewProfile(m) ? (
-                              <Link
-                                to={profileLink}
-                                className="text-sm font-medium text-primary hover:underline"
-                              >
-                                {m.firstName} {m.lastName}
-                              </Link>
-                            ) : (
-                              <p className="text-sm font-medium">
-                                {m.firstName} {m.lastName}
-                              </p>
-                            )}
-                            <p className="text-xs text-muted">{m.email}</p>
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            {canViewProfile(m) && (
-                              <Link to={profileLink}>
-                                <Button type="button" size="sm" variant="outline">
-                                  {t('org.profile', { defaultValue: 'Profile' })}
-                                </Button>
-                              </Link>
-                            )}
-                            {canInvite && !isOwner ? (
-                              <select
-                                className="h-9 rounded-lg border border-border bg-surface px-2 text-xs"
-                                value={m.role}
-                                disabled={busy}
-                                onChange={(e) =>
-                                  void onRoleChange(
-                                    m.id,
-                                    e.target.value as Exclude<OrgMemberRole, 'owner'>
-                                  )
-                                }
-                              >
-                                {ROLE_OPTIONS.map((r) => (
-                                  <option key={r} value={r}>
-                                    {r}
-                                  </option>
-                                ))}
-                              </select>
-                            ) : (
-                              <Badge variant="info">{m.role}</Badge>
-                            )}
-                            <Badge
-                              variant={
-                                m.status === 'active'
-                                  ? 'success'
-                                  : m.status === 'suspended'
-                                    ? 'error'
-                                    : 'warning'
-                              }
-                            >
-                              {m.status}
-                            </Badge>
-                            {canInvite && !isOwner && (
-                              <>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={busy}
-                                  onClick={() => void onToggleStatus(m)}
-                                >
-                                  {m.status === 'suspended'
-                                    ? t('org.reactivate', { defaultValue: 'Reactivate' })
-                                    : t('org.suspend', { defaultValue: 'Suspend' })}
-                                </Button>
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  disabled={busy}
-                                  onClick={() => void onRemove(m)}
-                                  className="text-destructive"
-                                >
-                                  {t('common.remove')}
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </CardContent>
-              </Card>
-              {canInvite && (
-                <Card className="h-fit border-border/60">
-                  <CardHeader>
-                    <CardTitle className="text-base">{t('org.inviteTitle')}</CardTitle>
-                    <CardDescription>{t('org.inviteHint')}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSubmit(onInvite)} className="space-y-4" noValidate>
-                      <div className="space-y-2">
-                        <Label htmlFor="email">{t('auth.email')}</Label>
-                        <Input id="email" type="email" {...register('email')} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="role">{t('org.role')}</Label>
-                        <select
-                          id="role"
-                          className="flex h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
-                          {...register('role')}
-                        >
-                          <option value="admin">{t('roles.admin')}</option>
-                          <option value="teacher">{t('roles.teacher')}</option>
-                          <option value="examiner">{t('roles.examiner')}</option>
-                          <option value="student">{t('roles.student')}</option>
-                        </select>
-                      </div>
-                      <Button type="submit" className="w-full" disabled={isSubmitting}>
-                        {isSubmitting ? t('common.loading') : t('org.invite')}
-                      </Button>
-                    </form>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-        </Container>
+    <OrgWorkspaceLayout
+      orgId={orgId}
+      orgName={org?.name}
+      role={org?.myRole}
+      branding={org?.branding}
+    >
+      <div className="mb-6 flex items-center gap-3">
+        <UserCog className="h-6 w-6 text-primary" />
+        <h1 className="text-2xl font-bold">{t('workspace.nav.members')}</h1>
       </div>
-    </OrgBrandScope>
+      {error && (
+        <Alert variant="error" className="mb-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      {loading ? (
+        <div className="flex justify-center py-16">
+          <Spinner />
+        </div>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-3">
+          <Card className="border-border/60 lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-base">{t('org.members')}</CardTitle>
+              <CardDescription>{t('org.membersHint')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="divide-y divide-border">
+                {members.map((m) => {
+                  const isOwner = m.role === 'owner'
+                  const busy = busyId === m.id
+                  const profileLink = `/app/organizations/${orgId}/members/${m.userId}`
+                  return (
+                    <li
+                      key={m.id}
+                      className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        {canViewProfile(m) ? (
+                          <Link
+                            to={profileLink}
+                            className="text-sm font-medium text-primary hover:underline"
+                          >
+                            {m.firstName} {m.lastName}
+                          </Link>
+                        ) : (
+                          <p className="text-sm font-medium">
+                            {m.firstName} {m.lastName}
+                          </p>
+                        )}
+                        <p className="text-xs text-muted">{m.email}</p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {canViewProfile(m) && (
+                          <Link to={profileLink}>
+                            <Button type="button" size="sm" variant="outline">
+                              {t('org.profile', { defaultValue: 'Profile' })}
+                            </Button>
+                          </Link>
+                        )}
+                        {canInvite && !isOwner ? (
+                          <select
+                            className="h-9 rounded-lg border border-border bg-surface px-2 text-xs"
+                            value={m.role}
+                            disabled={busy}
+                            onChange={(e) =>
+                              void onRoleChange(
+                                m.id,
+                                e.target.value as Exclude<OrgMemberRole, 'owner'>
+                              )
+                            }
+                          >
+                            {ROLE_OPTIONS.map((r) => (
+                              <option key={r} value={r}>
+                                {r}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <Badge variant="info">{m.role}</Badge>
+                        )}
+                        <Badge
+                          variant={
+                            m.status === 'active'
+                              ? 'success'
+                              : m.status === 'suspended'
+                                ? 'error'
+                                : 'warning'
+                          }
+                        >
+                          {m.status}
+                        </Badge>
+                        {canInvite && !isOwner && (
+                          <>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              disabled={busy}
+                              onClick={() => void onToggleStatus(m)}
+                            >
+                              {m.status === 'suspended'
+                                ? t('org.reactivate', { defaultValue: 'Reactivate' })
+                                : t('org.suspend', { defaultValue: 'Suspend' })}
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              disabled={busy}
+                              onClick={() => void onRemove(m)}
+                              className="text-destructive"
+                            >
+                              {t('common.remove')}
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
+            </CardContent>
+          </Card>
+          {canInvite && (
+            <Card className="h-fit border-border/60">
+              <CardHeader>
+                <CardTitle className="text-base">{t('org.inviteTitle')}</CardTitle>
+                <CardDescription>{t('org.inviteHint')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit(onInvite)} className="space-y-4" noValidate>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">{t('auth.email')}</Label>
+                    <Input id="email" type="email" {...register('email')} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="role">{t('org.role')}</Label>
+                    <select
+                      id="role"
+                      className="flex h-11 w-full rounded-lg border border-border bg-surface px-3 text-sm"
+                      {...register('role')}
+                    >
+                      <option value="admin">{t('roles.admin')}</option>
+                      <option value="teacher">{t('roles.teacher')}</option>
+                      <option value="examiner">{t('roles.examiner')}</option>
+                      <option value="student">{t('roles.student')}</option>
+                    </select>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? t('common.loading') : t('org.invite')}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+    </OrgWorkspaceLayout>
   )
 }
