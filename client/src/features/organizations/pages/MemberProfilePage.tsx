@@ -1,22 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Award, BookOpen, ClipboardList, User } from 'lucide-react'
+import { Award, BookOpen, ClipboardList, User } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import * as orgApi from '../api/orgApi'
 import type { MemberProfile } from '../api/orgApi'
+import type { Organization } from '../types'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Alert, AlertDescription } from '@/components/ui/Alert'
 import { Spinner } from '@/components/ui/Spinner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-import { AppShell } from '@/components/layout/AppShell'
+import { OrgWorkspaceLayout } from '@/components/layout/OrgWorkspaceLayout'
 
 export function MemberProfilePage() {
   const { orgId, userId } = useParams<{ orgId: string; userId: string }>()
   const { t, i18n } = useTranslation()
   const ar = i18n.language?.startsWith('ar')
   const { accessToken, user } = useAuth()
+  const [org, setOrg] = useState<Organization | null>(null)
   const [profile, setProfile] = useState<MemberProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +29,11 @@ export function MemberProfilePage() {
       setLoading(true)
       setError(null)
       try {
-        const res = await orgApi.getMemberProfileApi(accessToken, orgId, userId)
+        const [orgRes, res] = await Promise.all([
+          orgApi.getOrganizationApi(accessToken, orgId),
+          orgApi.getMemberProfileApi(accessToken, orgId, userId),
+        ])
+        setOrg(orgRes.data?.organization ?? null)
         setProfile(res.data?.profile ?? null)
       } catch (err) {
         setError(err instanceof Error ? err.message : t('errors.generic'))
@@ -37,17 +43,25 @@ export function MemberProfilePage() {
     })()
   }, [accessToken, orgId, userId, t])
 
+  if (!orgId) return null
+
   const isSelf = user?.id === userId
 
   return (
-    <AppShell>
-      <Link
-        to={`/app/organizations/${orgId}/members`}
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-        {ar ? 'الأعضاء' : 'Members'}
-      </Link>
+    <OrgWorkspaceLayout
+      orgId={orgId}
+      orgName={org?.name}
+      role={org?.myRole}
+      branding={org?.branding}
+    >
+      <div className="mb-4">
+        <Link
+          to={`/app/organizations/${orgId}/members`}
+          className="text-sm font-medium text-muted hover:text-foreground"
+        >
+          ← {t('workspace.nav.members')}
+        </Link>
+      </div>
 
       {loading ? (
         <div className="flex justify-center py-20">
@@ -90,7 +104,7 @@ export function MemberProfilePage() {
             </div>
             <Link to={`/app/organizations/${orgId}`}>
               <Button variant="outline" size="sm">
-                {ar ? 'المؤسسة' : 'Organization'}
+                {t('workspace.nav.overview')}
               </Button>
             </Link>
           </div>
@@ -162,7 +176,10 @@ export function MemberProfilePage() {
                 ) : (
                   <ul className="divide-y divide-border">
                     {profile.recentAttempts.map((a) => (
-                      <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+                      <li
+                        key={a.id}
+                        className="flex flex-wrap items-center justify-between gap-2 py-2.5"
+                      >
                         <div>
                           <p className="text-sm font-medium">{a.examTitle}</p>
                           <p className="text-xs text-muted">{a.status}</p>
@@ -171,7 +188,7 @@ export function MemberProfilePage() {
                           {a.percent != null && <Badge variant="info">{a.percent}%</Badge>}
                           {a.passed != null && (
                             <Badge variant={a.passed ? 'success' : 'error'}>
-                              {a.passed ? (ar ? 'ناجح' : 'Pass') : ar ? 'راسب' : 'Fail'}
+                              {a.passed ? t('exam.passed') : t('exam.failed')}
                             </Badge>
                           )}
                         </div>
@@ -212,16 +229,19 @@ export function MemberProfilePage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Award className="h-4 w-4 text-primary" />
-                {ar ? 'الشهادات' : 'Certificates'}
+                {t('cert.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {!profile.certificates.length ? (
-                <p className="text-sm text-muted">{ar ? 'لا شهادات' : 'No certificates'}</p>
+                <p className="text-sm text-muted">{t('cert.empty')}</p>
               ) : (
                 <ul className="divide-y divide-border">
                   {profile.certificates.map((c) => (
-                    <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+                    <li
+                      key={c.id}
+                      className="flex flex-wrap items-center justify-between gap-2 py-2.5"
+                    >
                       <div>
                         <p className="text-sm font-medium">{c.examTitle}</p>
                         <p className="text-xs text-muted">{c.code}</p>
@@ -235,6 +255,6 @@ export function MemberProfilePage() {
           </Card>
         </div>
       ) : null}
-    </AppShell>
+    </OrgWorkspaceLayout>
   )
 }
