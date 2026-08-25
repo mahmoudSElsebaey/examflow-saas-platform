@@ -14,6 +14,7 @@ import type { Exam } from '../types'
 import type { Question } from '@/features/content/types'
 import type { OrgMemberRole, Organization } from '@/features/organizations/types'
 import { isStaffRole } from '@/features/organizations/lib/roles'
+import { buildPreStartMessage } from '../lib/preStartConfirm'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Label } from '@/components/ui/Label'
@@ -88,7 +89,8 @@ export function OrgExamsPage() {
         setAvailable(availRes.data?.exams ?? [])
       }
     } catch (err) {
-      toast.fromError(err); setError(t('errors.generic'))
+      toast.fromError(err)
+      setError(t('errors.generic'))
     } finally {
       setLoading(false)
     }
@@ -119,7 +121,8 @@ export function OrgExamsPage() {
       toast.success(t('toast.saved'))
       await load()
     } catch (err) {
-      toast.fromError(err); setError(t('errors.generic'))
+      toast.fromError(err)
+      setError(t('errors.generic'))
     }
   })
 
@@ -130,18 +133,22 @@ export function OrgExamsPage() {
       toast.success(t('toast.published'))
       await load()
     } catch (err) {
-      toast.fromError(err); setError(t('errors.generic'))
+      toast.fromError(err)
+      setError(t('errors.generic'))
     }
   }
 
-  const onStart = async (examId: string) => {
+  const onStart = async (exam: Exam) => {
     if (!accessToken || !orgId) return
+    const ok = window.confirm(buildPreStartMessage(t, exam))
+    if (!ok) return
     try {
-      const res = await examApi.startAttemptApi(accessToken, orgId, examId)
+      const res = await examApi.startAttemptApi(accessToken, orgId, exam.id)
       const id = res.data?.attempt?.id
       if (id) navigate(`/app/organizations/${orgId}/attempts/${id}`)
     } catch (err) {
-      toast.fromError(err); setError(t('errors.generic'))
+      toast.fromError(err)
+      setError(t('errors.generic'))
     }
   }
 
@@ -339,7 +346,7 @@ export function OrgExamsPage() {
                       </Button>
                     )}
                     {exam.status === 'published' && (
-                      <Button size="sm" className="gap-1" onClick={() => onStart(exam.id)}>
+                      <Button size="sm" className="gap-1" onClick={() => void onStart(exam)}>
                         <Play className="h-3.5 w-3.5" />
                         {t('exam.start')}
                       </Button>
@@ -360,7 +367,7 @@ export function OrgExamsPage() {
                         setShowForm(true)
                       }}
                     >
-                      {t('common.edit')}
+                      {t('common.edit', { defaultValue: 'Edit' })}
                     </Button>
                   </div>
                 </CardContent>
@@ -407,7 +414,7 @@ export function OrgExamsPage() {
                   </span>
                 </div>
                 <div className="mt-4">
-                  <Button size="sm" className="gap-1" onClick={() => onStart(exam.id)}>
+                  <Button size="sm" className="gap-1" onClick={() => void onStart(exam)}>
                     <Play className="h-3.5 w-3.5" />
                     {t('exam.start')}
                   </Button>
