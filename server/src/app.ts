@@ -24,10 +24,35 @@ import { notFoundHandler, errorHandler } from './middlewares/errorHandler.js'
 
 const app = express()
 
-app.use(helmet())
+// API is consumed cross-origin (Vercel client → Vercel server)
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+)
+
+// Allow CLIENT_URL + any origin listed in CORS_ORIGINS
+const allowedOrigins = new Set(
+  [...config.corsOrigins, config.clientUrl].map((o) => o.replace(/\/$/, '')).filter(Boolean)
+)
+
 app.use(
   cors({
-    origin: config.corsOrigins,
+    origin(origin, callback) {
+      // Non-browser / same-origin tools (curl, server-to-server)
+      if (!origin) {
+        callback(null, true)
+        return
+      }
+      const normalized = origin.replace(/\/$/, '')
+      if (allowedOrigins.has(normalized)) {
+        callback(null, true)
+        return
+      }
+      // Helpful log in production diagnostics
+      console.warn(`CORS blocked origin: ${origin}. Allowed: ${[...allowedOrigins].join(', ')}`)
+      callback(null, false)
+    },
     credentials: true,
   })
 )
