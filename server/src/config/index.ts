@@ -28,7 +28,8 @@ const parsed = envSchema.safeParse(process.env)
 if (!parsed.success) {
   console.error('❌ Invalid environment variables:')
   console.error(parsed.error.flatten().fieldErrors)
-  process.exit(1)
+  // Throw instead of process.exit — process.exit crashes Vercel Serverless Functions
+  throw new Error('Invalid environment variables')
 }
 
 const env = parsed.data
@@ -48,10 +49,11 @@ if (env.NODE_ENV === 'production') {
     env.JWT_ACCESS_SECRET.length < 32 ||
     env.JWT_REFRESH_SECRET.length < 32
   ) {
-    console.error(
-      '❌ Production requires DATABASE_URL and strong JWT secrets (min 32 chars, not defaults).'
-    )
-    process.exit(1)
+    const msg =
+      'Production requires DATABASE_URL and strong JWT secrets (min 32 chars, not defaults).'
+    console.error('❌ ' + msg)
+    // Throw instead of process.exit — required for Vercel serverless
+    throw new Error(msg)
   }
 }
 
