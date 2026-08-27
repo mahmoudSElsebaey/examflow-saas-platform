@@ -30,10 +30,6 @@ const SLUG = 'demo-academy'
 
 type QType = 'mcq_single' | 'mcq_multiple' | 'true_false' | 'short_answer'
 
-function oid(doc: { id: string } | { _id: unknown }) {
-  return 'id' in doc ? String(doc.id) : String((doc as { _id: unknown })._id)
-}
-
 async function main() {
   console.log('Connecting…', MONGO.replace(/:\/\/.*@/, '://***@'))
   await mongoose.connect(MONGO)
@@ -91,7 +87,8 @@ async function main() {
     return u
   }
 
-  const platformAdmin = await upsertUser('admin@demo.examflow', 'Sara', 'Admin', 'super_admin')
+  // Platform super-admin account (used for demo login)
+  await upsertUser('admin@demo.examflow', 'Sara', 'Admin', 'super_admin')
   const owner = await upsertUser('owner@demo.examflow', 'Omar', 'Hassan', 'org_owner')
 
   const teacherSpecs = [
