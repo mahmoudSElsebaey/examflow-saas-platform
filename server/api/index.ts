@@ -1,8 +1,7 @@
 /**
  * Vercel Serverless entry — exports the Express app.
- * Root Directory in Vercel project settings must be `server`.
+ * In Vercel project settings: Root Directory = `server`
  */
-import type { VercelRequest, VercelResponse } from '@vercel/node'
 import app from '../src/app.js'
 import { connectDatabase } from '../src/config/database.js'
 
@@ -18,15 +17,19 @@ function ensureDb(): Promise<void> {
   return dbReady
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   try {
     await ensureDb()
   } catch (err) {
     console.error('Database connection failed:', err)
-    res.status(503).json({
-      success: false,
-      message: 'Service unavailable: database connection failed',
-    })
+    res.statusCode = 503
+    res.setHeader('Content-Type', 'application/json')
+    res.end(
+      JSON.stringify({
+        success: false,
+        message: 'Service unavailable: database connection failed',
+      })
+    )
     return
   }
 
