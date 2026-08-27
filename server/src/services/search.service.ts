@@ -120,10 +120,10 @@ export async function searchOrganization(
   }
 
   if (want.has('bank')) {
+    // QuestionBank schema uses `name` (not title) and has no isActive field
     const banks = await QuestionBank.find({
       organizationId: orgId,
-      isActive: true,
-      $or: [{ title: rx }, { description: rx }],
+      $or: [{ name: rx }, { description: rx }],
     })
       .sort({ updatedAt: -1 })
       .limit(LIMIT_PER_TYPE)
@@ -132,7 +132,7 @@ export async function searchOrganization(
       hits.push({
         type: 'bank',
         id: b.id,
-        title: b.title,
+        title: b.name,
         subtitle: b.description || null,
         hrefHint: 'content',
       })
