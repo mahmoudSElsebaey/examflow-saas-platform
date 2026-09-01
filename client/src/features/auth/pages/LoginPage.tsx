@@ -15,6 +15,13 @@ import { Container } from '@/components/ui/Container'
 import { LanguageSwitcher } from '@/components/common/LanguageSwitcher'
 import { useToast } from '@/components/ui/Toast'
 
+const DEMO = [
+  { role: 'Platform Admin', email: 'admin@demo.examflow', password: 'Demo1234!' },
+  { role: 'Owner', email: 'owner@demo.examflow', password: 'Demo1234!' },
+  { role: 'Teacher', email: 'teacher@demo.examflow', password: 'Demo1234!' },
+  { role: 'Student', email: 'student@demo.examflow', password: 'Demo1234!' },
+]
+
 export function LoginPage() {
   const { t } = useTranslation()
   const toast = useToast()
@@ -34,9 +41,14 @@ export function LoginPage() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      email: 'owner@demo.examflow',
+      password: 'Demo1234!',
+    },
   })
 
   const onSubmit = async (data: FormData) => {
@@ -48,6 +60,12 @@ export function LoginPage() {
       toast.fromError(err)
       setError(t('auth.loginFailed'))
     }
+  }
+
+  const fillDemo = (acc: (typeof DEMO)[0]) => {
+    setValue('email', acc.email, { shouldValidate: true })
+    setValue('password', acc.password, { shouldValidate: true })
+    setError(null)
   }
 
   return (
@@ -120,6 +138,29 @@ export function LoginPage() {
                 {isSubmitting ? t('auth.signingIn') : t('auth.signIn')}
               </Button>
             </form>
+
+            {/* Demo / test accounts */}
+            <div className="mt-6 space-y-2">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                Test accounts
+              </p>
+              <p className="text-xs text-muted">
+                Password for all: <span className="font-mono">Demo1234!</span>
+              </p>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {DEMO.map((acc) => (
+                  <button
+                    key={acc.email}
+                    type="button"
+                    onClick={() => fillDemo(acc)}
+                    className="w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-start text-sm transition hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    <span className="font-medium text-primary">{acc.role}</span>
+                    <p className="mt-0.5 font-mono text-xs text-muted">{acc.email}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <p className="mt-6 text-center text-sm text-muted">
               {t('auth.noAccount')}{' '}
