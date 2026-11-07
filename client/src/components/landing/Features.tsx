@@ -7,14 +7,14 @@ import { Container } from '@/components/ui/Container'
 import { Card, CardContent } from '@/components/ui/Card'
 
 const featureItems = [
-  { icon: BookOpen, key: 'questionBanks', image: 'photo-1498243691581-b145c3f54a5a', alt: 'Library shelves and study resources' },
-  { icon: ClipboardCheck, key: 'examBuilder', image: 'photo-1434030216411-0b793f4b4173', alt: 'Student preparing written work' },
-  { icon: Shuffle, key: 'randomization', image: 'photo-1509062522246-3755977927d7', alt: 'Modern classroom' },
-  { icon: Clock, key: 'examEngine', image: 'photo-1516321318423-f06f85e504b3', alt: 'Digital learning on a laptop' },
-  { icon: BarChart3, key: 'analytics', image: 'photo-1551288049-bebda4e38f71', alt: 'Data analytics on a screen' },
-  { icon: Award, key: 'certificates', image: 'photo-1523050854058-8df90110c9f1', alt: 'Graduates celebrating' },
-  { icon: Users, key: 'teams', image: 'photo-1522202176988-66273c2fd55f', alt: 'Team collaborating around a table' },
-  { icon: Shield, key: 'security', image: 'photo-1454165804606-c3d57bc86b40', alt: 'Professional reviewing work securely' },
+  { icon: BookOpen, key: 'questionBanks', image: 'photo-1498243691581-b145c3f54a5a', alt: 'Library shelves and study resources', altAr: 'أرفف مكتبة ومصادر للدراسة' },
+  { icon: ClipboardCheck, key: 'examBuilder', image: 'photo-1434030216411-0b793f4b4173', alt: 'Student preparing written work', altAr: 'طالب يستعد لكتابة واجب دراسي' },
+  { icon: Shuffle, key: 'randomization', image: 'photo-1509062522246-3755977927d7', alt: 'Modern classroom', altAr: 'فصل دراسي حديث' },
+  { icon: Clock, key: 'examEngine', image: 'photo-1516321318423-f06f85e504b3', alt: 'Digital learning on a laptop', altAr: 'التعلم الرقمي عبر الحاسوب' },
+  { icon: BarChart3, key: 'analytics', image: 'photo-1551288049-bebda4e38f71', alt: 'Data analytics on a screen', altAr: 'لوحة تحليلات وبيانات' },
+  { icon: Award, key: 'certificates', image: 'photo-1523050854058-8df90110c9f1', alt: 'Graduates celebrating', altAr: 'خريجون يحتفلون بالإنجاز' },
+  { icon: Users, key: 'teams', image: 'photo-1522202176988-66273c2fd55f', alt: 'Team collaborating around a table', altAr: 'فريق يتعاون حول طاولة عمل' },
+  { icon: Shield, key: 'security', image: 'photo-1454165804606-c3d57bc86b40', alt: 'Professional reviewing work securely', altAr: 'متخصص يراجع العمل' },
 ] as const
 
 export function Features() {
@@ -35,7 +35,7 @@ export function Features() {
         </div>
 
         <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {featureItems.map(({ icon: Icon, key, image, alt }, i) => (
+          {featureItems.map(({ icon: Icon, key, image, alt, altAr }, i) => (
             <motion.div
               key={key}
               initial={reduce ? false : { opacity: 0, y: 22 }}
@@ -45,7 +45,7 @@ export function Features() {
             >
               <Card className="feature-card group h-full overflow-hidden border-border/70 bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/8">
                 <div className="feature-card-image relative h-36 overflow-hidden">
-                  <img src={`https://images.unsplash.com/${image}?auto=format&fit=crop&w=700&q=82`} alt={alt} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img src={`https://images.unsplash.com/${image}?auto=format&fit=crop&w=700&q=82`} alt={ar ? altAr : alt} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-slate-950/5 to-transparent" />
                   <span className="absolute bottom-3 start-4 flex h-10 w-10 items-center justify-center rounded-xl border border-white/30 bg-white/90 text-primary shadow-lg backdrop-blur"><Icon className="h-5 w-5" /></span>
                   <span className="absolute end-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-white/35 bg-white/20 text-white opacity-0 backdrop-blur transition-all duration-300 group-hover:opacity-100"><ArrowUpRight className="h-4 w-4" /></span>

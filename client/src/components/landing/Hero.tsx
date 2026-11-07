@@ -79,7 +79,7 @@ export function Hero() {
                   <span className="h-2 w-2 rounded-full bg-emerald-300" />
                   {ar ? 'بيئة تعليمية متكاملة' : 'One connected learning space'}
                 </span>
-                <p className="mt-3 max-w-sm text-xl font-bold leading-snug sm:text-2xl">
+                <p className="mt-3 max-w-[18rem] text-start text-xl font-bold leading-snug sm:text-2xl">
                   {ar ? 'من أول سؤال إلى آخر شهادة، كل شيء في مكان واحد.' : 'From the first question to the final certificate, all in one place.'}
                 </p>
               </div>
