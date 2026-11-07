@@ -25,6 +25,7 @@
     "react-i18next": "^17.0.12",
     "react-redux": "^9.3.0",
     "react-router-dom": "^7.18.2",
+    "swiper": "^14.4.0",
     "tailwind-merge": "^3.6.0",
     "zod": "^4.4.3"
   },

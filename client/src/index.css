@@ -170,3 +170,95 @@
     }
   }
 }
+
+/* Landing page visual system */
+.hero-section {
+  background:
+    radial-gradient(ellipse 65% 65% at 5% 0%, rgb(20 184 166 / 0.12), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 100% 90%, rgb(217 119 6 / 0.10), transparent 72%),
+    linear-gradient(135deg, #fffcf8 0%, #f6f5f2 55%, #f0fdfa 100%);
+}
+.hero-orb {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 9999px;
+  filter: blur(1px);
+}
+.hero-orb-one {
+  width: 280px;
+  height: 280px;
+  inset-inline-start: -140px;
+  top: 22%;
+  border: 1px solid rgb(15 118 110 / .13);
+  box-shadow: 0 0 0 28px rgb(15 118 110 / .025), 0 0 0 56px rgb(15 118 110 / .02);
+}
+.hero-orb-two {
+  width: 190px;
+  height: 190px;
+  inset-inline-end: 8%;
+  top: -100px;
+  background: rgb(217 119 6 / .07);
+}
+.hero-underline {
+  position: absolute;
+  inset-inline: 0;
+  bottom: -7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, rgb(20 184 166 / .08), rgb(15 118 110 / .5), rgb(217 119 6 / .35));
+  transform: skewX(-18deg);
+}
+.hero-photo-wrap img {
+  animation: hero-image-enter .9s cubic-bezier(.2,.75,.25,1) both;
+}
+.hero-float-card {
+  animation: float-gently 6s ease-in-out infinite;
+}
+.hero-float-card:last-of-type {
+  animation-delay: -2.5s;
+}
+.section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgb(15 118 110 / .16);
+  border-radius: 9999px;
+  background: rgb(204 251 241 / .55);
+  padding: .45rem .85rem;
+  color: #0f766e;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+}
+.feature-card-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-bottom: 1px solid rgb(255 255 255 / .25);
+  pointer-events: none;
+}
+.examflow-showcase-swiper .swiper-pagination {
+  bottom: 0 !important;
+}
+.examflow-showcase-swiper .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  background: #0f766e;
+  opacity: .25;
+  transition: width .25s ease, opacity .25s ease;
+}
+.examflow-showcase-swiper .swiper-pagination-bullet-active {
+  width: 26px;
+  border-radius: 99px;
+  opacity: 1;
+}
+@keyframes float-gently {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-9px); }
+}
+@keyframes hero-image-enter {
+  from { opacity: .65; transform: scale(1.035); }
+  to { opacity: 1; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-float-card, .hero-photo-wrap img { animation: none !important; }
+}
