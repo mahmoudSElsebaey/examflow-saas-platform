@@ -1,6 +1,7 @@
 import { Navbar } from '@/components/landing/Navbar'
 import { Hero } from '@/components/landing/Hero'
 import { Features } from '@/components/landing/Features'
+import { LandingShowcase } from '@/components/landing/LandingShowcase'
 import { HowItWorks } from '@/components/landing/HowItWorks'
 import { Pricing } from '@/components/landing/Pricing'
 import { LandingSections } from '@/components/landing/LandingSections'
@@ -16,6 +17,7 @@ export function LandingPage() {
       <Navbar />
       <main className="flex-1">
         <Hero />
+        <LandingShowcase />
         <Features />
         <HowItWorks />
         <LandingSections />

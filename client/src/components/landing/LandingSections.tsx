@@ -38,7 +38,7 @@ const copy = {
   ar: {
     whatTitle: 'ما هي ExamFlow؟',
     whatBody:
-      'ExamFlow منصة SaaS تعليمية متعددة المؤسسات (Multi-Tenant) لإدارة التقييمات والامتحانات والمحتوى التعليمي. تخدم الأكاديميات والمدارس ومراكز التدريب والمعلمين المستقلين من خلال مساحة عمل واحدةحدة لكل مؤسسة مع أدوار واضحة: مالك، أدمن، معلم، ممتحن، وطالب.',
+      'ExamFlow منصة SaaS تعليمية متعددة المؤسسات (Multi-Tenant) لإدارة التقييمات والامتحانات والمحتوى التعليمي. تخدم الأكاديميات والمدارس ومراكز التدريب والمعلمين المستقلين من خلال مساحة عمل واحدة لكل مؤسسة مع أدوار واضحة: مالك، أدمن، معلم، ممتحن، وطالب.',
     whoTitle: 'لمن صُممت المنصة؟',
     who: [
       { title: 'مدارس وأكاديميات', desc: 'إدارة صفوف وامتحانات مركزية مع تقارير للإدارة.' },
@@ -160,7 +160,7 @@ const copy = {
       { title: 'اختبار منتصف الفصل', desc: 'انشر امتحانًا بوقت محدد، راجع التحليلات، صدّر الدرجات للإدارة.' },
       { title: 'تدريب موظفين', desc: 'منهج دروس قصيرة + اختبار كفاءة + شهادة عند النجاح.' },
       { title: 'معلم لغة / رياضيات', desc: 'بنك أسئلة متدرّج الصعوبة وامتحانات أسبوعية للطلاب.' },
-      { title: 'أكاديمية متعددة الفروع', desc: 'مؤسسة واحدةحدة، أدوار متعددة، وسجل نشاط للتدقيق.' },
+      { title: 'أكاديمية متعددة الفروع', desc: 'مؤسسة واحدة، أدوار متعددة، وسجل نشاط للتدقيق.' },
     ],
     ctaTitle: 'ابدأ مجانًا وابنِ أول امتحان اليوم',
     ctaBody: 'أنشئ مؤسستك، ادعُ طلابك، وانشر امتحانًا في أقل من ربع ساعة.',
@@ -170,7 +170,7 @@ const copy = {
     glossary: [
       { t: 'Organization', d: 'المؤسسة/الحساب التنظيمي الذي يفصل بياناتك عن الآخرين.' },
       { t: 'Question Bank', d: 'مستودع أسئلة يُعاد استخدامه في أكثر من امتحان.' },
-      { t: 'Attempt', d: 'محاولة طالب لأداء امتحان مرة واحدةحدة ضمن القواعد.' },
+      { t: 'Attempt', d: 'محاولة طالب لأداء امتحان مرة واحدة ضمن القواعد.' },
       { t: 'Membership', d: 'ارتباط المستخدم بمؤسسة بدور وحالة (نشط/موقوف).' },
       { t: 'White-label', d: 'تخصيص المظهر باسم وشعار وألوان مؤسستك.' },
     ],
@@ -345,15 +345,27 @@ export function LandingSections() {
         <Container>
           <SectionTitle title={c.whoTitle} />
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {c.who.map((item) => (
-              <Card key={item.title} className="border-border/60">
-                <CardContent className="pt-6">
-                  <Users className="mb-3 h-5 w-5 text-primary" />
-                  <h3 className="font-semibold text-foreground">{item.title}</h3>
-                  <p className="mt-2 text-sm text-muted">{item.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {c.who.map((item, index) => {
+              const images = [
+                'photo-1509062522246-3755977927d7',
+                'photo-1522202176988-66273c2fd55f',
+                'photo-1434030216411-0b793f4b4173',
+                'photo-1516321318423-f06f85e504b3',
+              ]
+              return (
+                <Card key={item.title} className="group overflow-hidden border-border/60 bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <div className="relative h-32 overflow-hidden">
+                    <img src={`https://images.unsplash.com/${images[index]}?auto=format&fit=crop&w=700&q=82`} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/35 to-transparent" />
+                  </div>
+                  <CardContent className="p-5">
+                    <Users className="mb-3 h-5 w-5 text-primary" />
+                    <h3 className="font-semibold text-foreground">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted">{item.desc}</p>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </Container>
       </section>
@@ -508,15 +520,27 @@ export function LandingSections() {
         <Container>
           <SectionTitle title={c.useCasesTitle} />
           <div className="mt-12 grid gap-4 sm:grid-cols-2">
-            {c.useCases.map((u) => (
-              <Card key={u.title} className="border-border/60">
-                <CardContent className="pt-6">
-                  <Target className="mb-3 h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">{u.title}</h3>
-                  <p className="mt-2 text-sm text-muted">{u.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {c.useCases.map((u, index) => {
+              const images = [
+                'photo-1509062522246-3755977927d7',
+                'photo-1521737711867-e3b97375f902',
+                'photo-1434030216411-0b793f4b4173',
+                'photo-1516321318423-f06f85e504b3',
+              ]
+              return (
+                <Card key={u.title} className="group overflow-hidden border-border/60 bg-surface shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                  <div className="relative h-40 overflow-hidden">
+                    <img src={`https://images.unsplash.com/${images[index]}?auto=format&fit=crop&w=900&q=82`} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/45 to-transparent" />
+                    <Target className="absolute bottom-4 start-4 h-6 w-6 text-white drop-shadow" />
+                  </div>
+                  <CardContent className="p-5">
+                    <h3 className="font-semibold">{u.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted">{u.desc}</p>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         </Container>
       </section>
@@ -565,7 +589,12 @@ export function LandingSections() {
       </section>
 
       {/* Final CTA */}
-      <section id="start" className="bg-primary py-16 text-primary-foreground sm:py-20">
+      <section id="start" className="relative isolate overflow-hidden bg-primary py-20 text-primary-foreground sm:py-28">
+        <div
+          className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center"
+          style={{ backgroundImage: 'linear-gradient(90deg, rgba(8,47,45,.94), rgba(15,118,110,.82)), url(https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1800&q=80)' }}
+        />
+        <div className="pointer-events-none absolute -end-20 -top-24 -z-10 h-80 w-80 rounded-full border-[40px] border-white/10" />
         <Container>
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight">{c.ctaTitle}</h2>

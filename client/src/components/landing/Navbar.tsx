@@ -26,9 +26,9 @@ export function Navbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/50 glass">
+    <header className="sticky top-0 z-50 border-b border-white/70 bg-white/85 shadow-[0_8px_30px_-24px_rgba(15,23,42,.35)] backdrop-blur-2xl">
       <Container>
-        <div className="flex h-16 items-center justify-between gap-4">
+        <div className="flex h-[4.5rem] items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5 group">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary-800 text-sm font-bold text-primary-foreground shadow-md shadow-primary/25 transition-transform group-hover:scale-105">
               EF
@@ -43,7 +43,7 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="rounded-lg px-2.5 py-2 text-sm font-medium text-muted transition-colors hover:bg-surface-subtle hover:text-foreground"
+                className="rounded-xl px-3 py-2 text-[13px] font-semibold text-muted transition-all hover:bg-primary-muted/60 hover:text-primary"
               >
                 {link.label}
               </a>
@@ -99,7 +99,7 @@ export function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="rounded-lg px-3 py-2.5 text-sm font-medium text-muted hover:bg-surface-subtle hover:text-foreground"
+                className="rounded-xl px-3 py-2.5 text-sm font-semibold text-muted transition-colors hover:bg-primary-muted/60 hover:text-primary"
                 onClick={() => setOpen(false)}
               >
                 {link.label}
